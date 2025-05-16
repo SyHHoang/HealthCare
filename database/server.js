@@ -1,0 +1,297 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Server } from 'socket.io';
+import http from 'http';
+import jwt from 'jsonwebtoken';
+import connectDB from "./config/connectDB.js";
+import userRoutes from "./routes/userRoutes.js";
+import newsRoutes from "./routes/newsRoutes.js";
+import feedbackRoutes from './routes/feedbackRoutes.js'
+import contactRoutes from './routes/contactRoutes.js';
+import authRoutes from "./routes/authRoutes.js";
+import fileUpload from 'express-fileupload';
+import mongoose from 'mongoose';
+import doctorRoutes from './routes/doctorRoutes.js';
+import specialtyRoutes from './routes/specialtyRoutes.js';
+import consultationListRoutes from './routes/consultationListRoutes.js';
+import verificationRoutes from './routes/verificationRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
+import drugRoutes from './routes/drugRoutes.js';
+import medicationRoutes from './routes/MedicalRecordRoutes/medicationRoutes.js';
+import allergyRoutes from './routes/MedicalRecordRoutes/allergyRoutes.js';
+import vaccinationRoutes from './routes/MedicalRecordRoutes/vaccinationRoutes.js';
+import prescriptionRoutes from './routes/MedicalRecordRoutes/prescriptionRoutes.js';
+import treatmentRoutes from './routes/MedicalRecordRoutes/treatmentRoutes.js';
+import symptomsRoutes from './routes/MedicalRecordRoutes/symptomsRoutes.js';
+import lifestyleRoutes from './routes/MedicalRecordRoutes/lifestyleRoutes.js';
+import healthDataRoutes from './routes/MedicalRecordRoutes/healthDataRoutes.js';
+import appointmentScheduleRoutes from './routes/appointmentScheduleRoutes.js';
+import vnpayRoutes from './routes/vnpayRoutes.js';
+import transactionRoutes from './routes/transactionRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import Chat from './models/Chat.js';
+import Message from './models/Message.js';
+import orderTypeRoutes from './routes/orderTypeRoutes.js';
+import videoCallRoutes from './routes/videoCallRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+
+// Tạo __dirname cho ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+connectDB();
+
+const app = express();
+const server = http.createServer(app);
+
+// Cấu hình view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Lưu trữ kết nối socket của người dùng và bác sĩ
+const userSockets = new Map();
+const doctorSockets = new Map();
+
+// Middleware xác thực socket
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error('Không có token'));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id || decoded.userId;
+    socket.role = decoded.role;
+    console.log("Socket connected:", socket.userId, socket.role);
+    next();
+  } catch (error) {
+    next(new Error('Token không hợp lệ'));
+  }
+});
+
+// Xử lý kết nối socket
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.userId, socket.role);
+
+  // Lưu socket vào Map tương ứng
+  if (socket.role === 'user') {
+    userSockets.set(socket.userId, socket);
+    // Tham gia vào room của user
+    socket.join(`user_${socket.userId}`);
+    console.log(`User ${socket.userId} joined room`);
+    // Thông báo user online cho tất cả doctor
+    io.to('doctor_room').emit('user_online', { userId: socket.userId });
+  } else if (socket.role === 'doctor') {
+    doctorSockets.set(socket.userId, socket);
+    // Tham gia vào room của doctor
+    socket.join(`doctor_${socket.userId}`);
+    console.log(`Doctor ${socket.userId} joined room doctor`);
+    // Tham gia vào room chung của doctor
+    socket.join('doctor_room');
+    // Thông báo doctor online cho tất cả user
+    io.emit('doctor_online', { doctorId: socket.userId });
+  } else if (socket.role === 'admin') {
+    // Tham gia vào room của admin
+    socket.join(`user_${socket.userId}`);
+  }
+
+  // Tham gia vào các room chat của user/doctor
+  socket.on('join_chat', (chatId) => {
+    socket.join(chatId);
+    console.log(`${socket.role} ${socket.userId} and ${socket.userId} joined chat ${chatId}`);
+    
+  });
+
+  // Rời khỏi room chat
+  socket.on('leave_chat', (chatId) => {
+    socket.leave(chatId);
+    console.log(`${socket.role} ${socket.userId} left chat ${chatId}`);
+  });
+
+  // Xử lý gửi tin nhắn mới
+  socket.on('send_message', async (data) => {
+    try {
+      const { chatId, content, image } = data;
+      const chat = await Chat.findById(chatId).populate('userId').populate('doctorId');
+      
+      if (!chat) {
+        return socket.emit('error', { message: 'Chat không tồn tại' });
+      }
+
+      // Xác định người gửi và người nhận
+      let sender, senderModel, receiver, receiverModel;
+      
+      if (socket.role === 'user') {
+        sender = socket.userId;
+        senderModel = 'User';
+        receiver = chat.doctorId._id;
+        receiverModel = 'Doctor';
+        
+        if (chat.userId._id.toString() !== socket.userId) {
+          return socket.emit('error', { message: 'Bạn không có quyền gửi tin nhắn trong chat này' });
+        }
+      } else if (socket.role === 'doctor') {
+        sender = socket.userId;
+        senderModel = 'Doctor';
+        receiver = chat.userId._id;
+        receiverModel = 'User';
+        
+        if (chat.doctorId._id.toString() !== socket.userId) {
+          return socket.emit('error', { message: 'Bạn không có quyền gửi tin nhắn trong chat này' });
+        }
+      }
+
+      const newMessage = new Message({
+        sender,
+        senderModel,
+        receiver,
+        receiverModel,
+        content,
+        image,
+        chatId
+      });
+
+      await newMessage.save();
+      chat.messages.push(newMessage._id);
+      chat.lastMessage = {
+        content: content || 'Đã gửi một hình ảnh',
+        timestamp: newMessage.createdAt
+      };
+      chat.updatedAt = new Date();
+      await chat.save();
+
+      // Gửi tin nhắn đến tất cả client trong room của chat
+      const messageData = {
+        _id: newMessage._id,
+        chatId,
+        content,
+        image,
+        sender: {
+          id: sender,
+          model: senderModel
+        },
+        receiver: {
+          id: receiver,
+          model: receiverModel
+        },
+        createdAt: newMessage.createdAt,
+        isRead: false
+      };
+
+      io.to(chatId).emit('new_message', messageData);
+      
+    } catch (error) {
+      console.error('Lỗi khi xử lý tin nhắn:', error);
+      socket.emit('error', { message: 'Lỗi khi gửi tin nhắn' });
+    }
+  });
+
+  // Xử lý ngắt kết nối
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.userId, socket.role);
+    
+    // Xóa socket khỏi Map và thông báo offline
+    if (socket.role === 'user') {
+      userSockets.delete(socket.userId);
+      io.to('doctor_room').emit('user_offline', { userId: socket.userId });
+    } else if (socket.role === 'doctor') {
+      doctorSockets.delete(socket.userId);
+      io.emit('doctor_offline', { doctorId: socket.userId });
+    }
+  });
+
+  // Video call events
+  socket.on('video_call_offer', (data) => {
+    socket.broadcast.emit('video_call_offer', data);
+  });
+
+  socket.on('video_call_answer', (data) => {
+    socket.broadcast.emit('video_call_answer', data);
+  });
+
+  socket.on('video_call_ice_candidate', (data) => {
+    socket.broadcast.emit('video_call_ice_candidate', data);
+  });
+
+  socket.on('video_call_end', (data) => {
+    socket.broadcast.emit('video_call_end', data);
+  });
+
+  socket.on('connect', () => {
+    console.log('Client connected with ID:', socket.id);
+    console.log('User ID:', socket.userId);
+    console.log('Role:', socket.role);
+  });
+
+  // socket.on('send_message', (data) => {
+  //   console.log('Received message from client:', data);
+  //   console.log('hàm này đang hoạt động');
+  //   // Xử lý tin nhắn
+  // });
+});
+
+// Thêm socket.io vào app
+app.set('io', io);
+
+app.use(express.json());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/feedback', feedbackRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/news", newsRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/doctors", doctorRoutes);
+app.use("/api/specialties", specialtyRoutes);
+app.use("/api/consultationList", consultationListRoutes);
+app.use("/api/verification", verificationRoutes);
+app.use("/api/chat", chatRoutes);
+app.use('/api/drugs', drugRoutes);
+app.use('/api/medical-record/medications', medicationRoutes);
+app.use('/api/medical-record/allergies', allergyRoutes);
+app.use('/api/medical-record/vaccinations', vaccinationRoutes);
+app.use('/api/medical-record/prescriptions', prescriptionRoutes);
+app.use('/api/medical-record/treatments', treatmentRoutes);
+app.use('/api/medical-record/symptoms', symptomsRoutes);
+app.use('/api/medical-record/lifestyles', lifestyleRoutes);
+app.use('/api/medical-record/health-data', healthDataRoutes);
+app.use('/api/appointment-schedule', appointmentScheduleRoutes);
+app.use('/api/vnpay', vnpayRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/order-types', orderTypeRoutes);
+app.use('/api/video-call', videoCallRoutes);
+app.use('/api/admin', adminRoutes);
+app.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 },
+  useTempFiles: true
+}));
+
+app.get("/", (req, res) => res.send("🚀 Server đang chạy!"));
+
+// Kết nối MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Đã kết nối với MongoDB'))
+  .catch((err) => console.error('Lỗi kết nối MongoDB:', err));
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+  console.log(`🚀 Socket.IO Server chạy tại ws://localhost:${PORT}`);
+});

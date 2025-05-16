@@ -1,0 +1,35 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'symptom.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_$SymptomImpl _$$SymptomImplFromJson(Map<String, dynamic> json) =>
+    _$SymptomImpl(
+      id: json['id'] as String?,
+      userId: json['userId'] as String?,
+      name: json['name'] as String,
+      severity: json['severity'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      notes: json['notes'] as String?,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
+    );
+
+Map<String, dynamic> _$$SymptomImplToJson(_$SymptomImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'userId': instance.userId,
+      'name': instance.name,
+      'severity': instance.severity,
+      'startDate': instance.startDate.toIso8601String(),
+      'notes': instance.notes,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+    };

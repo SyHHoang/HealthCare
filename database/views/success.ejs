@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kết quả thanh toán</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #842029;
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .details {
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #0d6efd;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            background: #0b5ed7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <% if (code === '00') { %>
+            <div class="success">
+                <h2>Thanh toán thành công!</h2>
+                <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+            </div>
+        <% } else { %>
+            <div class="error">
+                <h2>Thanh toán thất bại!</h2>
+                <p>Đã có lỗi xảy ra trong quá trình thanh toán.</p>
+            </div>
+        <% } %>
+        
+        <div class="details">
+            <h3>Chi tiết giao dịch:</h3>
+            <p>Mã giao dịch: <%= txnRef %></p>
+            <p>Số tiền: <%= amount %> VNĐ</p>
+            <p>Thời gian: <%= date %></p>
+        </div>
+
+        <button onclick="closeTabAndReturn()" class="btn">Quay về trang chủ</button>
+    </div>
+
+    <script>
+        function closeTabAndReturn() {
+            // Đóng tab hiện tại
+            window.close();
+            
+            // Nếu window.close() không hoạt động (một số trình duyệt chặn), 
+            // thì chuyển hướng về trang chủ
+            setTimeout(() => {
+                if (!window.closed) {
+                    window.location.href = '/';
+                }
+            }, 100);
+        }
+
+        // Thêm sự kiện beforeunload để đảm bảo tab được đóng
+        window.addEventListener('beforeunload', function(e) {
+            // Hủy thông báo mặc định của trình duyệt (nếu có)
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+</body>
+</html> 
