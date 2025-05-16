@@ -4,7 +4,7 @@ import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
 import doctorRoutes from './routes/doctorRoutes';
 import userRoutes from './routes/userRoutes';
-import Settings from '../views/UserView/Settings.vue';
+
 
 const routes = [
   ...publicRoutes,
@@ -12,6 +12,7 @@ const routes = [
   ...adminRoutes,
   ...doctorRoutes,
   ...userRoutes,
+
 ];
 
 const router = createRouter({

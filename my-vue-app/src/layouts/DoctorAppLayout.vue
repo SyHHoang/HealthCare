@@ -105,11 +105,16 @@
     <Toast />
     <!-- Chatbot Tooltip & Popup -->
     <Teleport to="body">
-      <div class="chatbot-tooltip" @click="toggleChatbot" v-tooltip="'Chat với AI'">
-        <i class="fas fa-robot"></i>
-      </div>
-      <ChatbotView v-if="showChatbot" @close="showChatbot = false" />
-    </Teleport>
+  <div class="chatbot-tooltip" @click="toggleChatbot" v-tooltip="'Chat với AI'">
+    <i class="bi bi-robot"></i>
+  </div>
+  <div v-if="showChatbot">
+    <!-- <div class="chatbot-overlay" @click="showChatbot = false"></div> -->
+    <div class="chatbot-popup">
+      <ChatbotView @close="showChatbot = false" />
+    </div>
+  </div>
+</Teleport>
   </div>
 </template>
 
@@ -888,4 +893,46 @@ onBeforeUnmount(() => {
 .chatbot-tooltip:hover {
   background: #217dbb;
 }
+.chatbot-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 62, 80, 0.35);
+  z-index: 3000;
+}
+
+.chatbot-popup {
+  position: fixed;
+  bottom: 90px;
+  right: 40px;
+  z-index: 3100;
+  max-width: 350px;
+  width: 100vw;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chatbot-fade-in 0.2s;
+}
+
+@media (max-width: 600px) {
+  .chatbot-popup {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    max-width: 100vw;
+    width: 100vw;
+    border-radius: 0;
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
+
+@keyframes chatbot-fade-in {
+  from { opacity: 0; transform: translateY(40px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
 </style> 

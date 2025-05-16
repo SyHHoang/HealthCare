@@ -239,9 +239,25 @@ router.get('/vnpay_ipn', async (req, res) => {
                }
             }
             else if(transaction.orderType=='Extend'){
-                const response= await ConsultationList.findOne({doctorId:transaction.doctorId, userId:transaction.userId}).select(" EndDate")
-                response.EndDate= new Date(response.EndDate+ 14 * 24 * 60 * 60 * 1000 )
-                await response.save();
+                console.log("Extend")
+                const response = await ConsultationList.findOne({ doctorId: transaction.doctorId, userId: transaction.userId }).select("EndDate");
+
+// Kiểm tra nếu response.EndDate đã tồn tại
+if (response && response.EndDate) {
+    // Chuyển EndDate từ chuỗi ISO thành đối tượng Date
+    const endDate = new Date(response.EndDate);
+
+    // Cộng thêm 14 ngày vào EndDate
+    endDate.setDate(endDate.getDate() + 14);
+
+    // Cập nhật lại EndDate
+    response.EndDate = endDate;
+
+    // Lưu thay đổi vào cơ sở dữ liệu
+    await response.save();
+} else {
+    console.log("Không tìm thấy EndDate hợp lệ.");
+}
             }
             else if(transaction.orderType=="AddCallVideo"){
                 const response= await ConsultationList.findOne({doctorId:transaction.doctorId, userId:transaction.userId}).select("call")

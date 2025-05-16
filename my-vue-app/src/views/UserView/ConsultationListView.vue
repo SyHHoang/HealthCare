@@ -272,6 +272,7 @@ const addConsultationSessions = async (doctorId, count) => {
 };
 
 const addConsultationDays = async (doctorId) => {
+  closeRenewModal();
     handleVNPayPayment(doctorId,"Extend",1);
 };
 const loadConsultationList = async () => {

@@ -291,7 +291,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.error('Lỗi kết nối MongoDB:', err));
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
   console.log(`🚀 Socket.IO Server chạy tại ws://localhost:${PORT}`);
 });

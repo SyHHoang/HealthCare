@@ -71,6 +71,12 @@
             </router-link>
           </li>
           <li>
+            <router-link to="/admin/order-types" class="nav-item">
+              <i class="fas fa-shopping-cart"></i>
+              <span>Quản lý loại đơn hàng</span>
+            </router-link>
+          </li>
+          <li>
             <router-link to="/admin/doctor-verifications" class="nav-item">
               <i class="fas fa-chart-bar"></i>
               <span>Quản lý xác thực bác sĩ</span>
@@ -246,7 +252,8 @@ export default {
         '/admin/drugs': 'Quản lý thuốc',
         '/admin/reports': 'Báo cáo & Thống kê',
         '/admin/settings': 'Cài đặt hệ thống',
-        '/admin/profile': 'Hồ sơ cá nhân'
+        '/admin/profile': 'Hồ sơ cá nhân',
+        '/admin/order-types': 'Quản lý loại đơn hàng'
       };
       
       return routeMap[route.path] || 'Quản trị hệ thống';

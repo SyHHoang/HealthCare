@@ -1,162 +1,181 @@
 <template>
   <div class="consultation-history-container">
-    <div class="container py-4">
-      <!-- Header -->
-      <div class="text-center mb-5">
-        <h1 class="display-4">Lịch sử tư vấn</h1>
-        <p class="lead">Danh sách các cuộc tư vấn của bạn</p>
-      </div>
-
-      <!-- Loading Spinner -->
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-
-      <!-- Error Message -->
-      <div v-if="error" class="alert alert-danger" role="alert">
-        {{ error }}
-      </div>
-
-      <!-- Next Consultation -->
-      <div v-if="!loading && !error && nextConsultation" class="next-consultation mb-5">
-        <h3 class="mb-4">Cuộc tư vấn sắp tới</h3>
-        <div class="card">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-md-2">
-                <img 
-                  :src="nextConsultation.userId.avatar || '/images/default-avatar.jpg'" 
-                  class="patient-avatar rounded-circle"
-                  :alt="nextConsultation.userId.fullname"
-                >
-              </div>
-              <div class="col-md-8">
-                <h5 class="card-title">{{ nextConsultation.userId.fullname }}</h5>
-                <p class="card-text text-muted">
-                  <i class="fas fa-user me-2"></i>
-                  {{ nextConsultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                  {{ nextConsultation.userId.age }} tuổi
-                </p>
-                <p class="card-text">
-                  <i class="fas fa-phone me-2"></i>
-                  {{ nextConsultation.userId.phone }}
-                </p>
-                <p class="card-text">
-                  <i class="fas fa-calendar-alt me-2"></i>
-                  {{ formatDate(nextConsultation.consultationDate) }}
-                </p>
-                <div class="countdown" v-if="nextConsultation">
-                  <span class="badge bg-primary">
-                    Còn {{ formatCountdown(nextConsultation.consultationDate) }}
-                  </span>
-                </div>
-              </div>
-              <div class="col-md-2 text-end">
-                <button 
-                  class="btn btn-primary" 
-                  @click="startVideoCall(nextConsultation._id)"
-                  :disabled="!isConsultationTime(nextConsultation.consultationDate)"
-                >
-                  <i class="fas fa-video"></i> Gọi video
-                </button>
-              </div>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+          <div class="d-flex flex-column p-3">
+            <h4 class="sidebar-title mb-4">Quản lý tư vấn</h4>
+            <div class="nav flex-column nav-pills">
+              <button 
+                class="nav-link mb-2" 
+                :class="{ active: activeTab === 'upcoming' }"
+                @click="activeTab = 'upcoming'"
+              >
+                <i class="fas fa-calendar-check me-2"></i>
+                Cuộc hẹn sắp tới
+              </button>
+              <button 
+                class="nav-link mb-2" 
+                :class="{ active: activeTab === 'history' }"
+                @click="activeTab = 'history'"
+              >
+                <i class="fas fa-history me-2"></i>
+                Lịch sử tư vấn
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Upcoming Consultations -->
-      <div v-if="!loading && !error && upcomingConsultations.length > 0" class="upcoming-consultations mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h3>Danh sách tư vấn sắp tới</h3>
-          <button class="btn btn-outline-primary" @click="showPastConsultations">
-            <i class="fas fa-history me-2"></i>Xem lịch sử tư vấn
-          </button>
-        </div>
-        <div class="row g-4">
-          <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col-md-3">
-                    <img 
-                      :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
-                      class="patient-avatar rounded-circle"
-                      :alt="consultation.userId.fullname"
-                    >
-                  </div>
-                  <div class="col-md-9">
-                    <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
-                    <p class="card-text text-muted">
-                      <i class="fas fa-user me-2"></i>
-                      {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                      {{ consultation.userId.age }} tuổi
-                    </p>
-                    <p class="card-text">
-                      <i class="fas fa-phone me-2"></i>
-                      {{ consultation.userId.phone }}
-                    </p>
-                    <p class="card-text">
-                      <i class="fas fa-calendar-alt me-2"></i>
-                      {{ formatDate(consultation.consultationDate) }}
-                    </p>
-                  </div>
-                </div>
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+          <div class="container py-4">
+            <!-- Loading Spinner -->
+            <div v-if="loading" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Empty State -->
-      <div v-if="!loading && !error && !nextConsultation && upcomingConsultations.length === 0" 
-           class="text-center py-5">
-        <h3>Bạn chưa có cuộc tư vấn nào</h3>
-        <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
-      </div>
-    </div>
-
-    <!-- Modal Lịch sử tư vấn -->
-    <div class="modal fade" id="pastConsultationsModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Lịch sử tư vấn</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div v-if="pastConsultations.length === 0" class="text-center py-4">
-              <p class="text-muted">Chưa có cuộc tư vấn nào đã hoàn thành</p>
+            <!-- Error Message -->
+            <div v-if="error" class="alert alert-danger" role="alert">
+              {{ error }}
             </div>
-            <div v-else class="row g-4">
-              <div v-for="consultation in pastConsultations" :key="consultation._id" class="col-md-6">
-                <div class="card h-100">
+
+            <!-- Upcoming Tab Content -->
+            <div v-if="!loading && !error && activeTab === 'upcoming'">
+              <!-- Next Consultation -->
+              <div v-if="nextConsultation" class="next-consultation mb-5">
+                <h3 class="mb-4">Cuộc tư vấn sắp tới</h3>
+                <div class="card">
                   <div class="card-body">
                     <div class="row align-items-center">
-                      <div class="col-md-3">
+                      <div class="col-md-2">
                         <img 
-                          :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                          :src="nextConsultation.userId.avatar || '/images/default-avatar.jpg'" 
                           class="patient-avatar rounded-circle"
-                          :alt="consultation.userId.fullname"
+                          :alt="nextConsultation.userId.fullname"
                         >
                       </div>
-                      <div class="col-md-9">
-                        <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                      <div class="col-md-8">
+                        <h5 class="card-title">{{ nextConsultation.userId.fullname }}</h5>
                         <p class="card-text text-muted">
                           <i class="fas fa-user me-2"></i>
-                          {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                          {{ consultation.userId.age }} tuổi
+                          {{ nextConsultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                          {{ nextConsultation.userId.age }} tuổi
                         </p>
                         <p class="card-text">
                           <i class="fas fa-phone me-2"></i>
-                          {{ consultation.userId.phone }}
+                          {{ nextConsultation.userId.phone }}
                         </p>
                         <p class="card-text">
                           <i class="fas fa-calendar-alt me-2"></i>
-                          {{ formatDate(consultation.consultationDate) }}
+                          {{ formatDate(nextConsultation.consultationDate) }}
                         </p>
+                        <div class="countdown">
+                          <span class="badge bg-primary">
+                            Còn {{ formatCountdown(nextConsultation.consultationDate) }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="col-md-2 text-end">
+                        <button 
+                          class="btn btn-primary" 
+                          @click="startVideoCall(nextConsultation._id)"
+                          :disabled="!isConsultationTime(nextConsultation.consultationDate)"
+                        >
+                          <i class="fas fa-video"></i> Gọi video
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upcoming Consultations List -->
+              <div v-if="upcomingConsultations.length > 0" class="upcoming-list">
+                <h3 class="mb-4">Danh sách tư vấn sắp tới</h3>
+                <div class="row g-4">
+                  <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="row align-items-center">
+                          <div class="col-md-3">
+                            <img 
+                              :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                              class="patient-avatar rounded-circle"
+                              :alt="consultation.userId.fullname"
+                            >
+                          </div>
+                          <div class="col-md-9">
+                            <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                            <p class="card-text text-muted">
+                              <i class="fas fa-user me-2"></i>
+                              {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                              {{ consultation.userId.age }} tuổi
+                            </p>
+                            <p class="card-text">
+                              <i class="fas fa-phone me-2"></i>
+                              {{ consultation.userId.phone }}
+                            </p>
+                            <p class="card-text">
+                              <i class="fas fa-calendar-alt me-2"></i>
+                              {{ formatDate(consultation.consultationDate) }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="!nextConsultation && upcomingConsultations.length === 0" 
+                   class="text-center py-5">
+                <h3>Bạn chưa có cuộc tư vấn nào sắp tới</h3>
+                <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
+              </div>
+            </div>
+
+            <!-- History Tab Content -->
+            <div v-if="!loading && !error && activeTab === 'history'">
+              <h3 class="mb-4">Lịch sử tư vấn</h3>
+              <div v-if="pastConsultations.length === 0" class="text-center py-5">
+                <p class="text-muted">Chưa có cuộc tư vấn nào đã hoàn thành</p>
+              </div>
+              <div v-else class="row g-4">
+                <div v-for="consultation in pastConsultations" :key="consultation._id" class="col-md-6">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <div class="row align-items-center">
+                        <div class="col-md-3">
+                          <img 
+                            :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                            class="patient-avatar rounded-circle"
+                            :alt="consultation.userId.fullname"
+                          >
+                        </div>
+                        <div class="col-md-9">
+                          <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                          <p class="card-text text-muted">
+                            <i class="fas fa-user me-2"></i>
+                            {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                            {{ consultation.userId.age }} tuổi
+                          </p>
+                          <p class="card-text">
+                            <i class="fas fa-phone me-2"></i>
+                            {{ consultation.userId.phone }}
+                          </p>
+                          <p class="card-text">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            {{ formatDate(consultation.consultationDate) }}
+                          </p>
+                          <p class="card-text">
+                            <i class="fas fa-clock me-2"></i>
+                            Ngày tạo: {{ formatDate(consultation.createdAt) }}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -175,7 +194,6 @@ import { ref, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import axios from '@/services/axiosInstance.js';
 import { useRouter } from 'vue-router';
-import { Modal } from 'bootstrap';
 
 const toast = useToast();
 const router = useRouter();
@@ -184,7 +202,7 @@ const error = ref(null);
 const nextConsultation = ref(null);
 const upcomingConsultations = ref([]);
 const pastConsultations = ref([]);
-const pastConsultationsModal = ref(null);
+const activeTab = ref('upcoming');
 
 const loadConsultationHistory = async () => {
   try {
@@ -211,17 +229,15 @@ const loadConsultationHistory = async () => {
 };
 
 const formatDate = (dateString) => {
+  if (!dateString) return '';
   const date = new Date(dateString);
-  const time = date.toLocaleTimeString('vi-VN', {
+  return date.toLocaleString('vi-VN', {
     hour: '2-digit',
-    minute: '2-digit'
-  });
-  const day = date.toLocaleDateString('vi-VN', {
+    minute: '2-digit',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
   });
-  return `${time} - ${day}`;
 };
 
 const formatCountdown = (dateString) => {
@@ -247,7 +263,6 @@ const isConsultationTime = (consultationDate) => {
   const now = new Date();
   const consultationTime = new Date(consultationDate);
   const timeDiff = consultationTime - now;
-  // Cho phép gọi trước 15 phút và sau 15 phút so với giờ hẹn
   return Math.abs(timeDiff) <= 15 * 60 * 1000;
 };
 
@@ -259,13 +274,8 @@ const startVideoCall = (consultationId) => {
   });
 };
 
-const showPastConsultations = () => {
-  pastConsultationsModal.value.show();
-};
-
 onMounted(() => {
   loadConsultationHistory();
-  pastConsultationsModal.value = new Modal(document.getElementById('pastConsultationsModal'));
 });
 </script>
 
@@ -274,6 +284,47 @@ onMounted(() => {
   padding-top: 80px;
   background-color: #f8f9fa;
   min-height: 100vh;
+}
+
+.sidebar {
+  background-color: white;
+  border-right: 1px solid #dee2e6;
+  min-height: calc(100vh - 80px);
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 16.666667%;
+  padding: 20px;
+  z-index: 100;
+}
+
+.sidebar-title {
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: #495057;
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #e9ecef;
+}
+
+.nav-link.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.main-content {
+  margin-left: 16.666667%;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  width: 83.333333%;
 }
 
 .patient-avatar {
@@ -287,6 +338,8 @@ onMounted(() => {
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: white;
+  margin-bottom: 20px;
 }
 
 .card:hover {
@@ -307,21 +360,22 @@ onMounted(() => {
   padding: 8px 16px;
 }
 
-.btn-outline-primary {
-  border-width: 2px;
-}
-
-.btn-outline-primary:hover {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.modal-body {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
 @media (max-width: 768px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+    width: 100%;
+  }
+
   .patient-avatar {
     width: 80px;
     height: 80px;

@@ -16,6 +16,11 @@ export default [
         component: () => import('@/views/AdminViews/AdminUserList.vue') // Lazy load
       },
       {
+        path: 'order-types',
+        name: 'AdminOrderTypeList',
+        component: () => import('@/views/AdminViews/OrderTypesView.vue') // Lazy load
+      },
+      {
         path: 'news',
         name: 'admin-news',
         component: () => import('@/views/AdminViews/AdminNewsList.vue') // Lazy load
