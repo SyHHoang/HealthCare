@@ -20,6 +20,7 @@ class SocketService {
 
     // Sử dụng URL từ biến môi trường hoặc fallback về localhost:3000
     const SOCKET_URL = import.meta.env.VITE_BASE_URL;
+
     console.log('Kết nối socket đến:', SOCKET_URL);
 
     this.socket = io(SOCKET_URL, {
