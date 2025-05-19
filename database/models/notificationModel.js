@@ -16,8 +16,8 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['appointment', 'message', 'system', 'prescription', 'cancel', 'reminder', 'feedback', 'payment_success'],
-    default: 'system'
+    enum: ['authentication', 'consultation', 'cancel', 'payment_success'],
+    default: 'authentication'
   },
   data: {
     type: mongoose.Schema.Types.Mixed,

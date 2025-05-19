@@ -93,9 +93,9 @@ export default {
     const showChatbot = ref(false);
     const menuItems = [
       { id: 'symptoms', title: 'Triệu chứng', icon: 'bi bi-thermometer-half' },
-      { id: 'prescriptions', title: 'Đơn thuốc', icon: 'bi bi-prescription' },
+      { id: 'prescriptions', title: 'Đơn thuốc', icon: 'bi bi-capsule' },
       { id: 'allergy', title: 'Dị ứng', icon: 'bi bi-exclamation-triangle' },
-      { id: 'vaccination', title: 'Tiêm chủng', icon: 'bi bi-arrow-through-heart' },
+      { id: 'vaccination', title: 'Tiêm chủng', icon: 'bi bi-suit-heart' },
       { id: 'treatments', title: 'Điều trị', icon: 'bi bi-hospital' },
       { id: 'lifestyle', title: 'Lối sống', icon: 'bi bi-heart' },
       { id: 'healthData', title: 'Dữ liệu sức khỏe', icon: 'bi bi-graph-up' }

@@ -33,7 +33,7 @@
           </li>
           <li>
             <router-link to="/user/medical-record" class="nav-item">
-              <i class="bi bi-file-medical"></i>
+              <i class="bi bi-file-earmark-medical"></i>
               <span>Hồ sơ y tế</span>
             </router-link>
           </li>
@@ -57,13 +57,13 @@
           </li>
           <li>
             <router-link to="/user/feedback" class="nav-item">
-              <i class="bi bi-star"></i>
+              <i class="bi bi-star-fill"></i>
               <span>Đánh giá</span>
             </router-link>
           </li>
           <li>
             <router-link to="/user/contact" class="nav-item">
-              <i class="bi bi-envelope"></i>
+              <i class="bi bi-envelope-fill"></i>
               <span>Liên hệ</span>
             </router-link>
           </li>
@@ -132,7 +132,7 @@
             </div>
             <div class="quick-actions">
               <button class="quick-action-button">
-                <i class="bi bi-calendar-plus"></i>
+                <i class="bi bi-calendar-plus-fill"></i>
               </button>
             </div>
           </div>
@@ -143,7 +143,7 @@
               <div class="user-dropdown">
                 <ul>
                   <li><router-link to="/user/profile"><i class="bi bi-person"></i> Hồ sơ</router-link></li>
-                  <li><router-link to="/user/medical-record"><i class="bi bi-file-medical"></i> Hồ sơ y tế</router-link></li>
+                  <li><router-link to="/user/medical-record"><i class="bi bi-file-earmark-medical"></i> Hồ sơ y tế</router-link></li>
                   <li><router-link to="/user/settings"><i class="bi bi-gear"></i> Cài đặt</router-link></li>
                   <li><a @click="handleLogout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
                 </ul>
@@ -194,13 +194,13 @@
           </li>
           <li>
             <router-link to="/user/feedback">
-              <i class="bi bi-star"></i>
+              <i class="bi bi-star-fill"></i>
               <span>Đánh giá</span>
             </router-link>
           </li>
           <li>
             <router-link to="/user/contact">
-              <i class="bi bi-envelope"></i>
+              <i class="bi bi-envelope-fill"></i>
               <span>Liên hệ</span>
             </router-link>
           </li>

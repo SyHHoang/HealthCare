@@ -162,18 +162,26 @@ router.get('/vnpay_ipn', async (req, res) => {
                 transaction.bankCode = vnp_Params['vnp_BankCode'];
                 transaction.transactionDate = moment(vnp_Params['vnp_PayDate'], 'YYYYMMDDHHmmss').toDate();
                 const result = await transaction.save();
-
+                let nameOrderType;
+                if(transaction.orderType == 'consultation'){
+                    nameOrderType='Đăng ký bác sĩ tư vấn y tế'
+                }else if(transaction.orderType == 'Extend'){
+                    nameOrderType='Gia hạn thời gian tư vấn'
+                }else if(transaction.orderType == 'AddCallVideo'){
+                    nameOrderType='Thêm số lượt gọi video trực tuyến với bác sĩ'
+                }
                 // Lưu thông báo vào database
                 const notification = new Notification({
-                    userId: transaction.userId,
+                    userId: transaction.userId || transaction.doctorId,
                     title: 'Thanh toán thành công',
                     message: 'Thanh toán thành công!',
                     type: 'payment_success',
                     data: {
-                        orderId: orderId,
-                        amount: amount,
-                        orderType: transaction.orderType,
-                        transactionDate: transaction.transactionDate
+                        'Mã đơn hàng':orderId,
+                        'Số tiền':amount,
+                        'Tên bác sĩ':transaction.doctorId.name,
+                        'Loại giao dịch':nameOrderType,
+                        'Ngày thanh toán':transaction.transactionDate
                     }
                 });
                 await notification.save();

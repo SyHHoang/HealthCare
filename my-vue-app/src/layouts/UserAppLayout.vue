@@ -93,7 +93,7 @@
                 <i class="bi bi-person"></i> Hồ sơ cá nhân
               </router-link>
               <router-link to="/user/medical-record" class="dropdown-item">
-                <i class="bi bi-file-medical"></i> Hồ sơ y tế
+                <i class="bi bi-file-earmark-medical"></i> Hồ sơ y tế
               </router-link>
               <router-link to="/user/settings" class="dropdown-item">
                 <i class="bi bi-gear"></i> Cài đặt
@@ -321,7 +321,7 @@ export default {
         appointment: 'bi bi-calendar-check',
         message: 'bi bi-chat-dots',
         system: 'bi bi-info-circle',
-        prescription: 'bi bi-clipboard2-pulse',
+        capsule: 'bi bi-capsule',
         reminder: 'bi bi-bell',
         payment_success: 'bi bi-check-circle-fill',
         feedback: 'bi bi-star'

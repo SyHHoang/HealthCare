@@ -73,10 +73,10 @@ export const createBulkNotifications = async (req, res) => {
 export const getNotifications = async (req, res) => {
   try {
     
-    let query = { userId: req.user.userId };
+    let query = { userId: req.user.userId || req.doctor.id };
     console.log("------------------------------------------query",query);
     // Nếu là admin, có thể lấy thông báo của tất cả user
-    const notifications = await Notification.find({userId:req.user.userId})
+    const notifications = await Notification.find(query)
       .limit(50);
     console.log("------------------------------------------notifications",notifications);
     res.json(notifications);
