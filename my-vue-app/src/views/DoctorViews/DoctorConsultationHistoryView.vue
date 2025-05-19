@@ -25,152 +25,152 @@
               </button>
             </div>
           </div>
-        </div>
+      </div>
 
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 main-content">
           <div class="container py-4">
-            <!-- Loading Spinner -->
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
+      <!-- Loading Spinner -->
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
 
-            <!-- Error Message -->
-            <div v-if="error" class="alert alert-danger" role="alert">
-              {{ error }}
-            </div>
+      <!-- Error Message -->
+      <div v-if="error" class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
 
             <!-- Upcoming Tab Content -->
             <div v-if="!loading && !error && activeTab === 'upcoming'">
-              <!-- Next Consultation -->
+      <!-- Next Consultation -->
               <div v-if="nextConsultation" class="next-consultation mb-5">
-                <h3 class="mb-4">Cuộc tư vấn sắp tới</h3>
-                <div class="card">
-                  <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-md-2">
-                        <img 
-                          :src="nextConsultation.userId.avatar || '/images/default-avatar.jpg'" 
-                          class="patient-avatar rounded-circle"
-                          :alt="nextConsultation.userId.fullname"
-                        >
-                      </div>
-                      <div class="col-md-8">
-                        <h5 class="card-title">{{ nextConsultation.userId.fullname }}</h5>
-                        <p class="card-text text-muted">
-                          <i class="fas fa-user me-2"></i>
-                          {{ nextConsultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                          {{ nextConsultation.userId.age }} tuổi
-                        </p>
-                        <p class="card-text">
-                          <i class="fas fa-phone me-2"></i>
-                          {{ nextConsultation.userId.phone }}
-                        </p>
-                        <p class="card-text">
-                          <i class="fas fa-calendar-alt me-2"></i>
-                          {{ formatDate(nextConsultation.consultationDate) }}
-                        </p>
+        <h3 class="mb-4">Cuộc tư vấn sắp tới</h3>
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <img 
+                  :src="nextConsultation.userId.avatar || '/images/default-avatar.jpg'" 
+                  class="patient-avatar rounded-circle"
+                  :alt="nextConsultation.userId.fullname"
+                >
+              </div>
+              <div class="col-md-8">
+                <h5 class="card-title">{{ nextConsultation.userId.fullname }}</h5>
+                <p class="card-text text-muted">
+                  <i class="fas fa-user me-2"></i>
+                  {{ nextConsultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                  {{ nextConsultation.userId.age }} tuổi
+                </p>
+                <p class="card-text">
+                  <i class="fas fa-phone me-2"></i>
+                  {{ nextConsultation.userId.phone }}
+                </p>
+                <p class="card-text">
+                  <i class="fas fa-calendar-alt me-2"></i>
+                  {{ formatDate(nextConsultation.consultationDate) }}
+                </p>
                         <div class="countdown">
-                          <span class="badge bg-primary">
-                            Còn {{ formatCountdown(nextConsultation.consultationDate) }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="col-md-2 text-end">
-                        <button 
-                          class="btn btn-primary" 
-                          @click="startVideoCall(nextConsultation._id)"
-                          :disabled="!isConsultationTime(nextConsultation.consultationDate)"
-                        >
-                          <i class="fas fa-video"></i> Gọi video
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <span class="badge bg-primary">
+                    Còn {{ formatCountdown(nextConsultation.consultationDate) }}
+                  </span>
                 </div>
               </div>
+              <div class="col-md-2 text-end">
+                <button 
+                  class="btn btn-primary" 
+                  @click="startVideoCall(nextConsultation._id)"
+                  :disabled="!isConsultationTime(nextConsultation.consultationDate)"
+                >
+                  <i class="fas fa-video"></i> Gọi video
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
               <!-- Upcoming Consultations List -->
               <div v-if="upcomingConsultations.length > 0" class="upcoming-list">
                 <h3 class="mb-4">Danh sách tư vấn sắp tới</h3>
-                <div class="row g-4">
-                  <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <div class="row align-items-center">
-                          <div class="col-md-3">
-                            <img 
-                              :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
-                              class="patient-avatar rounded-circle"
-                              :alt="consultation.userId.fullname"
-                            >
-                          </div>
-                          <div class="col-md-9">
-                            <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
-                            <p class="card-text text-muted">
-                              <i class="fas fa-user me-2"></i>
-                              {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                              {{ consultation.userId.age }} tuổi
-                            </p>
-                            <p class="card-text">
-                              <i class="fas fa-phone me-2"></i>
-                              {{ consultation.userId.phone }}
-                            </p>
-                            <p class="card-text">
-                              <i class="fas fa-calendar-alt me-2"></i>
-                              {{ formatDate(consultation.consultationDate) }}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+        <div class="row g-4">
+          <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-3">
+                    <img 
+                      :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                      class="patient-avatar rounded-circle"
+                      :alt="consultation.userId.fullname"
+                    >
+                  </div>
+                  <div class="col-md-9">
+                    <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                    <p class="card-text text-muted">
+                      <i class="fas fa-user me-2"></i>
+                      {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                      {{ consultation.userId.age }} tuổi
+                    </p>
+                    <p class="card-text">
+                      <i class="fas fa-phone me-2"></i>
+                      {{ consultation.userId.phone }}
+                    </p>
+                    <p class="card-text">
+                      <i class="fas fa-calendar-alt me-2"></i>
+                      {{ formatDate(consultation.consultationDate) }}
+                    </p>
                   </div>
                 </div>
               </div>
-
-              <!-- Empty State -->
-              <div v-if="!nextConsultation && upcomingConsultations.length === 0" 
-                   class="text-center py-5">
-                <h3>Bạn chưa có cuộc tư vấn nào sắp tới</h3>
-                <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
-              </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+              <div v-if="!nextConsultation && upcomingConsultations.length === 0" 
+           class="text-center py-5">
+                <h3>Bạn chưa có cuộc tư vấn nào sắp tới</h3>
+        <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
+      </div>
+    </div>
 
             <!-- History Tab Content -->
             <div v-if="!loading && !error && activeTab === 'history'">
               <h3 class="mb-4">Lịch sử tư vấn</h3>
               <div v-if="pastConsultations.length === 0" class="text-center py-5">
-                <p class="text-muted">Chưa có cuộc tư vấn nào đã hoàn thành</p>
-              </div>
-              <div v-else class="row g-4">
-                <div v-for="consultation in pastConsultations" :key="consultation._id" class="col-md-6">
-                  <div class="card h-100">
-                    <div class="card-body">
-                      <div class="row align-items-center">
-                        <div class="col-md-3">
-                          <img 
-                            :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
-                            class="patient-avatar rounded-circle"
-                            :alt="consultation.userId.fullname"
-                          >
-                        </div>
-                        <div class="col-md-9">
-                          <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
-                          <p class="card-text text-muted">
-                            <i class="fas fa-user me-2"></i>
-                            {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                            {{ consultation.userId.age }} tuổi
-                          </p>
-                          <p class="card-text">
-                            <i class="fas fa-phone me-2"></i>
-                            {{ consultation.userId.phone }}
-                          </p>
-                          <p class="card-text">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            {{ formatDate(consultation.consultationDate) }}
-                          </p>
+              <p class="text-muted">Chưa có cuộc tư vấn nào đã hoàn thành</p>
+            </div>
+            <div v-else class="row g-4">
+              <div v-for="consultation in pastConsultations" :key="consultation._id" class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-md-3">
+                        <img 
+                          :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                          class="patient-avatar rounded-circle"
+                          :alt="consultation.userId.fullname"
+                        >
+                      </div>
+                      <div class="col-md-9">
+                        <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                        <p class="card-text text-muted">
+                          <i class="fas fa-user me-2"></i>
+                          {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                          {{ consultation.userId.age }} tuổi
+                        </p>
+                        <p class="card-text">
+                          <i class="fas fa-phone me-2"></i>
+                          {{ consultation.userId.phone }}
+                        </p>
+                        <p class="card-text">
+                          <i class="fas fa-calendar-alt me-2"></i>
+                          {{ formatDate(consultation.consultationDate) }}
+                        </p>
                           <p class="card-text">
                             <i class="fas fa-clock me-2"></i>
                             Ngày tạo: {{ formatDate(consultation.createdAt) }}

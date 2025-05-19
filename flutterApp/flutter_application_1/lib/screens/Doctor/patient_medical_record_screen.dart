@@ -9,6 +9,7 @@ import '../../models/health_data.dart';
 import '../../services/token_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../AIEvaluationScreen.dart';
 
 class PatientMedicalRecordScreen extends StatefulWidget {
   final String patientId;
@@ -353,6 +354,23 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text('Hồ sơ sức khỏe: ${widget.patientName}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.psychology),
+            tooltip: 'Đánh giá sức khỏe bằng AI',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AIEvaluationScreen(
+                    user: null,
+                    patientId: widget.patientId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

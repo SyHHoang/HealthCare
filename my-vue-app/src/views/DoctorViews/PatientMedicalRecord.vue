@@ -24,6 +24,12 @@
           <span>{{ menu.name }}</span>
         </button>
       </div>
+
+      <!-- Thêm nút đánh giá tổng quan -->
+      <button class="ai-evaluation-btn" @click="showChatbot = true">
+        <i class="fas fa-robot"></i>
+        Đánh giá tổng quan sức khỏe bằng AI
+      </button>
     </div>
 
     <!-- Main Content -->
@@ -448,6 +454,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Chatbot Modal -->
+    <div v-if="showChatbot" class="chatbot-modal">
+      <div class="chatbot-modal-content">
+        <AIEvaluationView @close="showChatbot = false" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -455,6 +468,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axiosInstance from '@/services/axiosInstance'
+import AIEvaluationView from '@/components/AIEvaluationView.vue'
 
 const route = useRoute()
 const patient = ref({})
@@ -482,6 +496,9 @@ const menus = [
   { id: 'health-data', name: 'Dữ liệu sức khỏe', icon: 'fas fa-chart-line' }
 ]
 const currentMenu = ref('user-info')
+
+// Thêm state cho chatbot
+const showChatbot = ref(false)
 
 // Hàm xử lý
 const handleImageError = (event) => {
@@ -1126,5 +1143,49 @@ const formatDate = (dateString) => {
   .health-data-list {
     grid-template-columns: 1fr;
   }
+}
+
+/* Thêm styles cho nút AI và modal */
+.ai-evaluation-btn {
+  width: calc(100% - 40px);
+  margin: 20px;
+  padding: 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.ai-evaluation-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+.ai-evaluation-btn i {
+  font-size: 1.1rem;
+}
+
+.chatbot-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.chatbot-modal-content {
+  position: relative;
+  z-index: 1001;
 }
 </style>

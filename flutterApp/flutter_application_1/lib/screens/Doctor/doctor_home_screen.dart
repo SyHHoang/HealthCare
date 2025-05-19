@@ -24,193 +24,249 @@ class DoctorHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trang chủ bác sĩ'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Thông tin bác sĩ
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180,
+            pinned: true,
+            backgroundColor: Theme.of(context).primaryColor,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/images/background.jpeg',
+                    fit: BoxFit.cover,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).primaryColor.withOpacity(0.7),
+                          Theme.of(context).primaryColor.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16,
+                    bottom: 20,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         CircleAvatar(
-                          radius: 40,
+                          radius: 36,
                           backgroundImage: doctor.avatar != null && doctor.avatar!.isNotEmpty
                               ? NetworkImage(doctor.avatar!)
                               : null,
                           child: doctor.avatar == null || doctor.avatar!.isEmpty
-                              ? const Icon(Icons.person, size: 40)
+                              ? const Icon(Icons.person, size: 36)
                               : null,
                         ),
                         const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                doctor.fullName,
-                                style: Theme.of(context).textTheme.titleLarge,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              doctor.fullName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Bác sĩ',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                            ),
+                            if (doctor.experience != null) ...[
                               const SizedBox(height: 4),
-                              // Text(
-                              //   doctor.specialty,
-                              //   style: Theme.of(context).textTheme.titleMedium,
-                              // ),
-                              if (doctor.experience != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Kinh nghiệm: ${doctor.experience} năm',
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                              Text(
+                                'Kinh nghiệm: ${doctor.experience} năm',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
                                 ),
-                              ],
+                              ),
                             ],
-                          ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-            // Thống kê nhanh
-            Text(
-              'Thống kê nhanh',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    'Lịch hẹn hôm nay',
-                    '5',
-                    Icons.calendar_today,
-                    Colors.blue,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () {
+                  // Xử lý nhấn chuông thông báo
+                  print('Nhấn chuông thông báo');
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () => _logout(context),
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thống kê nhanh
+                  Row(
+                    children: [
+                      _StatCard(
+                        icon: Icons.calendar_today,
+                        color: Colors.blue,
+                        value: '5',
+                        label: 'Lịch hẹn hôm nay',
+                      ),
+                      const SizedBox(width: 12),
+                      _StatCard(
+                        icon: Icons.person_add,
+                        color: Colors.green,
+                        value: '3',
+                        label: 'Bệnh nhân mới',
+                      ),
+                      const SizedBox(width: 12),
+                      _StatCard(
+                        icon: Icons.star,
+                        color: Colors.amber,
+                        value: '4.8',
+                        label: 'Đánh giá',
+                      ),
+                      const SizedBox(width: 12),
+                      _StatCard(
+                        icon: Icons.attach_money,
+                        color: Colors.purple,
+                        value: '2.5M',
+                        label: 'Doanh thu',
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    'Bệnh nhân mới',
-                    '3',
-                    Icons.person_add,
-                    Colors.green,
+                  const SizedBox(height: 28),
+                  Text(
+                    'Chức năng chính',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    'Đánh giá',
-                    '4.8',
-                    Icons.star,
-                    Colors.amber,
+                  const SizedBox(height: 16),
+                  _MainFunctionCard(
+                    color: Colors.blue,
+                    icon: Icons.calendar_today,
+                    title: 'Quản lý lịch hẹn',
+                    description: 'Xem và quản lý lịch hẹn khám bệnh',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ConsultationHistoryScreen(doctor: doctor),
+                        ),
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    'Doanh thu',
-                    '2.5M',
-                    Icons.attach_money,
-                    Colors.purple,
+                  const SizedBox(height: 16),
+                  _MainFunctionCard(
+                    color: Colors.green,
+                    icon: Icons.schedule,
+                    title: 'Lịch làm việc',
+                    description: 'Xem và cập nhật lịch làm việc',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScheduleScreen(doctor: doctor),
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  _MainFunctionCard(
+                    color: Colors.orange,
+                    icon: Icons.folder,
+                    title: 'Hồ sơ bệnh án',
+                    description: 'Quản lý hồ sơ bệnh án của bệnh nhân',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 16),
+                  _MainFunctionCard(
+                    color: Colors.purple,
+                    icon: Icons.chat,
+                    title: 'Chat với bệnh nhân',
+                    description: 'Trò chuyện, tư vấn trực tuyến',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
-            // Các chức năng chính
-            Text(
-              'Chức năng chính',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _buildFunctionCard(
-                  context,
-                  'Quản lý lịch hẹn',
-                  Icons.calendar_today,
-                  Colors.blue,
-                ),
-                _buildFunctionCard(
-                  context,
-                  'Lịch làm việc',
-                  Icons.schedule,
-                  Colors.green,
-                ),
-                _buildFunctionCard(
-                  context,
-                  'Hồ sơ bệnh án',
-                  Icons.folder,
-                  Colors.orange,
-                ),
-                _buildFunctionCard(
-                  context,
-                  'Chat với bệnh nhân',
-                  Icons.chat,
-                  Colors.purple,
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+class _StatCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+
+  const _StatCard({
+    required this.icon,
+    required this.color,
+    required this.value,
+    required this.label,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 6),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium,
+              label,
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
               textAlign: TextAlign.center,
             ),
           ],
@@ -218,44 +274,74 @@ class DoctorHomeScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildFunctionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-  ) {
+class _MainFunctionCard extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _MainFunctionCard({
+    required this.color,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: InkWell(
-        onTap: () {
-          if (title == 'Lịch làm việc') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ScheduleScreen(doctor: doctor),
-              ),
-            );
-          } else if (title == 'Quản lý lịch hẹn') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ConsultationHistoryScreen(doctor: doctor),
-              ),
-            );
-          }
-        },
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(18.0),
+          child: Row(
             children: [
-              Icon(icon, color: color, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color, width: 3),
+                ),
+                child: Center(
+                  child: Icon(icon, color: color, size: 28),
+                ),
               ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 20),
             ],
           ),
         ),

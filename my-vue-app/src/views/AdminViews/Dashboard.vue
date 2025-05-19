@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1 class="dashboard-title">Tổng quan</h1>
+    <h1 class="dashboard-title">Tổng quan</h1>
       <div class="date-filter">
         <i class="fas fa-calendar-alt"></i>
         <span>{{ currentDate }}</span>

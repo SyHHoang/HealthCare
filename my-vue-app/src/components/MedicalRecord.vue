@@ -21,6 +21,11 @@
               </ul>
             </div>
           </div>
+          <!-- Thêm nút đánh giá tổng quan -->
+          <button class="ai-evaluation-btn" @click="showChatbot = true">
+            <i class="fas fa-robot"></i>
+            Đánh giá tổng quan sức khỏe bằng AI
+          </button>
         </div>
       </div>
 
@@ -50,6 +55,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Chatbot Modal -->
+    <div v-if="showChatbot" class="chatbot-modal">
+      <div class="chatbot-modal-content">
+        <AIEvaluationView @close="showChatbot = false" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -61,7 +73,9 @@ import Vaccination from './MedicalRecord/Vaccination.vue';
 import Treatment from './MedicalRecord/Treatment.vue';
 import Lifestyle from './MedicalRecord/Lifestyle.vue';
 import HealthData from './MedicalRecord/HealthData.vue';
+import AIEvaluationView from './AIEvaluationView.vue';
 import { ref } from 'vue';
+
 export default {
   name: 'MedicalRecord',
   components: {
@@ -71,10 +85,12 @@ export default {
     Vaccination,
     Treatment,
     Lifestyle,
-    HealthData
+    HealthData,
+    AIEvaluationView
   },
   setup() {
     const activeMenu = ref('symptoms');
+    const showChatbot = ref(false);
     const menuItems = [
       { id: 'symptoms', title: 'Triệu chứng', icon: 'bi bi-thermometer-half' },
       { id: 'prescriptions', title: 'Đơn thuốc', icon: 'bi bi-prescription' },
@@ -87,7 +103,8 @@ export default {
 
     return {
       activeMenu,
-      menuItems
+      menuItems,
+      showChatbot
     };
   }
 };
@@ -176,5 +193,49 @@ export default {
     margin-left: 0;
     width: 100%;
   }
+}
+
+/* Thêm styles cho nút AI và modal */
+.ai-evaluation-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.ai-evaluation-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+.ai-evaluation-btn i {
+  font-size: 1.1rem;
+}
+
+.chatbot-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.chatbot-modal-content {
+  position: relative;
+  z-index: 1001;
 }
 </style>

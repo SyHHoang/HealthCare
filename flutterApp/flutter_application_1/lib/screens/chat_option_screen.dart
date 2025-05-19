@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import 'appointment_screen.dart';
+import 'AIChatScreen.dart';
 class ChatOptionScreen extends ConsumerWidget {
   final User user;
   
@@ -122,21 +123,12 @@ class ChatOptionScreen extends ConsumerWidget {
   }
 
   void _openAIChat(BuildContext context) {
-    // Tạm thời hiển thị thông báo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng chat với AI đang được phát triển'),
-        duration: Duration(seconds: 2),
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => AIChatScreen(user: user),
       ),
     );
-    
-    // TODO: Chuyển đến màn hình chat AI
-    // Navigator.push(
-    //   context, 
-    //   MaterialPageRoute(
-    //     builder: (context) => AIChatScreen(user: user),
-    //   ),
-    // );
   }
 
   void _openDoctorChat(BuildContext context) {

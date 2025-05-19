@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
-        <img src="/images/logo.png" alt="Logo" class="logo">
+        <img class="logo">
         <h2>Doctor Portal</h2>
       </div>
       <nav class="sidebar-nav">
@@ -49,7 +49,7 @@
             <span class="badge">3</span>
           </div>
           <div class="user-menu">
-            <img src="/images/doctor-avatar.jpg" alt="Doctor" class="avatar">
+            <img  class="avatar">
             <span class="user-name">Dr. Nguyễn Văn A</span>
           </div>
         </div>
@@ -58,59 +58,59 @@
       <!-- Dashboard Content -->
       <div class="dashboard-content">
         <div class="dashboard-header">
-          <h1 class="dashboard-title">Tổng quan</h1>
+    <h1 class="dashboard-title">Tổng quan</h1>
         </div>
-        
-        <!-- Thống kê tổng quan -->
-        <div class="stats-grid">
+    
+    <!-- Thống kê tổng quan -->
+    <div class="stats-grid">
           <div class="stat-card appointments-card">
             <div class="stat-overlay"></div>
-            <div class="stat-icon">
-              <i class="fas fa-calendar-check"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Lịch hẹn hôm nay</h3>
+        <div class="stat-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Lịch hẹn hôm nay</h3>
               <p class="stat-number">{{ todayAppointments }}</p>
               <span class="stat-change" :class="appointmentChange >= 0 ? 'positive' : 'negative'">
                 {{ appointmentChange >= 0 ? '+' : '' }}{{ appointmentChange }} so với hôm qua
               </span>
-            </div>
-          </div>
+        </div>
+      </div>
 
           <div class="stat-card patients-card">
             <div class="stat-overlay"></div>
-            <div class="stat-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Tổng số bệnh nhân</h3>
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Tổng số bệnh nhân</h3>
               <p class="stat-number">{{ totalPatients }}</p>
               <span class="stat-change" :class="patientChange >= 0 ? 'positive' : 'negative'">
                 {{ patientChange >= 0 ? '+' : '' }}{{ patientChange }} tuần này
               </span>
-            </div>
-          </div>
+        </div>
+      </div>
 
           <div class="stat-card rating-card">
             <div class="stat-overlay"></div>
-            <div class="stat-icon">
+        <div class="stat-icon">
               <i class="fas fa-star"></i>
-            </div>
-            <div class="stat-info">
+        </div>
+        <div class="stat-info">
               <h3>Đánh giá trung bình</h3>
               <p class="stat-number">{{ averageRating }} <i class="fas fa-star rating-star"></i></p>
               <span class="stat-change" :class="ratingChange >= 0 ? 'positive' : 'negative'">
                 {{ ratingChange >= 0 ? '+' : '' }}{{ ratingChange }} so với tháng trước
               </span>
-            </div>
-          </div>
+        </div>
+      </div>
 
           <div class="stat-card revenue-card">
             <div class="stat-overlay"></div>
-            <div class="stat-icon">
+        <div class="stat-icon">
               <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <div class="stat-info">
+        </div>
+        <div class="stat-info">
               <h3>Tổng doanh thu</h3>
               <p class="stat-number">{{ formatCurrency(totalRevenue) }}</p>
               <span class="stat-change" :class="revenueChange >= 0 ? 'positive' : 'negative'">
@@ -145,14 +145,14 @@
                   <div v-html="guide.content"></div>
                 </div>
               </div>
-            </div>
-          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Lịch hẹn hôm nay -->
-        <div class="appointments-section">
+    <!-- Lịch hẹn hôm nay -->
+    <div class="appointments-section">
           <div class="section-header">
-            <h2>Lịch hẹn hôm nay</h2>
+      <h2>Lịch hẹn hôm nay</h2>
             <div class="appointment-filters">
               <button 
                 v-for="status in appointmentStatuses" 
@@ -164,7 +164,7 @@
               </button>
             </div>
           </div>
-          <div class="appointments-list">
+      <div class="appointments-list">
             <div v-if="filteredAppointments.length === 0" class="no-appointments">
               <i class="fas fa-calendar-times"></i>
               <p>Không có lịch hẹn nào</p>
@@ -175,17 +175,17 @@
               :key="appointment.id" 
               class="appointment-item"
             >
-              <div class="appointment-time">
-                <i class="fas fa-clock"></i>
-                <span>{{ appointment.time }}</span>
-              </div>
-              <div class="appointment-info">
+          <div class="appointment-time">
+            <i class="fas fa-clock"></i>
+            <span>{{ appointment.time }}</span>
+          </div>
+          <div class="appointment-info">
                 <div class="patient-info">
                   <img :src="appointment.patientAvatar || '/images/default-avatar.jpg'" :alt="appointment.patientName" class="patient-avatar">
                   <div>
-                    <h4>{{ appointment.patientName }}</h4>
-                    <p>{{ appointment.reason }}</p>
-                  </div>
+            <h4>{{ appointment.patientName }}</h4>
+            <p>{{ appointment.reason }}</p>
+          </div>
                 </div>
               </div>
               <div class="appointment-actions">
@@ -229,30 +229,30 @@ const appointmentStatuses = [
 ];
 
 const appointments = ref([
-  {
-    id: 1,
-    time: '09:00',
-    patientName: 'Nguyễn Văn A',
+        {
+          id: 1,
+          time: '09:00',
+          patientName: 'Nguyễn Văn A',
     patientAvatar: '/images/avatar1.jpg',
-    reason: 'Khám tổng quát',
-    status: 'completed'
-  },
-  {
-    id: 2,
-    time: '10:30',
-    patientName: 'Trần Thị B',
+          reason: 'Khám tổng quát',
+          status: 'completed'
+        },
+        {
+          id: 2,
+          time: '10:30',
+          patientName: 'Trần Thị B',
     patientAvatar: '/images/avatar2.jpg',
-    reason: 'Tái khám',
-    status: 'pending'
-  },
-  {
-    id: 3,
-    time: '14:00',
-    patientName: 'Lê Văn C',
+          reason: 'Tái khám',
+          status: 'pending'
+        },
+        {
+          id: 3,
+          time: '14:00',
+          patientName: 'Lê Văn C',
     patientAvatar: '/images/avatar3.jpg',
-    reason: 'Khám bệnh',
-    status: 'upcoming'
-  }
+          reason: 'Khám bệnh',
+          status: 'upcoming'
+        }
 ]);
 
 // Computed

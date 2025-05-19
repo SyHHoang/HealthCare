@@ -12,10 +12,12 @@ class NewsListScreen extends ConsumerStatefulWidget {
 }
 
 class _NewsListScreenState extends ConsumerState<NewsListScreen> {
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    // Kiểm tra nếu dữ liệu chưa được tải, thì tải dữ liệu
     Future.microtask(() {
       final newsLoaded = ref.read(newsLoadedProvider);
       if (!newsLoaded) {
@@ -23,6 +25,12 @@ class _NewsListScreenState extends ConsumerState<NewsListScreen> {
         ref.read(newsLoadedProvider.notifier).setLoaded(true);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   String _formatDate(String dateString) {
@@ -52,178 +60,184 @@ class _NewsListScreenState extends ConsumerState<NewsListScreen> {
   @override
   Widget build(BuildContext context) {
     final newsState = ref.watch(newsNotifierProvider);
-    
-    return Column(
-      children: [
-        AppBar(
-          title: const Text('Tin tức'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                ref.read(newsNotifierProvider.notifier).loadNews();
-              },
-            ),
-          ],
-        ),
-        Expanded(
-          child: newsState.when(
-            data: (newsList) {
-              if (newsList.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.newspaper, size: 48, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Text('Chưa có tin tức nào'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          ref.read(newsNotifierProvider.notifier).loadNews();
-                        },
-                        child: const Text('Tải tin tức'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  await ref.read(newsNotifierProvider.notifier).loadNews();
-                },
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: newsList.length,
-                  itemBuilder: (context, index) {
-                    final news = newsList[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      clipBehavior: Clip.antiAlias,
-                      elevation: 2,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NewsDetailScreen(news: news),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (news.coverImage.isNotEmpty)
-                              Stack(
-                                children: [
-                                  Image.network(
-                                    news.coverImage,
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        height: 200,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.error),
-                                      );
-                                    },
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _getCategoryColor(news.category),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        news.category,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    news.title,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    news.summary,
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      height: 1.5,
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        _formatDate(news.createdAt),
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value.trim();
+              });
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Có lỗi xảy ra: $error',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.read(newsNotifierProvider.notifier).loadNews();
-                    },
-                    child: const Text('Thử lại'),
-                  ),
-                ],
+            decoration: InputDecoration(
+              hintText: 'Tìm kiếm bài viết...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(24),
+                borderSide: BorderSide.none,
               ),
+              filled: true,
+              fillColor: Colors.grey[100],
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
             ),
           ),
         ),
-      ],
+        backgroundColor: Colors.white,
+        elevation: 1,
+      ),
+      body: newsState.when(
+        data: (newsList) {
+          final filteredList = _searchQuery.isEmpty
+              ? newsList
+              : newsList.where((n) =>
+                  n.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                  n.summary.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+
+          if (filteredList.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.newspaper, size: 48, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('Không tìm thấy bài viết phù hợp'),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(newsNotifierProvider.notifier).loadNews();
+            },
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: filteredList.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final news = filteredList[index];
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NewsDetailScreen(news: news),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: news.coverImage.isNotEmpty
+                                ? Image.network(
+                                    news.coverImage,
+                                    width: 80,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 80,
+                                        height: 60,
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.image, color: Colors.white),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    width: 80,
+                                    height: 60,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.image, color: Colors.white),
+                                  ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  news.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  news.summary,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _formatDate(news.createdAt),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Có lỗi xảy ra: $error',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(newsNotifierProvider.notifier).loadNews();
+                },
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
-} 
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/doctor.dart';
 import 'doctor_patient_list_screen.dart';
+import '../AIChatScreen.dart';
 
 class DoctorChatOptionScreen extends ConsumerWidget {
   final Doctor doctor;
@@ -123,21 +124,12 @@ class DoctorChatOptionScreen extends ConsumerWidget {
   }
 
   void _openAIChat(BuildContext context) {
-    // Tạm thời hiển thị thông báo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tính năng chat với AI đang được phát triển'),
-        duration: Duration(seconds: 2),
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => AIChatScreen(user: doctor),
       ),
     );
-    
-    // TODO: Chuyển đến màn hình chat AI cho bác sĩ
-    // Navigator.push(
-    //   context, 
-    //   MaterialPageRoute(
-    //     builder: (context) => DoctorAIChatScreen(doctor: doctor),
-    //   ),
-    // );
   }
 
   void _openPatientChat(BuildContext context) {

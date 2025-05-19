@@ -612,6 +612,122 @@ export default {
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   z-index: 1000;
 }
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.notification-header button {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.notification-header button:hover {
+  background-color: #ebf5fb;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f5f6fa;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+  background-color: #ebf5fb;
+}
+
+.notification-icon {
+  margin-right: 12px;
+  color: #3498db;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-text {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #95a5a6;
+}
+
+.empty-notifications {
+  padding: 20px;
+  text-align: center;
+  color: #95a5a6;
+}
+
+.notification-footer {
+  padding: 12px 15px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.notification-footer a {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.notification-footer a:hover {
+  color: #217dbb;
+}
+
+/* Scrollbar cho notification-list */
+.notification-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 .chatbot-tooltip {
   position: fixed;
   bottom: 32px;

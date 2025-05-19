@@ -6,6 +6,8 @@ import 'lifestyle_screen.dart';
 import 'vaccination_screen.dart';
 import 'prescription_screen.dart';
 import 'treatment_screen.dart';
+import 'AIEvaluationScreen.dart';
+
 class MedicalRecordScreen extends ConsumerStatefulWidget {
   const MedicalRecordScreen({Key? key}) : super(key: key);
 
@@ -23,6 +25,18 @@ class _MedicalRecordScreenState extends ConsumerState<MedicalRecordScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          _buildSection(
+            title: 'Đánh giá sức khỏe bằng AI',
+            icon: Icons.psychology,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AIEvaluationScreen(user: null),
+                ),
+              );
+            },
+          ),
           _buildSection(
             title: 'Dị ứng',
             icon: Icons.warning_amber,
