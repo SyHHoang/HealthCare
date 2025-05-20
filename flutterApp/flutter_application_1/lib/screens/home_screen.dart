@@ -186,14 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     _MainFunctionCard(
-                      color: Colors.redAccent,
-                      icon: Icons.medication,
-                      title: 'Tra cứu thuốc',
-                      description: 'Tìm kiếm thông tin về thuốc',
-                      onTap: () => _navigateToScreen(context, const DrugSearchScreen()),
-                    ),
-                    const SizedBox(height: 16),
-                    _MainFunctionCard(
                       color: Colors.orange,
                       icon: Icons.calendar_today,
                       title: 'Quản lý lịch hẹn',

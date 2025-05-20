@@ -81,7 +81,7 @@
                     @click="clearImage"
                     v-if="news.coverImage"
                   >
-                    <i class="fas fa-trash"></i> Xóa ảnh
+                    <i class="bi bi-trash"></i> Xóa ảnh
                   </button>
                 </div>
               </div>
@@ -170,10 +170,10 @@
               ></iframe>
               <div class="mt-2 d-flex justify-content-between">
                 <button type="button" class="btn btn-sm btn-info" @click="openInNewTab">
-                  <i class="fas fa-external-link-alt"></i> Mở trong tab mới
+                  <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
                 </button>
                 <button type="button" class="btn btn-sm btn-success" @click="fetchDocContent">
-                  <i class="fas fa-download"></i> Lấy nội dung
+                  <i class="bi bi-download"></i> Lấy nội dung
                 </button>
               </div>
             </div>
@@ -183,11 +183,11 @@
                 <label class="form-label mb-0">Xem trước nội dung</label>
                 <div>
                   <button type="button" class="btn btn-sm btn-outline-secondary me-2" @click="togglePreview">
-                    <i :class="showPreview ? 'fas fa-code' : 'fas fa-eye'"></i>
+                    <i :class="showPreview ? 'bi bi-code' : 'bi bi-eye'"></i>
                     {{ showPreview ? 'Xem HTML' : 'Xem trước' }}
                   </button>
                   <button type="button" class="btn btn-sm btn-outline-danger" @click="clearContent" v-if="news.content">
-                    <i class="fas fa-trash"></i> Xóa nội dung
+                    <i class="bi bi-trash"></i> Xóa nội dung
                   </button>
                 </div>
               </div>
@@ -211,10 +211,10 @@
 
       <div class="form-actions">
         <button type="button" class="btn btn-light me-2" @click="$router.push('/admin/news')">
-          <i class="fas fa-arrow-left"></i> Quay lại
+          <i class="bi bi-arrow-left"></i> Quay lại
         </button>
         <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-          <i class="fas fa-save"></i> 
+          <i class="bi bi-save"></i> 
           {{ isSubmitting ? 'Đang lưu...' : 'Lưu bài viết' }}
         </button>
       </div>

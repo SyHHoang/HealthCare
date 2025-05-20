@@ -10,7 +10,7 @@
         <div class="card dash-card" data-aos="fade-up">
           <div class="card-body">
             <div class="stat-icon">
-              <i class="fas fa-newspaper"></i>
+              <i class="bi bi-newspaper"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-title">{{ stats.totalArticles || 0 }}</h3>
@@ -22,7 +22,7 @@
         <div class="card dash-card" data-aos="fade-up" data-aos-delay="100">
           <div class="card-body">
             <div class="stat-icon">
-              <i class="fas fa-eye"></i>
+              <i class="bi bi-eye"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-title">{{ stats.totalViews || 0 }}</h3>
@@ -34,7 +34,7 @@
         <div class="card dash-card" data-aos="fade-up" data-aos-delay="200">
           <div class="card-body">
             <div class="stat-icon">
-              <i class="fas fa-users"></i>
+              <i class="bi bi-people"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-title">{{ userCount }}</h3>
@@ -46,7 +46,7 @@
         <div class="card dash-card" data-aos="fade-up" data-aos-delay="300">
           <div class="card-body">
             <div class="stat-icon">
-              <i class="fas fa-comments"></i>
+              <i class="bi bi-chat-dots"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-title">{{ feedbackCount }}</h3>
@@ -133,10 +133,10 @@
                     <td>{{ article.viewCount }}</td>
                     <td>
                       <button class="btn btn-sm btn-info me-2" @click="viewArticleStats(article._id)">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="bi bi-graph-up"></i>
                       </button>
                       <router-link :to="`/news/${article._id}`" class="btn btn-sm btn-primary" target="_blank">
-                        <i class="fas fa-eye"></i>
+                        <i class="bi bi-eye"></i>
                       </router-link>
                     </td>
                   </tr>

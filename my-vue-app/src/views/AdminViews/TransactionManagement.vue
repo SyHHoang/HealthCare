@@ -14,8 +14,15 @@
           <div class="card">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Doanh thu hôm nay</h6>
-              <h4 class="card-title">{{ formatCurrency(stats.daily.totalAmount) }}</h4>
-              <p class="card-text">{{ stats.daily.count }} giao dịch</p>
+              <div v-if="loadingStats" class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <template v-else>
+                <h4 class="card-title">{{ formatCurrency(stats?.daily?.totalAmount || 0) }}</h4>
+                <p class="card-text">{{ stats?.daily?.count || 0 }} giao dịch</p>
+              </template>
             </div>
           </div>
         </div>
@@ -23,7 +30,7 @@
           <div class="card bg-success bg-opacity-10">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Thành công</h6>
-              <h4 class="card-title text-dark">{{ stats.byStatus.success }}</h4>
+              <h4 class="card-title text-dark">{{ stats?.byStatus?.success || 0 }}</h4>
               <p class="card-text">giao dịch</p>
             </div>
           </div>
@@ -32,7 +39,7 @@
           <div class="card bg-info bg-opacity-10">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Đã gửi cho BS</h6>
-              <h4 class="card-title text-dark">{{ stats.byStatus.paid_to_doctor }}</h4>
+              <h4 class="card-title text-dark">{{ stats?.byStatus?.paid_to_doctor || 0 }}</h4>
               <p class="card-text">giao dịch</p>
             </div>
           </div>
@@ -41,7 +48,7 @@
           <div class="card bg-danger bg-opacity-10">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Thất bại</h6>
-              <h4 class="card-title text-dark">{{ stats.byStatus.failed }}</h4>
+              <h4 class="card-title text-dark">{{ stats?.byStatus?.failed || 0 }}</h4>
               <p class="card-text">giao dịch</p>
             </div>
           </div>
@@ -50,7 +57,7 @@
           <div class="card bg-warning bg-opacity-10">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Đang xử lý</h6>
-              <h4 class="card-title text-dark">{{ stats.byStatus.pending }}</h4>
+              <h4 class="card-title text-dark">{{ stats?.byStatus?.pending || 0 }}</h4>
               <p class="card-text">giao dịch</p>
             </div>
           </div>
@@ -355,22 +362,35 @@ import { transactionService } from '@/services/transactionService'
 import { useToast } from 'vue-toastification'
 import { Modal } from 'bootstrap'
 import * as XLSX from 'xlsx'
+import { useRouter } from 'vue-router'
 
 const toast = useToast()
+const router = useRouter()
 
 // State
 const transactions = ref([])
 const loading = ref(false)
+const loadingStats = ref(false)
 const error = ref(null)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const stats = ref({
-  totalRevenue: 0,
-  actualRevenue: 0,
-  pendingAmount: 0,
-  totalTransactions: 0
+  daily: {
+    totalAmount: 0,
+    count: 0
+  },
+  byStatus: {
+    success: 0,
+    failed: 0,
+    pending: 0,
+    paid_to_doctor: 0
+  },
+  revenueChart: {
+    labels: [],
+    data: []
+  }
 })
 const filters = ref({
   startDate: '',
@@ -398,26 +418,44 @@ const fetchTransactions = async () => {
   try {
     const params = {
       page: currentPage.value,
-      search: searchQuery.value,
-      status: statusFilter.value !== 'all' ? statusFilter.value : undefined
+      limit: 10,
+      status: filters.value.status,
+      startDate: filters.value.startDate,
+      endDate: filters.value.endDate,
+      search: filters.value.search
     }
+    console.log('Fetching transactions with params:', params)
     const response = await transactionService.getTransactions(params)
-    transactions.value = response.data
-    totalPages.value = response.last_page
+    console.log('Transactions response:', response)
+    transactions.value = response.transactions
+    totalPages.value = response.totalPages
   } catch (err) {
     error.value = 'Không thể tải danh sách giao dịch'
     console.error('Error fetching transactions:', err)
+    if (err.response?.status === 401) {
+      toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+      router.push('/auth/login')
+    } else if (err.response?.status === 403) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      router.push('/')
+    } else {
+      toast.error(err.response?.data?.message || 'Lỗi khi tải dữ liệu giao dịch')
+    }
   } finally {
     loading.value = false
   }
 }
 
 const fetchStats = async () => {
+  loadingStats.value = true
   try {
     const data = await transactionService.getStats()
     stats.value = data
   } catch (err) {
     console.error('Error fetching stats:', err)
+    toast.error('Lỗi khi tải thống kê')
+  } finally {
+    loadingStats.value = false
   }
 }
 
@@ -524,6 +562,13 @@ const updateStatus = async (id, status) => {
 
 // Lifecycle hooks
 onMounted(() => {
+  const role = localStorage.getItem('role')
+  if (role !== 'admin') {
+    toast.error('Bạn không có quyền truy cập trang này')
+    router.push('/')
+    return
+  }
+  
   fetchTransactions()
   fetchStats()
   transactionDetailModal.value = new Modal(document.getElementById('transactionDetailModal'))

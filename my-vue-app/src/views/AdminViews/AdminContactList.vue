@@ -4,7 +4,7 @@
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h3 class="mb-0">
-            <i class="fas fa-envelope me-2"></i> Quản lý liên hệ
+            <i class="bi bi-envelope me-2"></i> Quản lý liên hệ
           </h3>
         </div>
         <div class="card-body">
@@ -19,7 +19,7 @@
                   v-model="searchQuery"
                 >
                 <button class="btn btn-outline-primary" type="button" @click="applySearch">
-                  <i class="fas fa-search"></i>
+                  <i class="bi bi-search"></i>
                 </button>
               </div>
             </div>
@@ -86,16 +86,16 @@
                   <td>
                     <div class="btn-group">
                       <button class="btn btn-sm btn-info" @click="viewContact(contact)">
-                        <i class="fas fa-eye"></i>
+                        <i class="bi bi-eye"></i>
                       </button>
                       <button class="btn btn-sm btn-success" @click="updateStatus(contact, 'completed')" v-if="contact.status !== 'completed'">
-                        <i class="fas fa-check"></i>
+                        <i class="bi bi-check"></i>
                       </button>
                       <button class="btn btn-sm btn-warning" @click="updateStatus(contact, 'in-progress')" v-if="contact.status === 'new'">
-                        <i class="fas fa-clock"></i>
+                        <i class="bi bi-clock"></i>
                       </button>
                       <button class="btn btn-sm btn-danger" @click="deleteContact(contact)">
-                        <i class="fas fa-trash"></i>
+                        <i class="bi bi-trash"></i>
                       </button>
                     </div>
                   </td>
@@ -113,7 +113,7 @@
               <ul class="pagination">
                 <li class="page-item" :class="{ disabled: currentPage === 1 }">
                   <a class="page-link" href="#" @click.prevent="goToPage(currentPage - 1)">
-                    <i class="fas fa-chevron-left"></i>
+                    <i class="bi bi-chevron-left"></i>
                   </a>
                 </li>
                 <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: currentPage === page }">
@@ -121,7 +121,7 @@
                 </li>
                 <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                   <a class="page-link" href="#" @click.prevent="goToPage(currentPage + 1)">
-                    <i class="fas fa-chevron-right"></i>
+                    <i class="bi bi-chevron-right"></i>
                   </a>
                 </li>
               </ul>
@@ -137,7 +137,7 @@
         <div class="modal-content" v-if="selectedContact">
           <div class="modal-header">
             <h5 class="modal-title">
-              <i class="fas fa-envelope-open-text me-2"></i>
+              <i class="bi bi-envelope-open me-2"></i>
               Chi tiết liên hệ
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -198,7 +198,7 @@
                 ></textarea>
               </div>
               <button class="btn btn-primary" @click="sendReply">
-                <i class="fas fa-paper-plane me-2"></i> Gửi phản hồi
+                <i class="bi bi-send me-2"></i> Gửi phản hồi
               </button>
             </div>
           </div>

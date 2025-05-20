@@ -13,11 +13,11 @@
               placeholder="Tìm kiếm bác sĩ..."
             >
             <button class="btn btn-outline-secondary" @click="handleSearch">
-              <i class="fas fa-search"></i>
+              <i class="bi bi-search"></i>
             </button>
           </div>
           <button class="btn btn-primary" @click="showAddModal = true">
-            <i class="fas fa-plus"></i> Thêm bác sĩ
+            <i class="bi bi-plus"></i> Thêm bác sĩ
           </button>
         </div>
       </div>
@@ -80,13 +80,13 @@
                   </td>
                   <td>
                     <button class="btn btn-sm btn-info me-2" @click="viewDoctor(doctor)">
-                      <i class="fas fa-eye"></i>
+                      <i class="bi bi-eye"></i>
                     </button>
                     <button class="btn btn-sm btn-primary me-2" @click="editDoctor(doctor)">
-                      <i class="fas fa-edit"></i>
+                      <i class="bi bi-pencil"></i>
                     </button>
                     <button class="btn btn-sm btn-danger" @click="confirmDelete(doctor)">
-                      <i class="fas fa-trash"></i>
+                      <i class="bi bi-trash"></i>
                     </button>
                   </td>
                 </tr>

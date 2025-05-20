@@ -1,200 +1,232 @@
 <template>
   <div class="dashboard-container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <img class="logo">
-        <h2>Doctor Portal</h2>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <div class="nav-left">
+        <div class="logo">
+          <i class="bi bi-hospital"></i>
+          <span>Doctor Portal</span>
+        </div>
+        <div class="date-display">
+          <i class="bi bi-calendar3"></i>
+          <span>{{ currentDate }}</span>
+        </div>
       </div>
-      <nav class="sidebar-nav">
-        <router-link to="/doctor/dashboard" class="nav-item active">
-          <i class="fas fa-home"></i>
-          <span>Tổng quan</span>
-        </router-link>
-        <router-link to="/doctor/appointments" class="nav-item">
-          <i class="fas fa-calendar-check"></i>
-          <span>Lịch hẹn</span>
-        </router-link>
-        <router-link to="/doctor/patients" class="nav-item">
-          <i class="fas fa-users"></i>
-          <span>Bệnh nhân</span>
-        </router-link>
-        <router-link to="/doctor/consultations" class="nav-item">
-          <i class="fas fa-video"></i>
-          <span>Tư vấn</span>
-        </router-link>
-        <router-link to="/doctor/profile" class="nav-item">
-          <i class="fas fa-user-md"></i>
-          <span>Hồ sơ</span>
-        </router-link>
-      </nav>
-    </div>
+      <div class="nav-right">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Tìm kiếm...">
+        </div>
+        <div class="nav-actions">
+          <button class="action-btn">
+            <i class="bi bi-bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <button class="action-btn">
+            <i class="bi bi-envelope"></i>
+            <span class="badge">5</span>
+          </button>
+          <div class="user-profile">
+            <img src="../assets/images/default-avatar.png" alt="Doctor Avatar" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Dr. Nguyễn Văn A</span>
+              <span class="user-role">Bác sĩ chuyên khoa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
 
     <!-- Main Content -->
     <div class="main-content">
-      <!-- Header -->
-      <header class="main-header">
-        <div class="header-left">
-          <button class="menu-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <div class="date-filter">
-            <i class="fas fa-calendar-alt"></i>
-            <span>{{ currentDate }}</span>
-          </div>
-        </div>
-        <div class="header-right">
-          <div class="notifications">
-            <i class="fas fa-bell"></i>
-            <span class="badge">3</span>
-          </div>
-          <div class="user-menu">
-            <img  class="avatar">
-            <span class="user-name">Dr. Nguyễn Văn A</span>
-          </div>
-        </div>
-      </header>
-
-      <!-- Dashboard Content -->
       <div class="dashboard-content">
         <div class="dashboard-header">
-    <h1 class="dashboard-title">Tổng quan</h1>
+          <h1 class="dashboard-title">Tổng quan</h1>
         </div>
-    
-    <!-- Thống kê tổng quan -->
-    <div class="stats-grid">
+
+        <!-- Thống kê tổng quan -->
+        <div class="stats-grid">
           <div class="stat-card appointments-card">
-            <div class="stat-overlay"></div>
-        <div class="stat-icon">
-          <i class="fas fa-calendar-check"></i>
-        </div>
-        <div class="stat-info">
-          <h3>Lịch hẹn hôm nay</h3>
+            <div class="stat-icon">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Lịch hẹn hôm nay</h3>
               <p class="stat-number">{{ todayAppointments }}</p>
               <span class="stat-change" :class="appointmentChange >= 0 ? 'positive' : 'negative'">
-                {{ appointmentChange >= 0 ? '+' : '' }}{{ appointmentChange }} so với hôm qua
+                <i class="bi" :class="appointmentChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
+                {{ Math.abs(appointmentChange) }} so với hôm qua
               </span>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <div class="stat-card patients-card">
-            <div class="stat-overlay"></div>
-        <div class="stat-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-info">
-          <h3>Tổng số bệnh nhân</h3>
+            <div class="stat-icon">
+              <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Tổng số bệnh nhân</h3>
               <p class="stat-number">{{ totalPatients }}</p>
               <span class="stat-change" :class="patientChange >= 0 ? 'positive' : 'negative'">
-                {{ patientChange >= 0 ? '+' : '' }}{{ patientChange }} tuần này
+                <i class="bi" :class="patientChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
+                {{ Math.abs(patientChange) }} tuần này
               </span>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <div class="stat-card rating-card">
-            <div class="stat-overlay"></div>
-        <div class="stat-icon">
-              <i class="fas fa-star"></i>
-        </div>
-        <div class="stat-info">
+            <div class="stat-icon">
+              <i class="bi bi-star"></i>
+            </div>
+            <div class="stat-info">
               <h3>Đánh giá trung bình</h3>
-              <p class="stat-number">{{ averageRating }} <i class="fas fa-star rating-star"></i></p>
+              <p class="stat-number">{{ averageRating }} <i class="bi bi-star-fill rating-star"></i></p>
               <span class="stat-change" :class="ratingChange >= 0 ? 'positive' : 'negative'">
-                {{ ratingChange >= 0 ? '+' : '' }}{{ ratingChange }} so với tháng trước
+                <i class="bi" :class="ratingChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
+                {{ Math.abs(ratingChange) }} so với tháng trước
               </span>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <div class="stat-card revenue-card">
-            <div class="stat-overlay"></div>
-        <div class="stat-icon">
-              <i class="fas fa-money-bill-wave"></i>
-        </div>
-        <div class="stat-info">
+            <div class="stat-icon">
+              <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-info">
               <h3>Tổng doanh thu</h3>
               <p class="stat-number">{{ formatCurrency(totalRevenue) }}</p>
               <span class="stat-change" :class="revenueChange >= 0 ? 'positive' : 'negative'">
-                {{ revenueChange >= 0 ? '+' : '' }}{{ revenueChange }}% so với tháng trước
+                <i class="bi" :class="revenueChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
+                {{ Math.abs(revenueChange) }}% so với tháng trước
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Hướng dẫn sử dụng -->
-        <div class="guide-section">
-          <div class="section-header">
-            <h2>Hướng dẫn sử dụng</h2>
-          </div>
-          <div class="accordion" id="guideAccordion">
-            <div class="accordion-item" v-for="(guide, index) in guides" :key="index">
-              <h2 class="accordion-header">
-                <button 
-                  class="accordion-button" 
-                  :class="{ collapsed: activeGuide !== index }"
-                  @click="toggleGuide(index)"
-                >
-                  <i :class="guide.icon" class="me-2"></i>
-                  {{ guide.title }}
-                </button>
-              </h2>
+        <!-- Quick Guide Section (Hướng dẫn nhanh) dạng accordion, full width -->
+        <div class="quick-guide-section">
+          <h2>Hướng dẫn nhanh</h2>
+          <div class="accordion">
+            <div v-for="(guide, index) in guides" :key="index" class="accordion-item">
               <div 
-                class="accordion-collapse collapse" 
-                :class="{ show: activeGuide === index }"
+                class="accordion-header"
+                :class="{ active: activeGuideIndex === index }"
+                @click="toggleGuideAccordion(index)"
               >
-                <div class="accordion-body">
-                  <div v-html="guide.content"></div>
-                </div>
+                <h3>{{ guide.title }}</h3>
+                <i class="fas" :class="activeGuideIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
               </div>
+              <div class="accordion-content" v-show="activeGuideIndex === index">
+                <div v-html="guide.content"></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Lịch hẹn hôm nay -->
-    <div class="appointments-section">
-          <div class="section-header">
-      <h2>Lịch hẹn hôm nay</h2>
-            <div class="appointment-filters">
-              <button 
-                v-for="status in appointmentStatuses" 
-                :key="status.value"
-                :class="['filter-btn', { active: currentFilter === status.value }]"
-                @click="currentFilter = status.value"
-              >
-                {{ status.label }}
-              </button>
-            </div>
+        <!-- Guide Articles Section (Bài viết hướng dẫn) -->
+        <div class="guide-articles">
+          <h2>Bài viết hướng dẫn</h2>
+          <div v-if="loadingGuides" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Đang tải...
           </div>
-      <div class="appointments-list">
-            <div v-if="filteredAppointments.length === 0" class="no-appointments">
-              <i class="fas fa-calendar-times"></i>
-              <p>Không có lịch hẹn nào</p>
-            </div>
-            <div 
-              v-else
-              v-for="appointment in filteredAppointments" 
-              :key="appointment.id" 
-              class="appointment-item"
-            >
-          <div class="appointment-time">
-            <i class="fas fa-clock"></i>
-            <span>{{ appointment.time }}</span>
-          </div>
-          <div class="appointment-info">
-                <div class="patient-info">
-                  <img :src="appointment.patientAvatar || '/images/default-avatar.jpg'" :alt="appointment.patientName" class="patient-avatar">
-                  <div>
-            <h4>{{ appointment.patientName }}</h4>
-            <p>{{ appointment.reason }}</p>
-          </div>
+          <div v-else-if="guideArticles.length > 0" class="articles-grid">
+            <div v-for="article in guideArticles" :key="article._id" class="article-card">
+              <div class="article-image" v-if="article.coverImage">
+                <img :src="article.coverImage" :alt="article.title">
+              </div>
+              <div class="article-content">
+                <h3>{{ article.title }}</h3>
+                <p class="article-summary">{{ article.summary }}</p>
+                <div class="article-meta">
+                  <span class="article-date">{{ formatDate(article.createdAt) }}</span>
+                  <router-link :to="'/news/' + article._id" class="read-more">
+                    Đọc thêm <i class="fas fa-arrow-right"></i>
+                  </router-link>
                 </div>
               </div>
-              <div class="appointment-actions">
-                <button class="action-btn video-call" @click="startVideoCall(appointment.id)">
-                  <i class="fas fa-video"></i>
+            </div>
+          </div>
+          <div v-else class="no-articles">
+            <p>Chưa có bài viết hướng dẫn nào</p>
+          </div>
+        </div>
+
+        <!-- Tin tức nổi bật -->
+        <div class="featured-news">
+          <div class="section-header">
+            <h2>Tin tức nổi bật</h2>
+            <router-link to="/news" class="view-all">Xem tất cả <i class="bi bi-arrow-right"></i></router-link>
+          </div>
+          <div v-if="featuredNews.length === 0" class="no-articles">
+            <p>Chưa có tin tức nổi bật nào</p>
+          </div>
+          <div v-else class="news-grid">
+            <div v-for="news in featuredNews" :key="news._id" class="news-card">
+              <div class="news-image">
+                <img :src="news.coverImage" :alt="news.title">
+                <div class="news-category">{{ news.category }}</div>
+              </div>
+              <div class="news-content">
+                <h3>{{ news.title }}</h3>
+                <p>{{ news.summary }}</p>
+                <div class="news-meta">
+                  <span class="views"><i class="bi bi-eye"></i> {{ news.viewCount }} lượt xem</span>
+                  <span class="date"><i class="bi bi-calendar3"></i> {{ formatDate(news.createdAt) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Today's Appointments -->
+          <div class="dashboard-card appointments-section">
+            <div class="card-header">
+              <h2>Lịch hẹn hôm nay</h2>
+              <div class="appointment-filters">
+                <button 
+                  v-for="status in appointmentStatuses" 
+                  :key="status.value"
+                  :class="['filter-btn', { active: currentFilter === status.value }]"
+                  @click="currentFilter = status.value"
+                >
+                  {{ status.label }}
                 </button>
-                <button class="action-btn chat" @click="startChat(appointment.id)">
-                  <i class="fas fa-comments"></i>
-                </button>
+              </div>
+            </div>
+            <div class="appointments-list">
+              <div v-if="filteredAppointments.length === 0" class="no-appointments">
+                <i class="bi bi-calendar-x"></i>
+                <p>Không có lịch hẹn nào</p>
+              </div>
+              <div 
+                v-else
+                v-for="appointment in filteredAppointments" 
+                :key="appointment.id" 
+                class="appointment-item"
+              >
+                <div class="appointment-time">
+                  <i class="bi bi-clock"></i>
+                  <span>{{ appointment.time }}</span>
+                </div>
+                <div class="appointment-info">
+                  <div class="patient-info">
+                    <img :src="appointment.patientAvatar || '../assets/images/default-avatar.png'" :alt="appointment.patientName" class="patient-avatar">
+                    <div>
+                      <h4>{{ appointment.patientName }}</h4>
+                      <p>{{ appointment.reason }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="appointment-actions">
+                  <button class="action-btn video-call" @click="startVideoCall(appointment.id)">
+                    <i class="bi bi-camera-video"></i>
+                  </button>
+                  <button class="action-btn chat" @click="startChat(appointment.id)">
+                    <i class="bi bi-chat-dots"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -205,7 +237,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -313,10 +345,9 @@ const guides = [
   }
 ];
 
-const activeGuide = ref(0);
-
-const toggleGuide = (index) => {
-  activeGuide.value = activeGuide.value === index ? -1 : index;
+const activeGuideIndex = ref(null);
+const toggleGuideAccordion = (index) => {
+  activeGuideIndex.value = activeGuideIndex.value === index ? null : index;
 };
 
 // Methods
@@ -341,142 +372,173 @@ const startChat = (appointmentId) => {
     params: { appointmentId }
   });
 };
+
+// Thêm dữ liệu cho tin tức nổi bật
+const featuredNews = ref([]);
+
+// Hàm format ngày tháng
+const formatDate = (date) => {
+  try {
+    const d = new Date(date);
+    return d.toLocaleDateString('vi-VN');
+  } catch (error) {
+    return 'Không rõ ngày';
+  }
+};
+
+// Lấy tin tức nổi bật
+const fetchFeaturedNews = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/api/news/stats/views');
+    const data = await response.json();
+    if (data.topArticles) {
+      featuredNews.value = data.topArticles.slice(0, 3); // Chỉ lấy 3 bài viết
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy tin tức nổi bật:', error);
+  }
+};
+
+// Gọi API khi component được mount
+onMounted(() => {
+  fetchFeaturedNews();
+});
+
+const loadingGuides = ref(true);
+const guideArticles = ref([]);
+
+const fetchGuideArticles = async () => {
+  loadingGuides.value = true;
+  try {
+    const response = await fetch('http://localhost:5000/api/news?category=guide');
+    const data = await response.json();
+    // DashboardView.vue trả về mảng hoặc object có data
+    guideArticles.value = Array.isArray(data) ? data : (data.data || []);
+  } catch (error) {
+    console.error('Lỗi khi tải bài viết hướng dẫn:', error);
+    guideArticles.value = [];
+  } finally {
+    loadingGuides.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchGuideArticles();
+});
 </script>
 
 <style scoped>
 .dashboard-container {
-  display: flex;
   min-height: 100vh;
   background-color: #f8f9fa;
 }
 
-/* Sidebar Styles */
-.sidebar {
-  width: 280px;
+/* Top Navigation */
+.top-nav {
   background: white;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-  padding: 24px;
-  position: fixed;
-  height: 100vh;
-  z-index: 1000;
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.logo {
-  width: 40px;
-  height: 40px;
-}
-
-.sidebar-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #2c3e50;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  color: #666;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.nav-item:hover {
-  background: #f0f4f8;
-  color: #0d6efd;
-}
-
-.nav-item.active {
-  background: #0d6efd;
-  color: white;
-}
-
-.nav-item i {
-  width: 20px;
-  text-align: center;
-}
-
-/* Main Content Styles */
-.main-content {
-  flex: 1;
-  margin-left: 280px;
-  padding: 24px;
-}
-
-/* Header Styles */
-.main-header {
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  background: white;
-  padding: 16px 24px;
-  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.header-left {
+.nav-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 2rem;
 }
 
-.menu-toggle {
-  display: none;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.logo i {
+  font-size: 2rem;
+  color: #0d6efd;
+}
+
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.search-box {
+  position: relative;
+  width: 300px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.search-box i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.action-btn {
+  position: relative;
   background: none;
   border: none;
-  font-size: 20px;
-  color: #666;
+  font-size: 1.2rem;
+  color: #6c757d;
   cursor: pointer;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.notifications {
-  position: relative;
-  cursor: pointer;
-}
-
-.notifications i {
-  font-size: 20px;
-  color: #666;
+  padding: 0.5rem;
 }
 
 .badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #e74c3c;
+  top: 0;
+  right: 0;
+  background: #dc3545;
   color: white;
-  font-size: 12px;
-  padding: 2px 6px;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 10px;
 }
 
-.user-menu {
+.user-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-profile:hover {
+  background-color: #f8f9fa;
 }
 
 .avatar {
@@ -486,174 +548,155 @@ const startChat = (appointmentId) => {
   object-fit: cover;
 }
 
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .user-name {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-/* Existing styles */
-.dashboard {
-  padding: 24px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.dashboard-title {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 28px;
   font-weight: 600;
+  color: #2c3e50;
 }
 
-.date-filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  color: #666;
+.user-role {
+  font-size: 0.8rem;
+  color: #6c757d;
 }
 
+/* Main Content */
+.main-content {
+  padding: 2rem;
+}
+
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
-  position: relative;
-  overflow: hidden;
-  color: white;
-  z-index: 1;
-  padding: 24px;
+  background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 20px;
-  transition: transform 0.3s ease;
-}
-
-.stat-overlay {
-  display: none;
-}
-
-.appointments-card {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-}
-
-.patients-card {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-}
-
-.rating-card {
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-}
-
-.revenue-card {
-  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
-}
-
-.stat-card .stat-info h3,
-.stat-card .stat-number,
-.stat-card .stat-change {
-  color: white;
-}
-
-.stat-card .stat-icon {
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
+  gap: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+}
+
+.appointments-card .stat-icon {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.patients-card .stat-icon {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.rating-card .stat-icon {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+}
+
+.revenue-card .stat-icon {
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
 }
 
 .stat-info h3 {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 0.9rem;
+  color: #6c757d;
   font-weight: 500;
 }
 
 .stat-number {
-  margin: 8px 0;
-  font-size: 28px;
+  margin: 0.5rem 0;
+  font-size: 1.8rem;
   font-weight: 600;
   color: #2c3e50;
 }
 
-.rating-star {
-  color: #ffc107;
-  font-size: 20px;
-}
-
 .stat-change {
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
 .stat-change.positive {
-  color: #2ecc71;
+  color: #28a745;
 }
 
 .stat-change.negative {
-  color: #e74c3c;
+  color: #dc3545;
 }
 
-.appointments-section {
+.rating-star {
+  color: #ffc107;
+  font-size: 1.2rem;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.dashboard-card {
   background: white;
-  padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.section-header {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
-.section-header h2 {
+.card-header h2 {
   margin: 0;
+  font-size: 1.2rem;
   color: #2c3e50;
-  font-size: 20px;
   font-weight: 600;
 }
 
+/* Appointments Section */
 .appointment-filters {
   display: flex;
-  gap: 12px;
+  gap: 0.5rem;
 }
 
 .filter-btn {
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   border: none;
   border-radius: 8px;
   background: #f8f9fa;
-  color: #666;
-  font-size: 14px;
+  color: #6c757d;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .filter-btn:hover {
@@ -668,40 +711,28 @@ const startChat = (appointmentId) => {
 .appointments-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.no-appointments {
-  text-align: center;
-  padding: 48px 0;
-  color: #666;
-}
-
-.no-appointments i {
-  font-size: 48px;
-  margin-bottom: 16px;
-  color: #dee2e6;
+  gap: 1rem;
 }
 
 .appointment-item {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 20px;
+  gap: 1.5rem;
+  padding: 1rem;
   background: #f8f9fa;
   border-radius: 12px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s;
 }
 
 .appointment-item:hover {
-  background: #f0f4f8;
+  background: #e9ecef;
 }
 
 .appointment-time {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #666;
+  gap: 0.5rem;
+  color: #6c757d;
   font-weight: 500;
   min-width: 100px;
 }
@@ -709,7 +740,7 @@ const startChat = (appointmentId) => {
 .patient-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
   flex: 1;
 }
 
@@ -723,19 +754,19 @@ const startChat = (appointmentId) => {
 .patient-info h4 {
   margin: 0;
   color: #2c3e50;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .patient-info p {
-  margin: 4px 0 0;
-  color: #666;
-  font-size: 14px;
+  margin: 0.2rem 0 0;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
 .appointment-actions {
   display: flex;
-  gap: 12px;
+  gap: 0.5rem;
 }
 
 .action-btn {
@@ -747,7 +778,7 @@ const startChat = (appointmentId) => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .action-btn.video-call {
@@ -764,127 +795,428 @@ const startChat = (appointmentId) => {
   transform: translateY(-2px);
 }
 
-.guide-section {
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  margin-bottom: 32px;
+/* Guide Section */
+.guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.accordion-item {
-  border: none;
-  margin-bottom: 12px;
-  border-radius: 8px !important;
-  overflow: hidden;
-}
-
-.accordion-button {
+.guide-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
   background: #f8f9fa;
-  color: #2c3e50;
-  font-weight: 500;
-  padding: 16px 20px;
+  border-radius: 12px;
+  transition: background-color 0.3s;
 }
 
-.accordion-button:not(.collapsed) {
+.guide-item:hover {
+  background: #e9ecef;
+}
+
+.guide-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: #0d6efd;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
-.accordion-button:focus {
-  box-shadow: none;
-  border-color: transparent;
-}
-
-.accordion-body {
-  padding: 20px;
-  background: #f8f9fa;
-}
-
-.accordion-body h5 {
+.guide-content h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
   color: #2c3e50;
-  margin-bottom: 16px;
+  font-weight: 600;
 }
 
-.accordion-body ul {
+.guide-content ul {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 1.2rem;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
-.accordion-body li {
-  margin-bottom: 8px;
-  color: #666;
+.guide-content li {
+  margin-bottom: 0.3rem;
 }
 
-/* Responsive Styles */
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 80px;
-    padding: 24px 12px;
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
+}
 
-  .sidebar-header h2,
-  .nav-item span {
-    display: none;
+@media (max-width: 992px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
-
-  .main-content {
-    margin-left: 80px;
-  }
-
-  .nav-item {
-    justify-content: center;
-    padding: 12px;
-  }
-
-  .nav-item i {
-    margin: 0;
+  
+  .search-box {
+    width: 200px;
   }
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+  .top-nav {
+    padding: 1rem;
   }
-
-  .sidebar.show {
-    transform: translateX(0);
+  
+  .nav-left {
+    gap: 1rem;
   }
-
-  .menu-toggle {
-    display: block;
+  
+  .logo span {
+    display: none;
   }
-
+  
+  .search-box {
+    display: none;
+  }
+  
+  .user-info {
+    display: none;
+  }
+  
   .main-content {
-    margin-left: 0;
+    padding: 1rem;
   }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
+  
   .appointment-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 1rem;
   }
-
+  
   .appointment-actions {
     width: 100%;
     justify-content: flex-end;
   }
+}
 
-  .section-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
+.dashboard-title {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
 
-  .appointment-filters {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 8px;
+/* Featured News Styles */
+.featured-news {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.view-all {
+  color: #0d6efd;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s;
+}
+
+.view-all:hover {
+  color: #0a58ca;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.news-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.news-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.news-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-category {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(13, 110, 253, 0.9);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.news-content {
+  padding: 1rem;
+}
+
+.news-content h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #2c3e50;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.news-content p {
+  margin: 0 0 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.news-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+@media (max-width: 1200px) {
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-articles {
+  margin-top: 40px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+
+.guide-articles h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 20px;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.article-card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.article-card:hover {
+  transform: translateY(-5px);
+}
+
+.article-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.article-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-content {
+  padding: 20px;
+}
+
+.article-content h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.article-summary {
+  color: #7f8c8d;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.article-date {
+  color: #95a5a6;
+  font-size: 12px;
+}
+
+.read-more {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s;
+}
+
+.read-more:hover {
+  color: #2980b9;
+}
+
+.read-more i {
+  font-size: 12px;
+  transition: transform 0.3s;
+}
+
+.read-more:hover i {
+  transform: translateX(3px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  color: #7f8c8d;
+}
+
+.no-articles {
+  text-align: center;
+  padding: 40px 0;
+  color: #7f8c8d;
+}
+
+/* Font Awesome Spinner */
+.fa-spinner {
+  animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+  100% { transform: rotate(360deg); }
+}
+
+.quick-guide-section {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+
+.quick-guide-section h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 20px;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accordion-item {
+  border: 1px solid #ecf0f1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.accordion-header {
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.accordion-header:hover,
+.accordion-header.active {
+  background-color: #e9ecef;
+}
+
+.accordion-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.accordion-content {
+  padding: 20px;
+  background-color: white;
+  color: #7f8c8d;
+  font-size: 14px;
+  line-height: 1.6;
 }
 </style> 

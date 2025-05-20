@@ -18,73 +18,67 @@
         <ul>
           <li>
             <router-link to="/admin" class="nav-item">
-              <i class="fas fa-tachometer-alt"></i>
+              <i class="bi bi-speedometer2"></i>
               <span>Tổng quan</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/users" class="nav-item">
-              <i class="fas fa-users"></i>
+              <i class="bi bi-people"></i>
               <span>Quản lý người dùng</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/doctors" class="nav-item">
-              <i class="fas fa-user-md"></i>
+              <i class="bi bi-person-badge"></i>
               <span>Quản lý bác sĩ</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/specialties" class="nav-item">
-              <i class="fas fa-stethoscope"></i>
+              <i class="bi bi-heart-pulse"></i>
               <span>Quản lý chuyên khoa</span>
             </router-link>
           </li>
           <li>
-            <router-link to="/admin/drugs" class="nav-item">
-              <i class="fas fa-pills"></i>
-              <span>Quản lý thuốc</span>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/admin/transaction" class="nav-item">
-              <i class="fas fa-chart-bar"></i>
-              <span>Báo cáo & Thống kê</span>
-            </router-link>
-          </li>
-          <li>
             <router-link to="/admin/feedbacks" class="nav-item">
-              <i class="fas fa-chart-bar"></i>
+              <i class="bi bi-star"></i>
               <span>Quản lý đánh giá</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/contacts" class="nav-item">
-              <i class="fas fa-chart-bar"></i>
+              <i class="bi bi-envelope"></i>
               <span>Quản lý liên hệ</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/news" class="nav-item">
-              <i class="fas fa-chart-bar"></i>
+              <i class="bi bi-newspaper"></i>
               <span>Quản lý bài viết</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/order-types" class="nav-item">
-              <i class="fas fa-shopping-cart"></i>
+              <i class="bi bi-cart"></i>
               <span>Quản lý loại đơn hàng</span>
             </router-link>
           </li>
           <li>
             <router-link to="/admin/doctor-verifications" class="nav-item">
-              <i class="fas fa-chart-bar"></i>
+              <i class="bi bi-patch-check"></i>
               <span>Quản lý xác thực bác sĩ</span>
             </router-link>
           </li>
           <li>
+            <router-link to="/admin/transaction" class="nav-item">
+              <i class="bi bi-credit-card"></i>
+              <span>Quản lý giao dịch</span>
+            </router-link>
+          </li>
+          <li>
             <button @click="logout" class="nav-item logout-item">
-              <i class="fas fa-sign-out-alt"></i>
+              <i class="bi bi-box-arrow-right"></i>
               <span>Đăng xuất</span>
             </button>
           </li>
@@ -96,7 +90,7 @@
       <header class="admin-header">
         <div class="header-left">
           <button class="toggle-sidebar" @click="toggleSidebar">
-            <i class="fas fa-bars"></i>
+            <i class="bi bi-list"></i>
           </button>
           
           <div class="page-title">
@@ -115,14 +109,14 @@
             <div class="search-box">
               <input type="text" v-model="searchQuery" placeholder="Tìm kiếm..." @keyup.enter="performSearch">
               <button @click="performSearch">
-                <i class="fas fa-search"></i>
+                <i class="bi bi-search"></i>
               </button>
             </div>
           </div>
           
           <div class="notifications">
             <button class="notification-btn" @click="toggleNotifications">
-              <i class="fas fa-bell"></i>
+              <i class="bi bi-bell"></i>
               <span v-if="unreadNotifications > 0" class="notification-badge">{{ unreadNotifications }}</span>
             </button>
             <div class="notification-dropdown" v-if="showNotifications">
@@ -155,18 +149,18 @@
           <div class="user-profile">
             <div class="user-info" @click="toggleUserMenu">
               <img :src="adminAvatar || '/default-admin-avatar.png'" alt="Admin Avatar" class="user-avatar">
-              <i class="fas fa-chevron-down"></i>
+              <i class="bi bi-chevron-down"></i>
             </div>
             <div class="user-dropdown" v-if="showUserMenu">
               <router-link to="/admin/profile" class="dropdown-item">
-                <i class="fas fa-user-shield"></i> Hồ sơ cá nhân
+                <i class="bi bi-person-circle"></i> Hồ sơ cá nhân
               </router-link>
               <router-link to="/admin/settings" class="dropdown-item">
-                <i class="fas fa-cog"></i> Cài đặt
+                <i class="bi bi-gear"></i> Cài đặt
               </router-link>
               <div class="dropdown-divider"></div>
               <button @click="logout" class="dropdown-item logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
               </button>
             </div>
           </div>
@@ -289,15 +283,15 @@ export default {
     
     const getNotificationIcon = (type) => {
       const icons = {
-        user: 'fas fa-user-plus',
-        doctor: 'fas fa-user-md',
-        alert: 'fas fa-exclamation-triangle',
-        system: 'fas fa-server',
-        payment: 'fas fa-dollar-sign',
-        message: 'fas fa-envelope'
+        user: 'bi bi-person-plus',
+        doctor: 'bi bi-person-badge',
+        alert: 'bi bi-exclamation-triangle',
+        system: 'bi bi-server',
+        payment: 'bi bi-cash-coin',
+        message: 'bi bi-envelope'
       };
       
-      return icons[type] || 'fas fa-bell';
+      return icons[type] || 'bi bi-bell';
     };
     
     const formatTime = (time) => {
