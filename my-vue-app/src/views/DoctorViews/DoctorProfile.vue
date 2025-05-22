@@ -541,21 +541,20 @@ onMounted(() => {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.2);
+  
 }
 
 .status-badge.verified {
-  background: rgba(40, 167, 69, 0.2);
-  color: #28a745;
+  color: #ffffff;
 }
 
 .status-badge.pending {
-  background: rgba(255, 193, 7, 0.2);
+  
   color: #ffc107;
 }
 
 .status-badge.inactive {
-  background: rgba(220, 53, 69, 0.2);
+  background: rgba(0, 123, 255, 0.2);
   color: #dc3545;
 }
 .status-badge.pendingProcessing {

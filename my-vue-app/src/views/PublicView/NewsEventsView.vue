@@ -42,18 +42,18 @@
                   class="article-image"
                   loading="lazy"
                 />
-                <div class="category-badge" :class="getCategoryClass(article.category)">
+                <div class="category-badge" :class="getCategoryClass(article.updatedAt)">
                   {{ getCategoryName(article.category) }}
                 </div>
               </div>
               <div class="article-content">
                 <div class="article-meta">
-                  <span class="article-date"><i class="far fa-calendar-alt"></i> {{ formatDate(article.date) }}</span>
+                  <span class="article-date"><i class="bi bi-calendar-event"></i> {{ formatDate(article.updatedAt) }}</span>
                 </div>
-                <h2 class="article-title">{{ article.title }}</h2>
+                <p class="article-title">{{ article.title }}</p>
                 <p class="article-summary">{{ article.summary || truncateContent(article.content) }}</p>
                 <router-link :to="'/news/' + article._id" class="read-more">
-                  Xem thêm <i class="fas fa-arrow-right"></i>
+                  Xem thêm <i class="bi bi-arrow-right"></i>
                 </router-link>
               </div>
             </div>
@@ -66,7 +66,7 @@
           </div>
           
           <div v-if="!isLoading && filteredArticles.length === 0" class="no-articles">
-            <i class="fas fa-newspaper"></i>
+            <i class="bi bi-newspaper"></i>
             <p>Không có bài viết nào</p>
           </div>
         </main>
@@ -98,6 +98,7 @@ const fetchArticles = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/news')
     articles.value = response.data
+    console.log('Dữ liệu bài viết:', articles.value[0].updatedAt)
     console.log('Danh sách bài viết:', articles.value)
     console.log('Tiêu đề bài viết đầu tiên:', articles.value[0]?.title)
     filteredArticles.value = [...articles.value]
@@ -110,13 +111,16 @@ const fetchArticles = async () => {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('vi-VN', {
+  if (!date) return '';
+  console.log('Định dạng ngày:', date)
+  const d = new Date(date);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })
-}
-
+  });
+};
 const truncateContent = (content) => {
   if (!content) return ''
   const plainText = content.replace(/<[^>]*>?/gm, '')

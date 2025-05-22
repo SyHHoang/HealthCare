@@ -11,7 +11,7 @@
                 :class="{ active: activeTab === 'specialties' }"
                 @click="activeTab = 'specialties'"
               >
-                <i class="fas fa-stethoscope me-2"></i>
+                <i class="bi bi-heart-pulse me-2"></i>
                 Danh sách chuyên khoa
               </button>
               <button
@@ -19,7 +19,7 @@
                 :class="{ active: activeTab === 'doctors' }"
                 @click="activeTab = 'doctors'"
               >
-                <i class="fas fa-user-md me-2"></i>
+                <i class="bi bi-person-badge me-2"></i>
                 Danh sách bác sĩ
               </button>
             </div>
@@ -39,7 +39,7 @@
                 @keyup.enter="handleSearch"
               />
               <button class="btn btn-primary" @click="handleSearch">
-                <i class="fas fa-search"></i>
+                <i class="bi bi-search"></i>
               </button>
             </div>
             <!-- Filter Section for Doctors -->
@@ -96,6 +96,7 @@
                         class="btn btn-outline-primary btn-sm"
                         @click="viewDoctorsBySpecialty(specialty._id)"
                       >
+                        <i class="bi bi-person-badge me-1"></i>
                         Xem bác sĩ
                       </button>
                     </div>
@@ -124,25 +125,35 @@
                   <div class="card-body">
                     <h5 class="card-title">{{ doctor.fullName || doctor.name }}</h5>
                     <p class="card-text text-muted">
-                      <i class="fas fa-user-md me-2"></i>{{ doctor.academicTitle || 'Chưa cập nhật' }}
+                      <i class="bi bi-person-badge me-2"></i>{{ doctor.academicTitle || 'Chưa cập nhật' }}
                     </p>
                     <p class="card-text text-muted">
-                      <i class="fas fa-stethoscope me-2"></i>{{ doctor.specialty?.name || doctor.specialty || 'Chưa cập nhật' }}
+                      <i class="bi bi-heart-pulse me-2"></i>{{ doctor.specialty?.name || doctor.specialty || 'Chưa cập nhật' }}
                     </p>
                     <p class="card-text">
-                      <i class="fas fa-briefcase me-2"></i>{{ doctor.experience || 0 }} năm kinh nghiệm
-                    </p>
+  <i class="bi bi-briefcase me-2"></i>{{ doctor.experience || 0 }} năm kinh nghiệm
+</p>
+<p class="card-text">
+  <i class="bi bi-star-half me-2"></i>
+  Đánh giá: 
+  <span >
+    {{ 4 }} / 5
+  </span>
+</p>
+
                     <div class="d-flex justify-content-between align-items-center">
                       <button
                         class="btn btn-outline-primary btn-sm"
                         @click="showDoctorDetail(doctor._id)"
                       >
+                        <i class="bi bi-info-circle me-1"></i>
                         Xem chi tiết
                       </button>
                       <button
                         class="btn btn-primary btn-sm"
                         @click="handleVNPayPayment"
                       >
+                        <i class="bi bi-currency-exchange me-1"></i>
                         Đăng ký tư vấn
                       </button>
                     </div>
@@ -174,6 +185,8 @@
     />
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';

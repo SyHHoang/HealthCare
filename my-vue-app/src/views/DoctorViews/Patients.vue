@@ -1,6 +1,6 @@
 <template>
   <div class="patients">
-    <h1 class="page-title">Quản lý bệnh nhân</h1>
+    <h2 class="page-title">Quản lý bệnh nhân</h2>
 
     <!-- Thanh tìm kiếm -->
     <div class="search-bar">
@@ -26,7 +26,7 @@
               @error="handleImageError"
             >
             <div>
-              <h3>{{ patient.fullname }}</h3>
+              <p>{{ patient.fullname }}</p>
             </div>
           </div>
         </div>
@@ -34,17 +34,17 @@
         <div class="patient-details">
           <div class="detail-row">
             <div class="detail-item">
-              <i class="fas fa-phone"></i>
+              <i class="bi bi-telephone"></i>
               <span>{{ patient.phone }}</span>
             </div>
           </div>
           <div class="detail-row">
             <div class="detail-item">
-              <i class="fas fa-venus-mars"></i>
+              <i class="bi bi-gender-ambiguous"></i>
               <span>{{ patient.gender === 'male' ? 'Nam' : 'Nữ' }}</span>
             </div>
             <div class="detail-item">
-              <i class="fas fa-calendar"></i>
+              <i class="bi bi-calendar"></i>
               <span>{{ patient.age }} tuổi</span>
             </div>
           </div>
@@ -53,9 +53,6 @@
         <div class="patient-actions">
           <button class="action-btn view" @click="viewPatient(patient)">
             <i class="fas fa-eye"></i> Xem hồ sơ
-          </button>
-          <button class="action-btn edit" @click="showPrescriptionModal(patient)">
-            <i class="fas fa-edit"></i> Thêm đơn thuốc
           </button>
         </div>
       </div>

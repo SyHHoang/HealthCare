@@ -1,7 +1,7 @@
 <template>
   <div class="admin-news">
     <div class="header">
-      <h1>Quản lý tin tức</h1>
+      <h2>Quản lý tin tức, bài viết y tế</h2>
       <div class="d-flex align-items-center">
         <div class="input-group me-3" style="width: 300px;">
           <input 

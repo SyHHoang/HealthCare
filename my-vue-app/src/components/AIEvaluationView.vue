@@ -1,21 +1,21 @@
 <template>
   <div class="ai-evaluation">
     <div class="evaluation-header">
-      <h2><i class="fas fa-robot"></i> Đánh giá sức khỏe bằng AI</h2>
+      <h2><i class="bi bi-robot"></i> Đánh giá sức khỏe bằng AI</h2>
       <button class="close-btn" @click="$emit('close')">
-        <i class="fas fa-times"></i>
+        <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
     <div class="evaluation-content">
       <!-- Phần đánh giá các mục sức khỏe -->
       <div class="evaluation-section">
-        <h3><i class="fas fa-clipboard-check"></i> Đánh giá chi tiết</h3>
+        <h3><i class="bi bi-clipboard-check"></i> Đánh giá chi tiết</h3>
         <div class="health-metrics">
           <!-- Dị ứng -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-allergies"></i>
+              <i class="bi bi-exclamation-triangle"></i>
               <span>Dị ứng</span>
               <span class="status warning">Cần lưu ý</span>
             </div>
@@ -25,7 +25,7 @@
           <!-- Dữ liệu sức khỏe -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-heartbeat"></i>
+              <i class="bi bi-heart-pulse"></i>
               <span>Chỉ số sức khỏe</span>
               <span class="status good">Tốt</span>
             </div>
@@ -35,7 +35,7 @@
           <!-- Lối sống -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-running"></i>
+              <i class="bi bi-person-walking"></i>
               <span>Lối sống</span>
               <span class="status good">Tốt</span>
             </div>
@@ -45,7 +45,7 @@
           <!-- Thuốc men -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-pills"></i>
+              <i class="bi bi-capsule"></i>
               <span>Thuốc men</span>
               <span class="status warning">Cần lưu ý</span>
             </div>
@@ -55,7 +55,7 @@
           <!-- Triệu chứng -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-thermometer-half"></i>
+              <i class="bi bi-thermometer-half"></i>
               <span>Triệu chứng</span>
               <span class="status warning">Cần lưu ý</span>
             </div>
@@ -65,7 +65,7 @@
           <!-- Phác đồ điều trị -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-stethoscope"></i>
+              <i class="bi bi-stethoscope"></i>
               <span>Điều trị</span>
               <span class="status good">Tốt</span>
             </div>
@@ -75,7 +75,7 @@
           <!-- Tiêm chủng -->
           <div class="metric-item">
             <div class="metric-header">
-              <i class="fas fa-syringe"></i>
+              <i class="bi bi-syringe"></i>
               <span>Tiêm chủng</span>
               <span class="status good">Đầy đủ</span>
             </div>
@@ -86,7 +86,7 @@
 
       <!-- Phần kết luận tình trạng -->
       <div class="evaluation-section">
-        <h3><i class="fas fa-stethoscope"></i> Kết luận tình trạng</h3>
+        <h3><i class="bi bi-stethoscope"></i> Kết luận tình trạng</h3>
         <div class="conclusion">
           <p>Tình trạng sức khỏe chung đang ở mức tốt. Các chỉ số cơ bản đều trong giới hạn cho phép. Tuy nhiên, cần lưu ý:</p>
           <ul>
@@ -100,26 +100,26 @@
 
       <!-- Phần lời khuyên -->
       <div class="evaluation-section">
-        <h3><i class="fas fa-lightbulb"></i> Lời khuyên</h3>
+        <h3><i class="bi bi-lightbulb"></i> Lời khuyên</h3>
         <div class="recommendations">
           <div class="recommendation-item">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             <p>Duy trì chế độ ăn uống lành mạnh, tránh các thực phẩm gây dị ứng</p>
           </div>
           <div class="recommendation-item">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             <p>Tiếp tục tập thể dục đều đặn 30 phút mỗi ngày</p>
           </div>
           <div class="recommendation-item">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             <p>Đặt lịch tái khám định kỳ sau 2 tuần</p>
           </div>
           <div class="recommendation-item">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             <p>Ghi chú lại các triệu chứng bất thường để báo cáo với bác sĩ</p>
           </div>
           <div class="recommendation-item">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi bi-check-circle"></i>
             <p>Đặt lịch tiêm vắc xin cúm trong tháng tới</p>
           </div>
         </div>
@@ -137,6 +137,7 @@ defineEmits(['close'])
   background: white;
   border-radius: 15px;
   width: 800px;
+  height: 600px;
   max-width: 90vw;
   max-height: 90vh;
   overflow-y: auto;

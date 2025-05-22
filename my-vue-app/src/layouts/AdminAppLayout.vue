@@ -6,18 +6,12 @@
         <span class="admin-badge">Admin</span>
       </div>
       
-      <div class="sidebar-user">
-        <img :src="adminAvatar || '/default-admin-avatar.png'" alt="Admin Avatar" class="user-avatar">
-        <div class="user-info">
-          <h4>{{ adminName }}</h4>
-          <span>Quản trị viên</span>
-        </div>
-      </div>
+
       
       <nav class="sidebar-nav">
         <ul>
           <li>
-            <router-link to="/admin" class="nav-item">
+            <router-link to="/admin" class="nav-item" >
               <i class="bi bi-speedometer2"></i>
               <span>Tổng quan</span>
             </router-link>
@@ -105,46 +99,7 @@
         </div>
         
         <div class="header-right">
-          <div class="search-container">
-            <div class="search-box">
-              <input type="text" v-model="searchQuery" placeholder="Tìm kiếm..." @keyup.enter="performSearch">
-              <button @click="performSearch">
-                <i class="bi bi-search"></i>
-              </button>
-            </div>
-          </div>
           
-          <div class="notifications">
-            <button class="notification-btn" @click="toggleNotifications">
-              <i class="bi bi-bell"></i>
-              <span v-if="unreadNotifications > 0" class="notification-badge">{{ unreadNotifications }}</span>
-            </button>
-            <div class="notification-dropdown" v-if="showNotifications">
-              <div class="notification-header">
-                <h3>Thông báo</h3>
-                <button @click="markAllAsRead">Đánh dấu đã đọc</button>
-              </div>
-              <div class="notification-list" v-if="notifications.length > 0">
-                <div v-for="(notification, index) in notifications" :key="index" 
-                     class="notification-item" 
-                     :class="{ 'unread': !notification.read }">
-                  <div class="notification-icon">
-                    <i :class="getNotificationIcon(notification.type)"></i>
-                  </div>
-                  <div class="notification-content">
-                    <p class="notification-text">{{ notification.message }}</p>
-                    <span class="notification-time">{{ formatTime(notification.time) }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="empty-notifications" v-else>
-                <p>Không có thông báo</p>
-              </div>
-              <div class="notification-footer">
-                <router-link to="/admin/notifications">Xem tất cả</router-link>
-              </div>
-            </div>
-          </div>
           
           <div class="user-profile">
             <div class="user-info" @click="toggleUserMenu">

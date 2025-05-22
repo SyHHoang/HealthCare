@@ -5,47 +5,47 @@
         <div class="header-left">
           <div class="logo">
             <router-link to="/doctor/dashboard">
-              <h2><span class="primary-text">Health</span><span class="secondary-text">Right</span><sup class="doctor-badge">Bác sĩ</sup></h2>
+              <div class="logo">MediConnect</div>
             </router-link>
-          </div>
-          <div class="search-container">
-            <div class="search-box">
-              <input type="text" v-model="searchQuery" placeholder="Tìm kiếm bệnh nhân..." @keyup.enter="performSearch">
-              <button @click="performSearch">
-                <i class="fas fa-search"></i>
-              </button>
-            </div>
           </div>
         </div>
         
         <nav class="main-nav">
           <router-link to="/doctor/dashboard" class="nav-item">
-            <i class="fas fa-home"></i>
+            <i class="bi bi-house-door"></i>
             <span>Trang chủ</span>
           </router-link>
           <router-link to="/doctor/patients" class="nav-item">
-            <i class="fas fa-users"></i>
-            <span>Bệnh nhân</span>
+            <i class="bi bi-people"></i>
+            <span>Quản lý bệnh nhân</span>
           </router-link>
           <router-link to="/doctor/schedule" class="nav-item">
-            <i class="fas fa-calendar-alt"></i>
+            <i class="bi bi-calendar-event"></i>
             <span>Quản lý Lịch làm việc</span>
           </router-link>
           <router-link to="/doctor/consultation-history" class="nav-item">
-            <i class="fas fa-history"></i>
-            <span>Lịch sử tư vấn</span>
+            <i class="bi bi-clock-history"></i>
+            <span>Cuộc hẹn</span>
           </router-link>
           <router-link to="/doctor/chat" class="nav-item">
-            <i class="fas fa-comment-medical"></i>
-            <span>Tư vấn</span>
+            <i class="bi bi-chat-dots"></i>
+            <span>Nhắn tin</span>
             <span v-if="unreadMessages > 0" class="message-badge">{{ unreadMessages }}</span>
+          </router-link>
+                    <router-link to="/doctor/feedback" class="nav-item">
+            <i class="bi bi-star"></i>
+            <span>Đánh giá</span>
+          </router-link>
+          <router-link to="/doctor/contact" class="nav-item">
+            <i class="bi bi-envelope"></i>
+            <span>Liên hệ</span>
           </router-link>
         </nav>
         
         <div class="header-right">
           <div class="notifications">
             <button class="notification-btn" @click="toggleNotifications">
-              <i class="fas fa-bell"></i>
+              <i class="bi bi-bell"></i>
               <span v-if="unreadNotifications > 0" class="notification-badge">{{ unreadNotifications }}</span>
             </button>
             <div class="notification-dropdown" v-if="showNotifications">
@@ -76,10 +76,10 @@
           </div>
           
           <div class="user-profile">
-            <div class="user-info" @click="toggleUserMenu">
-              <img :src="doctorAvatar || '/default-doctor-avatar.png'" alt="Doctor Avatar" class="user-avatar">
-              <span class="user-name">BS. {{ doctorName }}</span>
-              <i class="fas fa-chevron-down"></i>
+     <div class="user-info" @click="toggleUserMenu">
+              <img :src="userAvatar || '@/assets/images/default-avatar.png'" alt="User Avatar" class="user-avatar">
+              <span class="user-name">{{ userName }}</span>
+              <i class="bi bi-chevron-down"></i>
             </div>
             <div class="user-dropdown" v-if="showUserMenu">
               <router-link to="/doctor/profile" class="dropdown-item">
@@ -250,16 +250,15 @@ const markAllAsRead = async () => {
 
 const getNotificationIcon = (type) => {
   const icons = {
-    appointment: 'fas fa-calendar-check',
-    message: 'fas fa-comment-medical',
-    system: 'fas fa-info-circle',
-    prescription: 'fas fa-prescription',
-    cancel: 'fas fa-calendar-times',
-    reminder: 'fas fa-bell',
-    feedback: 'fas fa-comment-alt'
+    appointment: 'bi bi-calendar-check',
+    message: 'bi bi-chat-dots',
+    system: 'bi bi-info-circle',
+    prescription: 'bi bi-file-earmark-medical',
+    cancel: 'bi bi-calendar-x',
+    reminder: 'bi bi-bell',
+    feedback: 'bi bi-chat-left-text'
   };
-  
-  return icons[type] || 'fas fa-bell';
+  return icons[type] || 'bi bi-bell';
 };
 
 const formatTime = (time) => {
@@ -793,8 +792,8 @@ onBeforeUnmount(() => {
     display: none;
   }
   
-  .user-info i {
-    display: none;
+  .user-info {
+    padding: 4px 8px;
   }
   
   .notification-dropdown {
@@ -934,5 +933,12 @@ onBeforeUnmount(() => {
   from { opacity: 0; transform: translateY(40px);}
   to { opacity: 1; transform: translateY(0);}
 }
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
 
+.logo span {
+  color: gold;
+}
 </style> 

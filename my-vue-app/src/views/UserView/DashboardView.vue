@@ -4,31 +4,49 @@
     <div class="dashboard-grid">
       <div class="dashboard-card history-card">
         <div class="card-content">
-          <h3>Lịch sử tư vấn</h3>
+          <h3>
+            <i class="bi bi-clock-history me-2"></i>
+            Lịch sử tư vấn
+          </h3>
           <p>Xem lại các cuộc tư vấn trước đây</p>
-          <router-link to="/user/consultation-history" class="card-button">Xem ngay</router-link>
+          <router-link to="/user/consultation-history" class="card-button">
+            <i class="bi bi-eye"></i> Xem ngay
+          </router-link>
         </div>
       </div>
       
       <div class="dashboard-card doctor-card">
         <div class="card-content">
-          <h3>Tìm bác sĩ</h3>
+          <h3>
+            <i class="bi bi-person-vcard me-2"></i>
+            Tìm bác sĩ
+          </h3>
           <p>Tìm bác sĩ phù hợp với nhu cầu của bạn</p>
-          <router-link to="/user/doctors" class="card-button">Tìm kiếm</router-link>
+          <router-link to="/user/doctors" class="card-button">
+            <i class="bi bi-search"></i> Tìm kiếm
+          </router-link>
         </div>
       </div>
       
       <div class="dashboard-card medical-card">
         <div class="card-content">
-          <h3>Hồ sơ y tế</h3>
+          <h3>
+            <i class="bi bi-file-earmark-medical me-2"></i>
+            Hồ sơ y tế
+          </h3>
           <p>Quản lý thông tin y tế cá nhân</p>
-          <router-link to="/user/medical-record" class="card-button">Xem hồ sơ</router-link>
+          <router-link to="/user/medical-record" class="card-button">
+            <i class="bi bi-journal-medical"></i> Xem hồ sơ
+          </router-link>
         </div>
       </div>
     </div>
     
     <div class="faq-section">
-      <h2>Hướng dẫn sử dụng hệ thống</h2>
+      <h2>
+        <i class="bi bi-question-circle me-2"></i>
+        Hướng dẫn sử dụng hệ thống
+      </h2>
       <div class="accordion">
         <div v-for="(faq, index) in faqs" :key="index" class="accordion-item">
           <div 
@@ -37,7 +55,7 @@
             :class="{ 'active': activeIndex === index }"
           >
             <h3>{{ faq.question }}</h3>
-            <i class="fas" :class="activeIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            <i class="bi" :class="activeIndex === index ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
           </div>
           <div class="accordion-content" v-show="activeIndex === index">
             <p>{{ faq.answer }}</p>
@@ -47,9 +65,12 @@
     </div>
     
     <div class="guide-articles">
-      <h2>Bài viết hướng dẫn</h2>
+      <h2>
+        <i class="bi bi-journal-text me-2"></i>
+        Bài viết hướng dẫn
+      </h2>
       <div v-if="loadingGuides" class="loading">
-        <i class="fas fa-spinner fa-spin"></i> Đang tải...
+        <i class="bi bi-arrow-repeat fa-spin"></i> Đang tải...
       </div>
       <div v-else-if="guideArticles.length > 0" class="articles-grid">
         <div v-for="article in guideArticles" :key="article._id" class="article-card">
@@ -60,15 +81,18 @@
             <h3>{{ article.title }}</h3>
             <p class="article-summary">{{ article.summary }}</p>
             <div class="article-meta">
-              <span class="article-date">{{ formatDate(article.createdAt) }}</span>
+              <span class="article-date">
+                <i class="bi bi-calendar-event"></i> {{ formatDate(article.createdAt) }}
+              </span>
               <router-link :to="'/news/' + article._id" class="read-more">
-                Đọc thêm <i class="fas fa-arrow-right"></i>
+                Đọc thêm <i class="bi bi-arrow-right"></i>
               </router-link>
             </div>
           </div>
         </div>
       </div>
       <div v-else class="no-articles">
+        <i class="bi bi-newspaper"></i>
         <p>Chưa có bài viết hướng dẫn nào</p>
       </div>
     </div>

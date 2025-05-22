@@ -43,38 +43,35 @@
             <div class="card-body">
               <h5 class="card-title">{{ doctor.fullName }}</h5>
               <p class="card-text text-muted">
-                <i class="fas fa-stethoscope me-2"></i>{{ doctor.specialty }}
+                <i class="bi bi-briefcase me-2"></i>{{ doctor.specialty }}
               </p>
               <p class="card-text">
-                <i class="fas fa-briefcase me-2"></i> Ngày bắt đầu tư vấn {{ formatDate(doctor.StartDate)}}
-              </p>
-              <p class="card-text">
-                <i class="fas fa-briefcase me-2"></i>ngày kết thúc tư vấn {{ formatDate(doctor.EndDate) }} 
-              </p>
-              <p class="card-text">
-                <i class="fas fa-briefcase me-2"></i>{{ doctor.experience }} năm kinh nghiệm
-              </p>
-              <p class="card-text text-muted">
-                <small>
-                  <i class="fas fa-calendar-plus me-2"></i>
-                  Đã thêm vào: {{ formatDate(doctor.addedAt) }}
-                </small>
-              </p>
+  <i class="bi bi-briefcase me-2"></i> Ngày bắt đầu tư vấn {{ formatDate(doctor.StartDate)}}
+</p>
+<p class="card-text">
+  <i class="bi bi-briefcase me-2"></i> Ngày kết thúc tư vấn {{ formatDate(doctor.EndDate) }} 
+</p>
+<p class="card-text">
+  <i class="bi bi-briefcase me-2"></i>{{ doctor.experience }} năm kinh nghiệm
+</p>
+<p class="card-text text-muted">
+  <small>
+    <i class="bi bi-calendar-plus me-2"></i>
+    Đã thêm vào: {{ formatDate(doctor.addedAt) }}
+  </small>
+</p>
               <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <button class="btn btn-outline-primary me-2" @click="showDoctorDetail(doctor._id)">
-                    Xem chi tiết
-                  </button>
-                  <button class="btn btn-success me-2" @click="startChat(doctor._id)">
-                    <i ></i> Chat
-                  </button>
-                  <button class="btn btn-primary" @click="showBookingModal(doctor)">
-                    <i ></i> Đặt lịch
-                  </button>
-                  <button class="btn btn-warning" @click="showRenewModal(doctor)">
-                    <i ></i> Gia hạn
-                    </button>
-                </div>
+<div class="d-flex gap-2 justify-content-between align-items-center flex-wrap">
+  <button class="btn btn-outline-primary flex-fill" @click="showDoctorDetail(doctor._id)">
+    <i class="bi bi-info-circle me-1"></i> Xem chi tiết
+  </button>
+  <button class="btn btn-primary flex-fill" @click="showBookingModal(doctor)">
+    <i class="bi bi-calendar-check me-1"></i> Đặt lịch
+  </button>
+  <button class="btn btn-warning flex-fill" @click="showRenewModal(doctor)">
+    <i class="bi bi-arrow-repeat me-1"></i> Gia hạn
+  </button>
+</div>
               </div>
             </div>
           </div>

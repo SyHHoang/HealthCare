@@ -1,9 +1,9 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-    <h1 class="dashboard-title">Tổng quan</h1>
+      <h1 class="dashboard-title">Tổng quan</h1>
       <div class="date-filter">
-        <i class="fas fa-calendar-alt"></i>
+        <i class="bi bi-calendar-event"></i>
         <span>{{ currentDate }}</span>
       </div>
     </div>
@@ -12,111 +12,86 @@
     <div class="stats-grid">
       <div class="stat-card users-card">
         <div class="stat-icon">
-          <i class="fas fa-users"></i>
+          <i class="bi bi-people-fill"></i>
         </div>
         <div class="stat-info">
           <h3>Tổng số người dùng</h3>
           <p class="stat-number">{{ formatNumber(stats.totalUsers) }}</p>
-          <span class="stat-change" :class="userChange >= 0 ? 'positive' : 'negative'">
-            {{ userChange >= 0 ? '+' : '' }}{{ userChange }}% so với tháng trước
-          </span>
         </div>
       </div>
 
       <div class="stat-card posts-card">
         <div class="stat-icon">
-          <i class="fas fa-newspaper"></i>
+          <i class="bi bi-newspaper"></i>
         </div>
         <div class="stat-info">
           <h3>Tổng số bài viết</h3>
           <p class="stat-number">{{ formatNumber(stats.totalPosts) }}</p>
-          <span class="stat-change" :class="postChange >= 0 ? 'positive' : 'negative'">
-            {{ postChange >= 0 ? '+' : '' }}{{ postChange }}% so với tháng trước
-          </span>
         </div>
       </div>
 
       <div class="stat-card revenue-card">
         <div class="stat-icon">
-          <i class="fas fa-money-bill-wave"></i>
+          <i class="bi bi-cash-stack"></i>
         </div>
         <div class="stat-info">
           <h3>Tổng doanh thu</h3>
-          <p class="stat-number">{{ formatCurrency(stats.totalRevenue) }}</p>
-          <span class="stat-change" :class="revenueChange >= 0 ? 'positive' : 'negative'">
-            {{ revenueChange >= 0 ? '+' : '' }}{{ revenueChange }}% so với tháng trước
-          </span>
+          <p class="stat-number">50.000.000 (VNĐ)</p>
         </div>
       </div>
 
       <div class="stat-card actual-revenue-card">
         <div class="stat-icon">
-          <i class="fas fa-hand-holding-usd"></i>
+          <i class="bi bi-wallet2"></i>
         </div>
         <div class="stat-info">
           <h3>Doanh thu thực tế</h3>
-          <p class="stat-number">{{ formatCurrency(stats.actualRevenue) }}</p>
-          <span class="stat-change" :class="actualRevenueChange >= 0 ? 'positive' : 'negative'">
-            {{ actualRevenueChange >= 0 ? '+' : '' }}{{ actualRevenueChange }}% so với tháng trước
-          </span>
+          <p class="stat-number">25.000.000 (VNĐ)</p>
         </div>
       </div>
 
       <div class="stat-card active-doctors-card">
         <div class="stat-icon">
-          <i class="fas fa-user-md"></i>
+          <i class="bi bi-person-badge"></i>
         </div>
         <div class="stat-info">
           <h3>Bác sĩ đang hoạt động</h3>
-          <p class="stat-number">{{ formatNumber(stats.activeDoctors) }}</p>
-          <span class="stat-change" :class="activeDoctorsChange >= 0 ? 'positive' : 'negative'">
-            {{ activeDoctorsChange >= 0 ? '+' : '' }}{{ activeDoctorsChange }}% so với tháng trước
-          </span>
+          <p class="stat-number">2</p>
         </div>
       </div>
 
       <div class="stat-card inactive-doctors-card">
         <div class="stat-icon">
-          <i class="fas fa-user-md"></i>
+          <i class="bi bi-person-badge"></i>
         </div>
         <div class="stat-info">
           <h3>Bác sĩ chưa kích hoạt</h3>
-          <p class="stat-number">{{ formatNumber(stats.inactiveDoctors) }}</p>
-          <span class="stat-change" :class="inactiveDoctorsChange >= 0 ? 'positive' : 'negative'">
-            {{ inactiveDoctorsChange >= 0 ? '+' : '' }}{{ inactiveDoctorsChange }}% so với tháng trước
-          </span>
+          <p class="stat-number">1</p>
         </div>
       </div>
 
       <div class="stat-card feedbacks-card">
         <div class="stat-icon">
-          <i class="fas fa-comments"></i>
+          <i class="bi bi-chat-dots"></i>
         </div>
         <div class="stat-info">
           <h3>Tổng số phản hồi</h3>
           <p class="stat-number">{{ formatNumber(stats.totalFeedbacks) }}</p>
-          <span class="stat-change" :class="feedbackChange >= 0 ? 'positive' : 'negative'">
-            {{ feedbackChange >= 0 ? '+' : '' }}{{ feedbackChange }}% so với tháng trước
-          </span>
         </div>
       </div>
 
       <div class="stat-card consultations-card">
         <div class="stat-icon">
-          <i class="fas fa-headset"></i>
+          <i class="bi bi-headset"></i>
         </div>
         <div class="stat-info">
           <h3>Tổng lượt tư vấn</h3>
-          <p class="stat-number">{{ formatNumber(stats.totalConsultations) }}</p>
-          <span class="stat-change" :class="consultationChange >= 0 ? 'positive' : 'negative'">
-            {{ consultationChange >= 0 ? '+' : '' }}{{ consultationChange }}% so với tháng trước
-          </span>
+          <p class="stat-number">30</p>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { dashboardService } from '@/services/dashboardService'

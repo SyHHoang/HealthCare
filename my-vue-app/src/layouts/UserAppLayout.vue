@@ -5,7 +5,7 @@
         <div class="header-left">
           <div class="logo">
             <router-link to="/user/dashboard">
-              <h2><span class="primary-text">Health</span><span class="secondary-text">Right</span></h2>
+             <div class="logo">MediConnect</div>
             </router-link>
           </div>
         </div>
@@ -17,19 +17,19 @@
           </router-link>
           <router-link to="/user/consultation-history" class="nav-item">
             <i class="bi bi-calendar-check"></i>
-            <span>Lịch sử</span>
+            <span>Cuộc hẹn</span>
           </router-link>
           <router-link to="/user/consultationlist" class="nav-item">
             <i class="bi bi-list-check"></i>
-            <span>Đặt lịch</span>
+            <span>Đặt lịch tư vấn</span>
           </router-link>
           <router-link to="/user/doctors" class="nav-item">
             <i class="bi bi-person-plus"></i>
-            <span>Bác sĩ</span>
+            <span>Tìm bác sĩ</span>
           </router-link>
-          <router-link to="/user/drugs" class="nav-item">
-            <i class="bi bi-capsule"></i>
-            <span>Thuốc</span>
+                   <router-link to="/user/chat" class="nav-item">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span>Nhắn tin</span>
           </router-link>
           <router-link to="/user/news" class="nav-item">
             <i class="bi bi-newspaper"></i>
@@ -43,10 +43,7 @@
             <i class="bi bi-envelope"></i>
             <span>Liên hệ</span>
           </router-link>
-          <router-link to="/user/chat" class="nav-item">
-            <i class="bi bi-chat-dots-fill"></i>
-            <span>Tư vấn</span>
-          </router-link>
+ 
         </nav>
         
         <div class="header-right">
@@ -84,7 +81,7 @@
           
           <div class="user-profile">
             <div class="user-info" @click="toggleUserMenu">
-              <img :src="userAvatar || '/default-avatar.png'" alt="User Avatar" class="user-avatar">
+              <img :src="userAvatar || '@/assets/images/default-avatar.png'" alt="User Avatar" class="user-avatar">
               <span class="user-name">{{ userName }}</span>
               <i class="bi bi-chevron-down"></i>
             </div>
@@ -400,7 +397,7 @@ export default {
       try {
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         userName.value = userInfo.fullName || userInfo.name || 'Người dùng';
-        userAvatar.value = userInfo.avatar;
+        userAvatar.value = '/src/assets/images/default-avatar.png';
 
         // Kết nối socket và lấy thông báo
         socketService.connect();
@@ -804,6 +801,132 @@ export default {
 @media (max-width: 768px) {
   .user-app-content {
     padding: 15px;
+  }
+}
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logo span {
+  color: gold;
+}
+.user-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #f5f6fa;
+  transition: background 0.2s;
+}
+
+.user-info:hover {
+  background: #ebf5fb;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e1e1e1;
+  background: #fff;
+}
+
+.user-name {
+  font-size: 15px;
+  color: #2c3e50;
+  font-weight: 500;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-profile .bi-chevron-down {
+  font-size: 16px;
+  color: #888;
+  margin-left: 2px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  z-index: 1200;
+  padding: 8px 0;
+  animation: fadeIn 0.18s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+.user-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  color: #2c3e50;
+  font-size: 15px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+}
+
+.user-dropdown .dropdown-item:hover,
+.user-dropdown .dropdown-item.logout-btn:hover {
+  background: #f8f9fa;
+  color: #3498db;
+}
+
+.user-dropdown .dropdown-divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}
+
+.user-dropdown .logout-btn {
+  color: #e74c3c;
+}
+
+.user-dropdown .logout-btn:hover {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+@media (max-width: 600px) {
+  .user-profile {
+    margin-left: 0;
+  }
+  .user-info {
+    padding: 4px 8px;
+  }
+  .user-name {
+    max-width: 70px;
+    font-size: 13px;
+  }
+  .user-dropdown {
+    min-width: 140px;
+    right: -20px;
   }
 }
 </style>

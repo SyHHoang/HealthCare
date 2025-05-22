@@ -553,12 +553,20 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: flex-start;
   margin-bottom: 8px;
-  max-width: 40%;
+  max-width: 85%; /* Tăng từ 40% lên 70% để tin nhắn dài ra */
+  word-break: break-word;
 }
 
 .message-user {
   align-self: flex-end;
-  margin-left: 800px;
+   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  max-width: 85%; /* Tăng từ 40% lên 70% để tin nhắn dài ra */
+  word-break: break-word;
+  margin-left: 750px; 
+   
 }
 
 .message-content {

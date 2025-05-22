@@ -32,7 +32,7 @@
                     <i class="fas fa-eye"></i>
                   </button>
                   <button @click="deleteLifestyle(lifestyle._id)" class="btn-delete">
-                    <i class="fas fa-trash"></i>
+                    <i class="bi bi-trash"></i>
                   </button>
                 </div>
               </td>

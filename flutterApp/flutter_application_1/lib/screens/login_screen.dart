@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         segments: const [
                           ButtonSegment(
                             value: 'user',
-                            label: Text('Người dùng'),
+                            label: Text('Bệnh nhân'),
                             icon: Icon(Icons.person),
                           ),
                           ButtonSegment(
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => RegisterScreen(role: _selectedRole),
+                      builder: (context) => RegisterScreen(),
                     ),
                   );
                 },

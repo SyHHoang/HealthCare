@@ -12,7 +12,7 @@
                 :class="{ active: activeTab === 'upcoming' }"
                 @click="activeTab = 'upcoming'"
               >
-                <i class="fas fa-calendar-check me-2"></i>
+                <i class="bi bi-calendar-check me-2"></i>
                 Cuộc hẹn sắp tới
               </button>
               <button 
@@ -20,7 +20,7 @@
                 :class="{ active: activeTab === 'history' }"
                 @click="activeTab = 'history'"
               >
-                <i class="fas fa-history me-2"></i>
+                <i class="bi bi-clock-history me-2"></i>
                 Lịch sử tư vấn
               </button>
             </div>
@@ -60,11 +60,11 @@
                       <div class="col-md-8">
                         <h5 class="card-title">{{ nextConsultation.doctorId.fullName }}</h5>
                         <p class="card-text text-muted">
-                          <i class="fas fa-user-md me-2"></i>
+                          <i class="bi bi-stethoscope me-2"></i>
                           {{ nextConsultation.doctorId.specialty }}
                         </p>
                         <p class="card-text">
-                          <i class="fas fa-calendar-alt me-2"></i>
+                          <i class="bi bi-calendar-event me-2"></i>
                           {{ formatDate(nextConsultation.consultationDate) }}
                         </p>
                         <div class="countdown">
@@ -79,7 +79,7 @@
                           @click="startVideoCall(nextConsultation._id)"
                           :disabled="!isConsultationTime(nextConsultation.consultationDate)"
                         >
-                          <i class="fas fa-video"></i> Gọi video
+                          <i class="bi bi-camera-video"></i> Gọi video
                         </button>
                       </div>
                     </div>
@@ -105,11 +105,11 @@
                           <div class="col-md-9">
                             <h5 class="card-title">{{ consultation.doctorId.fullName }}</h5>
                             <p class="card-text text-muted">
-                              <i class="fas fa-stethoscope me-2"></i>
+                              <i class="bi bi-stethoscope me-2"></i>
                               {{ consultation.doctorId.specialty }}
                             </p>
                             <p class="card-text">
-                              <i class="fas fa-calendar-alt me-2"></i>
+                              <i class="bi bi-calendar-event me-2"></i>
                               {{ formatDate(consultation.consultationDate) }}
                             </p>
                           </div>
@@ -152,15 +152,15 @@
                         <div class="col-md-9">
                           <h5 class="card-title">{{ consultation.doctorId.fullName }}</h5>
                           <p class="card-text text-muted">
-                            <i class="fas fa-stethoscope me-2"></i>
+                            <i class="bi bi-stethoscope me-2"></i>
                             {{ consultation.doctorId.specialty }}
                           </p>
                           <p class="card-text">
-                            <i class="fas fa-calendar-alt me-2"></i>
+                            <i class="bi bi-calendar-event me-2"></i>
                             {{ formatDate(consultation.consultationDate) }}
                           </p>
                           <p class="card-text">
-                            <i class="fas fa-clock me-2"></i>
+                            <i class="bi bi-clock me-2"></i>
                             Ngày tạo: {{ formatDate(consultation.createdAt) }}
                           </p>
                         </div>
@@ -176,7 +176,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';

@@ -23,7 +23,7 @@
           </div>
           <!-- Thêm nút đánh giá tổng quan -->
           <button class="ai-evaluation-btn" @click="showChatbot = true">
-            <i class="fas fa-robot"></i>
+            <i class="bi bi-robot"></i>
             Đánh giá tổng quan sức khỏe bằng AI
           </button>
         </div>

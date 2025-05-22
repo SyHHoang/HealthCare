@@ -1,41 +1,7 @@
 <template>
   <div class="dashboard-container">
     <!-- Top Navigation -->
-    <nav class="top-nav">
-      <div class="nav-left">
-        <div class="logo">
-          <i class="bi bi-hospital"></i>
-          <span>Doctor Portal</span>
-        </div>
-        <div class="date-display">
-          <i class="bi bi-calendar3"></i>
-          <span>{{ currentDate }}</span>
-        </div>
-      </div>
-      <div class="nav-right">
-        <div class="search-box">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Tìm kiếm...">
-        </div>
-        <div class="nav-actions">
-          <button class="action-btn">
-            <i class="bi bi-bell"></i>
-            <span class="badge">3</span>
-          </button>
-          <button class="action-btn">
-            <i class="bi bi-envelope"></i>
-            <span class="badge">5</span>
-          </button>
-          <div class="user-profile">
-            <img src="../assets/images/default-avatar.png" alt="Doctor Avatar" class="avatar">
-            <div class="user-info">
-              <span class="user-name">Dr. Nguyễn Văn A</span>
-              <span class="user-role">Bác sĩ chuyên khoa</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
+    
 
     <!-- Main Content -->
     <div class="main-content">
@@ -53,10 +19,7 @@
             <div class="stat-info">
               <h3>Lịch hẹn hôm nay</h3>
               <p class="stat-number">{{ todayAppointments }}</p>
-              <span class="stat-change" :class="appointmentChange >= 0 ? 'positive' : 'negative'">
-                <i class="bi" :class="appointmentChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
-                {{ Math.abs(appointmentChange) }} so với hôm qua
-              </span>
+
             </div>
           </div>
 
@@ -67,10 +30,7 @@
             <div class="stat-info">
               <h3>Tổng số bệnh nhân</h3>
               <p class="stat-number">{{ totalPatients }}</p>
-              <span class="stat-change" :class="patientChange >= 0 ? 'positive' : 'negative'">
-                <i class="bi" :class="patientChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
-                {{ Math.abs(patientChange) }} tuần này
-              </span>
+
             </div>
           </div>
 
@@ -80,11 +40,8 @@
             </div>
             <div class="stat-info">
               <h3>Đánh giá trung bình</h3>
-              <p class="stat-number">{{ averageRating }} <i class="bi bi-star-fill rating-star"></i></p>
-              <span class="stat-change" :class="ratingChange >= 0 ? 'positive' : 'negative'">
-                <i class="bi" :class="ratingChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
-                {{ Math.abs(ratingChange) }} so với tháng trước
-              </span>
+              <p class="stat-number">{{ 4}} <i class="bi bi-star-fill rating-star"></i></p>
+            
             </div>
           </div>
 
@@ -95,10 +52,7 @@
             <div class="stat-info">
               <h3>Tổng doanh thu</h3>
               <p class="stat-number">{{ formatCurrency(totalRevenue) }}</p>
-              <span class="stat-change" :class="revenueChange >= 0 ? 'positive' : 'negative'">
-                <i class="bi" :class="revenueChange >= 0 ? 'bi-arrow-up' : 'bi-arrow-down'"></i>
-                {{ Math.abs(revenueChange) }}% so với tháng trước
-              </span>
+        
             </div>
           </div>
         </div>

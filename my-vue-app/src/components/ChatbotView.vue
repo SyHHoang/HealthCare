@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 
 // URL API của FastAPI
 const apiUrl = 'http://localhost:8000/generate';
@@ -32,6 +32,13 @@ const apiUrl = 'http://localhost:8000/generate';
 // State
 const userInput = ref('');
 const messages = ref([]);
+
+// Khi mở chatbot, hiển thị tin nhắn chào
+onMounted(() => {
+  messages.value = [
+    { sender: 'bot', text: 'Xin chào, tôi có thể giúp gì cho bạn?' }
+  ];
+});
 
 // Gửi tin nhắn đến API FastAPI
 const sendMessage = async () => {

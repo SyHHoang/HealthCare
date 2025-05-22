@@ -10,7 +10,7 @@
           @error="handleImageError"
         >
         <h2>{{ patient.fullname }}</h2>
-        <p class="patient-id">ID: {{ patient._id }}</p>
+        
       </div>
       
       <div class="sidebar-menu">
@@ -27,7 +27,7 @@
 
       <!-- Thêm nút đánh giá tổng quan -->
       <button class="ai-evaluation-btn" @click="showChatbot = true">
-        <i class="fas fa-robot"></i>
+        <i class="bi bi-robot"></i>
         Đánh giá tổng quan sức khỏe bằng AI
       </button>
     </div>
@@ -135,10 +135,7 @@
           <div class="list-container">
             <div v-if="prescriptionsList && prescriptionsList.length > 0" class="prescriptions-list">
               <div v-for="(item, index) in prescriptionsList" :key="index" class="prescription-item">
-                <div class="prescription-header">
-                  <h3>Đơn thuốc #{{ index + 1 }}</h3>
-                  <span class="date">{{ new Date(item.createdAt).toLocaleDateString() }}</span>
-                </div>
+           
                 <div class="prescription-details">
                   <div class="detail-item">
                     <i class="fas fa-diagnoses"></i>
@@ -386,8 +383,8 @@
                 </div>
                 <div class="lifestyle-details">
                   <div class="description">
-                    <h4><i class="fas fa-info-circle"></i> Mô tả:</h4>
-                    <p>{{ item.description }}</p>
+                    <p><i class="bi bi-info-circle"></i> Mô tả: {{ item.description }}</p>
+                 
                   </div>
                   <div class="timeline">
                     <div class="timeline-item">
@@ -486,14 +483,14 @@ const healthDataList = ref([])
 
 // Menus
 const menus = [
-  { id: 'user-info', name: 'Thông tin người dùng', icon: 'fas fa-user' },
-  { id: 'symptoms', name: 'Triệu chứng', icon: 'fas fa-thermometer-half' },
-  { id: 'prescriptions', name: 'Đơn thuốc', icon: 'fas fa-prescription' },
-  { id: 'allergies', name: 'Dị ứng', icon: 'fas fa-allergies' },
-  { id: 'vaccinations', name: 'Tiêm chủng', icon: 'fas fa-syringe' },
-  { id: 'treatments', name: 'Điều trị', icon: 'fas fa-stethoscope' },
-  { id: 'lifestyle', name: 'Lối sống', icon: 'fas fa-heartbeat' },
-  { id: 'health-data', name: 'Dữ liệu sức khỏe', icon: 'fas fa-chart-line' }
+  { id: 'user-info', name: 'Thông tin người dùng', icon: 'bi bi-person' },
+  { id: 'symptoms', name: 'Triệu chứng', icon: 'bi bi-thermometer-half' },
+
+  { id: 'allergies', name: 'Dị ứng', icon: 'bi bi-exclamation-triangle' },
+  { id: 'vaccinations', name: 'Tiêm chủng', icon: 'bi bi-file-earmark-medical' },
+  { id: 'treatments', name: 'Điều trị', icon: 'bi bi-bar-chart-line' },
+  { id: 'lifestyle', name: 'Lối sống', icon: 'bi bi-heart-pulse' },
+  { id: 'health-data', name: 'Dữ liệu sức khỏe', icon: 'bi bi-bar-chart-line' }
 ]
 const currentMenu = ref('user-info')
 

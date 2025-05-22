@@ -1,9 +1,9 @@
 <template>
   <div class="schedule-container">
     <div class="schedule-header">
-      <h1>Lịch làm việc</h1>
+      <h2>Lịch làm việc</h2>
       <button class="add-btn" @click="showAddModal = true">
-        <i class="fas fa-plus"></i> Thêm thời gian làm việc
+        <i class="bi bi-plus"></i> Thêm thời gian làm việc
       </button>
     </div>
 
@@ -23,7 +23,7 @@
                 <div v-for="(slot, slotIndex) in getWorkingTime(day.name)" :key="slotIndex" class="time-slot">
                   {{ slot.startTime }}
                   <button class="delete-btn" @click="deleteTimeSlot(day.name, slotIndex)">
-                    <i class="fas fa-times"></i>
+                    <i class="bi bi-x"></i>
                   </button>
                 </div>
               </div>
@@ -40,7 +40,7 @@
     <div v-if="showAddModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Thêm thời gian làm việc</h2>
+          <h3>Thêm thời gian làm việc</h3>
           <button class="close-btn" @click="closeModal">×</button>
         </div>
         <form @submit.prevent="addWorkingTime">
