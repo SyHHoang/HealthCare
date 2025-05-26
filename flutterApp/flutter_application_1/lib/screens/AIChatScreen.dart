@@ -21,6 +21,15 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
 
+@override
+  void initState() {
+    super.initState();
+    _messages.add(ChatMessage(
+      text: 'Xin chào, tôi có thể giúp gì cho bạn?',
+      isUser: false,
+    ));
+  }
+
   @override
   void dispose() {
     _messageController.dispose();

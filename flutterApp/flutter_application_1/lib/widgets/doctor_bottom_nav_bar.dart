@@ -22,10 +22,6 @@ class DoctorBottomNavBar extends StatelessWidget {
           label: 'Trang chủ',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: 'Lịch hẹn',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.people),
           label: 'Bệnh nhân',
         ),

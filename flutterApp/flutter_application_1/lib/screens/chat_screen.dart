@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../providers/message_provider.dart';
 import '../models/message.dart';
 import 'dart:async';
@@ -10,8 +8,6 @@ import '../services/socket_service.dart';
 import '../services/message_service.dart';
 import '../services/token_service.dart';
 import '../providers/auth_provider.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 // Provider để lưu trữ userId hiện tại
 final userIdProvider = StateProvider<String?>((ref) => null);
@@ -37,7 +33,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final SocketService _socketService = SocketService.instance;
   final MessageService _messageService = MessageService();
-  final ImagePicker _picker = ImagePicker();
   final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
   bool _isTyping = false;
@@ -45,7 +40,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   String _typingUserId = '';
   Timer? _typingTimer;
   Timer? _stopTypingTimer;
-  bool _isUploading = false;
 
   @override
   void initState() {
@@ -267,83 +261,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  Future<void> _pickAndUploadImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
-      if (image == null) return;
-
-      setState(() {
-        _isUploading = true;
-      });
-
-      // Tạo FormData để upload ảnh
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('https://api.imgbb.com/1/upload'),
-      );
-
-      // Thêm API key và file ảnh
-      request.fields['key'] = 'YOUR_IMGBB_API_KEY'; // Thay thế bằng API key của bạn
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'image',
-          image.path,
-        ),
-      );
-
-      // Gửi request
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-      final jsonData = json.decode(responseData);
-
-      if (jsonData['success'] == true) {
-        // Gửi tin nhắn với ảnh
-        await ref.read(chatMessagesProvider.notifier).sendMessage(
-          '',
-          image: {
-            'url': jsonData['data']['url'],
-            'deleteUrl': jsonData['data']['delete_url'],
-          },
-        );
-      } else {
-        throw Exception('Upload ảnh thất bại');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi khi upload ảnh: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isUploading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final messagesAsync = ref.watch(chatMessagesProvider);
+    final messages = ref.watch(chatMessagesProvider);
     final isDoctorOnline = ref.watch(onlineDoctorsProvider.notifier).isDoctorOnline(widget.partnerId);
     
     // Thêm các điều khiển debug khi ở chế độ phát triển
     const bool isDevMode = false; // Đặt thành true để bật chế độ phát triển
     
     // Cuộn xuống khi có tin nhắn mới, sử dụng addPostFrameCallback để tránh lỗi
-    messagesAsync.whenData((messages) {
-      if (messages.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToBottom();
-        });
-      }
-    });
+  
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -432,15 +363,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           // Khu vực tin nhắn
           Expanded(
-            child: messagesAsync.when(
-              data: (messages) => messages.isEmpty
-                  ? _buildEmptyChat()
-                  : _buildMessageList(messages),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Lỗi: $error'),
-              ),
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _buildMessageList(messages),
           ),
 
           // Khung nhập tin nhắn
@@ -548,9 +473,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     
     return ListView(
+      
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
-      children: messageWidgets,
+      children: messageWidgets.reversed.toList(), // Đảo ngược danh sách để hiển thị mới nhất ở dưới cùng
     );
   }
 
@@ -593,17 +519,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: _isUploading ? null : _pickAndUploadImage,
-            icon: _isUploading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.image),
-            color: Theme.of(context).primaryColor,
-          ),
           Expanded(
             child: TextField(
               controller: _messageController,
@@ -642,82 +557,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Message message) {
-    final isMe = message.senderModel == 'User';
+  Widget _buildMessageBubble(Map<String, dynamic> message) {
+    final authState = ref.watch(authProvider);
+    final isCurrentUser = message['senderId'] == authState.userId;
     
+    // debugPrint('Message: $message');
+    // debugPrint('Message Sender ID: ${message['senderId']}');
+    // debugPrint('Current User ID: ${authState.userId}');
+    // debugPrint('Is Current User: $isCurrentUser');
+
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7,
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isCurrentUser ? Colors.blue : Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (message.image != null)
-              GestureDetector(
-                onTap: () {
-                  // Hiển thị ảnh full màn hình
-                  showDialog(
-                    context: context,
-                    builder: (context) => Dialog(
-                      child: Image.network(
-                        message.image!['url'],
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 4),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      message.image!['url'],
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          height: 200,
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            if (message.content.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isMe ? Theme.of(context).primaryColor : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(18).copyWith(
-                    bottomRight: isMe ? const Radius.circular(0) : null,
-                    bottomLeft: !isMe ? const Radius.circular(0) : null,
-                  ),
-                ),
-                child: Text(
-                  message.content,
-                  style: TextStyle(
-                    color: isMe ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-          ],
+        child: Text(
+          message['content'] ?? '',
+          style: TextStyle(
+            color: isCurrentUser ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );

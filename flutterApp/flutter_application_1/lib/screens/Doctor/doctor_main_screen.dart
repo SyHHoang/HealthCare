@@ -35,14 +35,12 @@ class _DoctorMainScreenState extends ConsumerState<DoctorMainScreen> {
       case 0:
         return DoctorHomeScreen(doctor: widget.doctor);
       case 1:
-        return DoctorConsultationHistoryScreen(doctor: widget.doctor);
-      case 2:
         return DoctorPatientsScreen(doctor: widget.doctor);
-      case 3:
+      case 2:
         return const NewsListScreen();
-      case 4:
+      case 3:
         return DoctorChatOptionScreen(doctor: widget.doctor);
-      case 5:
+      case 4:
         return DoctorProfileScreen(doctor: widget.doctor);
       default:
         return DoctorHomeScreen(doctor: widget.doctor);

@@ -6,9 +6,9 @@
         <router-link to="/">Trang chủ</router-link> 
         <router-link to="/about">Giới thiệu</router-link>
         <router-link to="/news-events">Tin tức</router-link>
+        
+        <router-link to="/doctors&specialties"> Bác sĩ</router-link>
         <router-link to="/feedback">Đánh giá</router-link>
-        <router-link to="/doctors&specialties">Chuyên khoa & Bác sĩ</router-link>
-        <router-link to="/drugs">Tra cứu thuốc</router-link>
         <li class="nav-item">
           <router-link class="nav-link" to="/contact">Liên hệ</router-link>
         </li>

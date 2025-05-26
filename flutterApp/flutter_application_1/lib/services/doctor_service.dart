@@ -44,7 +44,7 @@ class DoctorService extends _$DoctorService {
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
 
-      final uri = Uri.parse('$baseUrl/active/isActive').replace(queryParameters: queryParams);
+      final uri = Uri.parse('$baseUrl/doctors/active/isActive').replace(queryParameters: queryParams);
       
       final response = await http.get(
         uri,
@@ -365,7 +365,7 @@ class DoctorService extends _$DoctorService {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/schedule'),
+      Uri.parse('$baseUrl/doctors/schedule'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

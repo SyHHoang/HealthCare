@@ -84,14 +84,14 @@ class ConsultationService {
   Future<void> fetchAndCacheSchedule(String doctorId, Map<String, dynamic>? schedule) async {
     if (schedule != null) {
       _scheduleCache[doctorId] = schedule;
-      debugPrint('Đã cache lịch làm việc cho bác sĩ $doctorId');
+      //debugPrint('Đã cache lịch làm việc cho bác sĩ $doctorId');
       
       // Debug log để kiểm tra lịch làm việc
       if (schedule.isNotEmpty) {
-        debugPrint('Lịch làm việc của bác sĩ $doctorId:');
+        //debugPrint('Lịch làm việc của bác sĩ $doctorId:');
         for (var entry in schedule.entries) {
           if (entry.value is List) {
-            debugPrint('${entry.key}: ${(entry.value as List).length} slot');
+           // debugPrint('${entry.key}: ${(entry.value as List).length} slot');
           }
         }
       } else {

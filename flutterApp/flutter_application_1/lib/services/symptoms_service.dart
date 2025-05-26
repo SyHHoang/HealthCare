@@ -12,7 +12,7 @@ class SymptomsService {
   SymptomsService(this._apiService);
 
   Future<List<Symptom>> getSymptoms() async {
-    final response = await _apiService.get('/api/medical-record/symptoms');
+    final response = await _apiService.get('/medical-record/symptoms');
     return (response['data'] as List)
         .map((json) => Symptom.fromJson(json))
         .toList();
@@ -24,7 +24,7 @@ class SymptomsService {
     required DateTime startDate,
     String? notes,
   }) async {
-    final response = await _apiService.post('/api/medical-record/symptoms', {
+    final response = await _apiService.post('/medical-record/symptoms', {
       'name': name,
       'severity': severity,
       'startDate': startDate.toIso8601String(),
@@ -42,6 +42,6 @@ class SymptomsService {
   }
 
   Future<void> deleteSymptom(String id) async {
-    await _apiService.delete('/api/medical-record/symptoms/$id');
+    await _apiService.delete('/medical-record/symptoms/$id');
   }
 } 

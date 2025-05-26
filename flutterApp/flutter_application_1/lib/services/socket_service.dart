@@ -41,7 +41,7 @@ class SocketService {
       debugPrint('🔄 Đang kết nối socket với:');
       debugPrint('  - Token: ${token.substring(0, 15)}...');
       debugPrint('  - Role: $role');
-      debugPrint('  - URL: http://localhost:5000');
+      debugPrint('  - URL: http://192.168.2.101:5000');
 
       _socket = IO.io('http://localhost:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],

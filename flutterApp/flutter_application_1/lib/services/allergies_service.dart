@@ -12,7 +12,7 @@ class AllergiesService {
   AllergiesService(this._apiService);
 
   Future<List<Allergy>> getAllergies() async {
-    final response = await _apiService.get('/api/medical-record/allergies');
+    final response = await _apiService.get('/medical-record/allergies');
     return (response['data'] as List)
         .map((json) => Allergy.fromJson(json))
         .toList();
@@ -28,7 +28,7 @@ class AllergiesService {
     String? treatment,
     String? notes,
   }) async {
-    final response = await _apiService.post('/api/medical-record/allergies', {
+    final response = await _apiService.post('/medical-record/allergies', {
       'allergen': allergen,
       'type': type,
       'severity': severity,
@@ -45,7 +45,7 @@ class AllergiesService {
 
   Future<Allergy> updateAllergy(Allergy allergy) async {
     final response = await _apiService.put(
-      '/api/medical-record/allergies/${allergy.id}',
+      '/medical-record/allergies/${allergy.id}',
       {
         'allergen': allergy.allergen,
         'type': allergy.type,
@@ -64,6 +64,6 @@ class AllergiesService {
   }
 
   Future<void> deleteAllergy(String id) async {
-    await _apiService.delete('/api/medical-record/allergies/$id');
+    await _apiService.delete('/medical-record/allergies/$id');
   }
 } 

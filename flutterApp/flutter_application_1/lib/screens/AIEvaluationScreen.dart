@@ -38,31 +38,27 @@ class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
     setState(() {
       _evaluationData = {
         'allergies': {
-          'status': 'warning',
+          
           'message': 'Có 2 dị ứng đang hoạt động: Penicillin (Nặng) và Đậu phộng (Trung bình). Cần thận trọng khi sử dụng thuốc và thực phẩm.',
         },
         'healthData': {
-          'status': 'good',
+          
           'message': 'Huyết áp: 120/80 mmHg, Nhịp tim: 75 bpm, Đường huyết: 5.5 mmol/L. Các chỉ số đều trong giới hạn bình thường.',
         },
         'lifestyle': {
-          'status': 'good',
+          
           'message': 'Tập thể dục đều đặn 30 phút/ngày, chế độ ăn cân bằng. Cần cải thiện thời gian ngủ.',
         },
-        'medications': {
-          'status': 'warning',
-          'message': 'Đang sử dụng 3 loại thuốc thường xuyên. Cần tuân thủ đúng liều lượng và thời gian.',
-        },
         'symptoms': {
-          'status': 'warning',
+          
           'message': 'Có triệu chứng đau đầu và mệt mỏi kéo dài. Cần theo dõi và tái khám nếu không cải thiện.',
         },
         'treatment': {
-          'status': 'good',
+          
           'message': 'Đang trong quá trình điều trị viêm xoang. Tuân thủ tốt phác đồ điều trị.',
         },
         'vaccination': {
-          'status': 'good',
+         
           'message': 'Đã tiêm đầy đủ các mũi vắc xin cơ bản. Cần tiêm nhắc lại vắc xin cúm.',
         },
         'conclusion': {
@@ -114,43 +110,37 @@ class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
                   _buildMetricItem(
                     title: 'Dị ứng',
                     icon: Icons.warning_amber,
-                    status: _evaluationData['allergies']['status'],
+                    
                     message: _evaluationData['allergies']['message'],
                   ),
                   _buildMetricItem(
                     title: 'Chỉ số sức khỏe',
                     icon: Icons.monitor_heart,
-                    status: _evaluationData['healthData']['status'],
                     message: _evaluationData['healthData']['message'],
                   ),
                   _buildMetricItem(
                     title: 'Lối sống',
                     icon: Icons.directions_run,
-                    status: _evaluationData['lifestyle']['status'],
+                    
                     message: _evaluationData['lifestyle']['message'],
                   ),
-                  _buildMetricItem(
-                    title: 'Thuốc men',
-                    icon: Icons.medication,
-                    status: _evaluationData['medications']['status'],
-                    message: _evaluationData['medications']['message'],
-                  ),
+                
                   _buildMetricItem(
                     title: 'Triệu chứng',
                     icon: Icons.sick,
-                    status: _evaluationData['symptoms']['status'],
+                    
                     message: _evaluationData['symptoms']['message'],
                   ),
                   _buildMetricItem(
                     title: 'Điều trị',
                     icon: Icons.healing,
-                    status: _evaluationData['treatment']['status'],
+                    
                     message: _evaluationData['treatment']['message'],
                   ),
                   _buildMetricItem(
                     title: 'Tiêm chủng',
                     icon: Icons.vaccines,
-                    status: _evaluationData['vaccination']['status'],
+                    
                     message: _evaluationData['vaccination']['message'],
                   ),
                 ],
@@ -255,24 +245,8 @@ class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
   Widget _buildMetricItem({
     required String title,
     required IconData icon,
-    required String status,
     required String message,
   }) {
-    Color statusColor;
-    switch (status) {
-      case 'good':
-        statusColor = Colors.green;
-        break;
-      case 'warning':
-        statusColor = Colors.orange;
-        break;
-      case 'bad':
-        statusColor = Colors.red;
-        break;
-      default:
-        statusColor = Colors.grey;
-    }
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -295,23 +269,6 @@ class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
                 ),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  status == 'good' ? 'Tốt' : status == 'warning' ? 'Cần lưu ý' : 'Không tốt',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 8),

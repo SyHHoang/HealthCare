@@ -100,91 +100,383 @@ class OnlineDoctorsNotifier extends StateNotifier<Set<String>> {
 }
 
 // ChatMessagesNotifier là một lớp kế thừa StateNotifier để quản lý trạng thái tin nhắn
-class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<Message>>> {
-  ChatMessagesNotifier() : super(const AsyncValue.loading()) {
-    _loadMessages();
+class ChatMessagesNotifier extends StateNotifier<List<Message>> {
+  final MessageService _messageService;
+  final SocketService _socketService;
+  String? _currentChatId;
+  String? _currentDoctorId;
+  bool _isInitialized = false;
+  Timer? _mockMessageTimer;
+  final bool _useMockMessages ;
+
+  ChatMessagesNotifier(this._messageService, this._socketService, this._useMockMessages) : super([]) {
+    // Khi khởi tạo, mở kết nối socket và đăng ký lắng nghe
+    _initialize();
   }
 
-  final MessageService _messageService = MessageService();
-  final SocketService _socketService = SocketService.instance;
+  Future<void> _initialize() async {
+    if (_isInitialized) return;
+    
+    if (!_useMockMessages) {
+      await _socketService.connect();
+      _registerSocketListeners();
+    } else {
+      debugPrint('Sử dụng chế độ tin nhắn giả lập, không kết nối socket');
+    }
+    
+    _isInitialized = true;
+  }
 
-  Future<void> _loadMessages() async {
-    try {
-      final messages = await _messageService.getMessages();
-      state = AsyncValue.data(messages);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+  void _registerSocketListeners() {
+    debugPrint('Đăng ký lắng nghe sự kiện tin nhắn mới socket');
+    
+    // Lắng nghe sự kiện từ socket service
+    _socketService.addMessageListener(_handleNewMessage);
+  }
+
+  void _disposeSocketListeners() {
+    if (!_useMockMessages) {
+      _socketService.removeMessageListener(_handleNewMessage);
+      debugPrint('Đã hủy đăng ký lắng nghe sự kiện socket');
+    }
+    
+    if (_mockMessageTimer != null) {
+      _mockMessageTimer!.cancel();
+      _mockMessageTimer = null;
     }
   }
 
-  Future<void> loadChatHistory(String partnerId) async {
+  void _handleNewMessage(Map<String, dynamic> data) {
+    debugPrint('📩 Nhận tin nhắn mới trong MessageProvider:');
+    debugPrint('  - Dữ liệu: $data');
+    debugPrint('  - Chat ID: ${data['chatId']}');
+    debugPrint('  - Sender: ${data['sender']}');
+    debugPrint('  - Content: ${data['content']}');
+    
     try {
-      state = const AsyncValue.loading();
-      final messages = await _messageService.getChatHistory(partnerId);
-      state = AsyncValue.data(messages);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Future<void> sendMessage(String content, {Map<String, dynamic>? image}) async {
-    try {
-      final token = await TokenService.getToken();
-      if (token == null) throw Exception('Không tìm thấy token');
-
-      final message = await _messageService.sendMessageWithImage(content, image: image);
-      
-      state.whenData((messages) {
-        state = AsyncValue.data([...messages, message]);
-      });
-
-      _socketService.emit('sendMessage', {
-        'content': content,
-        'image': image,
-        'token': token,
-      });
+      // Kiểm tra xem tin nhắn có thuộc chat hiện tại không
+      if (data['chatId'] == _currentChatId) {
+        debugPrint('✅ Tin nhắn thuộc chat hiện tại');
+        _processNewMessage(data);
+      } else {
+        debugPrint('❌ Tin nhắn không thuộc chat hiện tại');
+        debugPrint('  - Chat hiện tại: $_currentChatId');
+        debugPrint('  - Chat của tin nhắn: ${data['chatId']}');
+      }
     } catch (e) {
+      debugPrint('❌ Lỗi khi xử lý tin nhắn trong MessageProvider: $e');
+      debugPrint('  - Dữ liệu gốc: $data');
+    }
+  }
+  
+  void _processNewMessage(Map<String, dynamic> messageData) {
+    try {
+      // Xác định xem tin nhắn thuộc chat hiện tại không
+      final chatId = messageData['chatId'];
+      if (_currentChatId != null && chatId == _currentChatId) {
+        // Kiểm tra xem tin nhắn đã tồn tại trong state chưa
+        final messageId = messageData['_id'] ?? messageData['id'];
+        final existingIndex = state.indexWhere((m) => m.id == messageId);
+        
+        if (existingIndex == -1) {  // Tin nhắn chưa tồn tại
+          // Kiểm tra và xây dựng cấu trúc tin nhắn phù hợp
+          Message newMessage;
+          
+          try {
+            // Xử lý trường hợp sender là một object
+            if (messageData.containsKey('sender') && messageData['sender'] is Map) {
+              // Tạo bản sao để không ảnh hưởng đến dữ liệu gốc
+              final Map<String, dynamic> formattedData = Map<String, dynamic>.from(messageData);
+              
+              // Trích xuất thông tin từ sender object
+              final senderData = messageData['sender'] as Map<String, dynamic>;
+              formattedData['sender'] = senderData['id'] ?? '';
+              formattedData['senderModel'] = senderData['model'] ?? '';
+              
+              // Trích xuất thông tin từ receiver object nếu cần
+              if (messageData.containsKey('receiver') && messageData['receiver'] is Map) {
+                final receiverData = messageData['receiver'] as Map<String, dynamic>;
+                formattedData['receiver'] = receiverData['id'] ?? '';
+                formattedData['receiverModel'] = receiverData['model'] ?? '';
+              }
+              
+              // Đảm bảo có ID tin nhắn
+              if (!formattedData.containsKey('_id') && formattedData.containsKey('id')) {
+                formattedData['_id'] = formattedData['id'];
+              }
+              
+              debugPrint('Đã chuyển đổi dữ liệu tin nhắn: $formattedData');
+              newMessage = Message.fromJson(formattedData);
+            } else {
+              // Cố gắng tạo tin nhắn từ dữ liệu nhận được
+              newMessage = Message.fromJson(messageData);
+            }
+          } catch (e) {
+            // Nếu có lỗi, tự tạo đối tượng tin nhắn với dữ liệu có sẵn
+            debugPrint('Lỗi khi chuyển đổi dữ liệu tin nhắn: $e');
+            
+            // Xử lý trường sender có thể là object hoặc string
+            String sender = '';
+            String senderModel = '';
+            
+            if (messageData['sender'] is Map) {
+              sender = messageData['sender']['id'] ?? '';
+              senderModel = messageData['sender']['model'] ?? '';
+            } else {
+              sender = messageData['sender']?.toString() ?? '';
+              senderModel = messageData['senderModel']?.toString() ?? '';
+            }
+            
+            // Xử lý tương tự cho receiver
+            String receiver = '';
+            String receiverModel = '';
+            
+            if (messageData['receiver'] is Map) {
+              receiver = messageData['receiver']['id'] ?? '';
+              receiverModel = messageData['receiver']['model'] ?? '';
+            } else {
+              receiver = messageData['receiver']?.toString() ?? '';
+              receiverModel = messageData['receiverModel']?.toString() ?? '';
+            }
+            
+            newMessage = Message(
+              id: messageData['_id']?.toString() ?? messageData['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              sender: sender,
+              senderModel: senderModel,
+              receiver: receiver,
+              receiverModel: receiverModel,
+              content: messageData['content']?.toString() ?? '',
+              isRead: messageData['isRead'] == true,
+              createdAt: messageData['createdAt'] != null 
+                ? DateTime.parse(messageData['createdAt'].toString()) 
+                : DateTime.now(),
+            );
+          }
+          
+          // Cập nhật state với tin nhắn mới
+          state = [newMessage, ...state];
+          debugPrint('Đã thêm tin nhắn mới vào state: ${newMessage.content}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Lỗi khi xử lý tin nhắn mới: $e');
+    }
+  }
+  
+  
+  // Hàm gửi tin nhắn giả cho chế độ demo
+  void _startMockMessageResponses() {
+    if (_mockMessageTimer != null) {
+      _mockMessageTimer!.cancel();
+    }
+    
+    // Tạo timer để gửi phản hồi giả sau 2-5 giây
+    _mockMessageTimer = Timer(Duration(seconds: 2 + (DateTime.now().second % 4)), () {
+      if (_currentChatId != null && _currentDoctorId != null) {
+        final responses = [
+          'Vâng, tôi hiểu vấn đề của bạn.',
+          'Bạn cần uống thuốc đều đặn nhé.',
+          'Hãy nghỉ ngơi nhiều và uống đủ nước.',
+          'Tôi sẽ kê đơn thuốc cho bạn.',
+          'Bạn cần đến khám trực tiếp để có chẩn đoán chính xác hơn.',
+          'Đây có thể là triệu chứng của bệnh mãn tính.',
+          'Không có gì đáng lo ngại, bạn chỉ cần nghỉ ngơi.',
+          'Tình trạng của bạn cần theo dõi thêm.',
+        ];
+        
+        // Chọn ngẫu nhiên một câu trả lời
+        final response = responses[DateTime.now().millisecond % responses.length];
+        
+        // Tạo tin nhắn giả
+        final mockMessage = {
+          '_id': DateTime.now().millisecondsSinceEpoch.toString(),
+          'chatId': _currentChatId,
+          'sender': _currentDoctorId,
+          'senderModel': 'Doctor',
+          'receiver': 'user-id',
+          'receiverModel': 'User',
+          'content': response,
+          'createdAt': DateTime.now().toIso8601String(),
+          'isRead': false,
+        };
+        
+        // Xử lý tin nhắn giả
+        _processNewMessage(mockMessage);
+      }
+    });
+  }
+  
+  // Tải lịch sử chat với bác sĩ
+  Future<void> loadChatHistory(String doctorId) async {
+    debugPrint('Bắt đầu tải lịch sử chat với bác sĩ: $doctorId');
+    
+    if (!_isInitialized) {
+      await _initialize();
+    }
+    
+    try {
+      // Lưu ID bác sĩ hiện tại
+      _currentDoctorId = doctorId;
+      
+      // Nếu đang trong một chat khác, rời khỏi phòng chat đó
+      if (!_useMockMessages && _currentChatId != null) {
+        _socketService.leaveChat(_currentChatId!);
+      }
+      
+      if (_useMockMessages) {
+        // Dùng dữ liệu mẫu cho chế độ demo
+        _currentChatId = 'mock-chat-$doctorId';
+        
+        // Tạo một số tin nhắn mẫu
+        final now = DateTime.now();
+        state = [
+          Message(
+            id: '1',
+            sender: 'user-id',
+            senderModel: 'User',
+            receiver: doctorId,
+            receiverModel: 'Doctor',
+            content: 'Xin chào bác sĩ!',
+            isRead: true,
+            createdAt: now.subtract(const Duration(days: 1, hours: 2)),
+          ),
+          Message(
+            id: '2',
+            sender: doctorId,
+            senderModel: 'Doctor', 
+            receiver: 'user-id',
+            receiverModel: 'User',
+            content: 'Chào bạn, tôi có thể giúp gì cho bạn?',
+            isRead: true,
+            createdAt: now.subtract(const Duration(days: 1, hours: 1, minutes: 55)),
+          ),
+          Message(
+            id: '3',
+            sender: 'user-id',
+            senderModel: 'User',
+            receiver: doctorId,
+            receiverModel: 'Doctor',
+            content: 'Tôi đang bị đau đầu và sốt.',
+            isRead: true,
+            createdAt: now.subtract(const Duration(days: 1, hours: 1, minutes: 40)),
+          ),
+          Message(
+            id: '4',
+            sender: doctorId,
+            senderModel: 'Doctor',
+            receiver: 'user-id',
+            receiverModel: 'User',
+            content: 'Bạn bị từ khi nào? Nhiệt độ là bao nhiêu?',
+            isRead: true,
+            createdAt: now.subtract(const Duration(days: 1, hours: 1, minutes: 30)),
+          ),
+        ];
+        
+        return;
+      }
+      
+      // Kiểm tra xem chat đã tồn tại chưa
+      final existingChat = await _messageService.getChatByDoctorId(doctorId);
+      
+      if (existingChat != null) {
+        debugPrint('Tìm thấy chat với ID: ${existingChat['_id']}');
+        _currentChatId = existingChat['_id'];
+        
+        // Tham gia phòng chat qua socket
+        _socketService.joinChat(_currentChatId!);
+        
+        // Tải tin nhắn từ chat đã có
+        final messages = await _messageService.getMessagesByChatId(_currentChatId!);
+        
+        // Đảo ngược danh sách tin nhắn để hiển thị tin nhắn cũ ở trên, mới ở dưới
+        state = messages.reversed.toList();
+        
+        // Đánh dấu tất cả tin nhắn là đã đọc
+        await _messageService.markMessagesAsRead(_currentChatId!);
+      } else {
+        debugPrint('Không tìm thấy chat, tạo chat mới');
+        // Tạo chat mới
+        final newChat = await _messageService.createChat(doctorId);
+        if (newChat != null) {
+          _currentChatId = newChat['_id'];
+          debugPrint('Đã tạo chat mới với ID: $_currentChatId');
+          
+          // Tham gia phòng chat qua socket
+          _socketService.joinChat(_currentChatId!);
+          
+          state = [];
+        }
+      }
+    } catch (e) {
+      debugPrint('Lỗi khi tải lịch sử chat: $e');
       rethrow;
     }
   }
 
-  void addMessage(Message message) {
-    state.whenData((messages) {
-      if (!messages.any((m) => m.id == message.id)) {
-        state = AsyncValue.data([...messages, message]);
+  // Gửi tin nhắn đến bác sĩ
+  Future<void> sendMessage(String content) async {
+    if (_currentChatId == null || _currentDoctorId == null) {
+      debugPrint('Không thể gửi tin nhắn: Không có chat hoặc bác sĩ hiện tại');
+      throw Exception('Không thể gửi tin nhắn: Chưa kết nối với bác sĩ');
+    }
+    
+    // Tạo tin nhắn của người dùng
+    final userMessage = Message(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      sender: 'user-id',
+      senderModel: 'User',
+      receiver: _currentDoctorId!,
+      receiverModel: 'Doctor',
+      content: content,
+      isRead: false,
+      createdAt: DateTime.now(),
+    );
+    
+    // Thêm tin nhắn của người dùng vào state ngay lập tức để UI hiển thị nhanh
+    state = [...state, userMessage];
+    
+    try {
+      if (_useMockMessages) {
+        // Trong chế độ demo, sau khi gửi tin nhắn, tạo phản hồi giả sau một vài giây
+        _startMockMessageResponses();
+        return;
       }
-    });
+      
+      debugPrint('Gửi tin nhắn qua socket đến chat: $_currentChatId');
+      
+      // Gửi tin nhắn qua socket thay vì API
+      _socketService.emit('send_message', {
+        'chatId': _currentChatId,
+        'content': content
+      });
+      
+      debugPrint('Đã gửi tin nhắn qua socket thành công');
+    } catch (e) {
+      // Nếu có lỗi, giữ nguyên tin nhắn tạm thời trong UI nhưng đánh dấu là đang gửi lại
+      debugPrint('Lỗi khi gửi tin nhắn qua socket: $e');
+      throw Exception('Không thể gửi tin nhắn: $e');
+    }
   }
 
-  void updateMessageReadStatus(String messageId) {
-    state.whenData((messages) {
-      final updatedMessages = messages.map((message) {
-        if (message.id == messageId) {
-          return Message(
-            id: message.id,
-            sender: message.sender,
-            senderModel: message.senderModel,
-            receiver: message.receiver,
-            receiverModel: message.receiverModel,
-            content: message.content,
-            isRead: true,
-            createdAt: message.createdAt,
-            image: message.image,
-          );
-        }
-        return message;
-      }).toList();
-      state = AsyncValue.data(updatedMessages);
-    });
-  }
-
+  // Đánh dấu tin nhắn là đã đọc
+  
   @override
   void dispose() {
+    // Rời khỏi phòng chat hiện tại nếu có
+    if (!_useMockMessages && _currentChatId != null) {
+      _socketService.leaveChat(_currentChatId!);
+    }
+    
+    _disposeSocketListeners();
     super.dispose();
   }
 }
 
 // Provider để truy cập trình quản lý tin nhắn
-final chatMessagesProvider = StateNotifierProvider<ChatMessagesNotifier, AsyncValue<List<Message>>>((ref) {
-  return ChatMessagesNotifier();
+final chatMessagesProvider = StateNotifierProvider<ChatMessagesNotifier, List<Message>>((ref) {
+  final messageService = ref.watch(messageServiceProvider);
+  final socketService = ref.watch(socketProvider);
+  final useMockMessages = ref.watch(mockMessagesProvider);
+  
+  return ChatMessagesNotifier(messageService, socketService, useMockMessages);
 });

@@ -17,7 +17,7 @@
             <div class="metric-header">
               <i class="bi bi-exclamation-triangle"></i>
               <span>Dị ứng</span>
-              <span class="status warning">Cần lưu ý</span>
+             
             </div>
             <p>Có 2 dị ứng đang hoạt động: Penicillin (Nặng) và Đậu phộng (Trung bình). Cần thận trọng khi sử dụng thuốc và thực phẩm.</p>
           </div>
@@ -27,7 +27,7 @@
             <div class="metric-header">
               <i class="bi bi-heart-pulse"></i>
               <span>Chỉ số sức khỏe</span>
-              <span class="status good">Tốt</span>
+              
             </div>
             <p>Huyết áp: 120/80 mmHg, Nhịp tim: 75 bpm, Đường huyết: 5.5 mmol/L. Các chỉ số đều trong giới hạn bình thường.</p>
           </div>
@@ -37,7 +37,7 @@
             <div class="metric-header">
               <i class="bi bi-person-walking"></i>
               <span>Lối sống</span>
-              <span class="status good">Tốt</span>
+              
             </div>
             <p>Tập thể dục đều đặn 30 phút/ngày, chế độ ăn cân bằng. Cần cải thiện thời gian ngủ.</p>
           </div>
@@ -47,7 +47,7 @@
             <div class="metric-header">
               <i class="bi bi-capsule"></i>
               <span>Thuốc men</span>
-              <span class="status warning">Cần lưu ý</span>
+           
             </div>
             <p>Đang sử dụng 3 loại thuốc thường xuyên. Cần tuân thủ đúng liều lượng và thời gian.</p>
           </div>
@@ -57,7 +57,7 @@
             <div class="metric-header">
               <i class="bi bi-thermometer-half"></i>
               <span>Triệu chứng</span>
-              <span class="status warning">Cần lưu ý</span>
+              
             </div>
             <p>Có triệu chứng đau đầu và mệt mỏi kéo dài. Cần theo dõi và tái khám nếu không cải thiện.</p>
           </div>
@@ -67,7 +67,7 @@
             <div class="metric-header">
               <i class="bi bi-stethoscope"></i>
               <span>Điều trị</span>
-              <span class="status good">Tốt</span>
+              
             </div>
             <p>Đang trong quá trình điều trị viêm xoang. Tuân thủ tốt phác đồ điều trị.</p>
           </div>
@@ -77,7 +77,7 @@
             <div class="metric-header">
               <i class="bi bi-syringe"></i>
               <span>Tiêm chủng</span>
-              <span class="status good">Đầy đủ</span>
+              
             </div>
             <p>Đã tiêm đầy đủ các mũi vắc xin cơ bản. Cần tiêm nhắc lại vắc xin cúm.</p>
           </div>
