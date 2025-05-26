@@ -136,8 +136,12 @@
 <p class="card-text">
   <i class="bi bi-star-half me-2"></i>
   Đánh giá: 
-  <span >
-    {{ 4 }} / 5
+  <span v-if="doctor.ratingStats">
+    {{ doctor.ratingStats.averageRating.toFixed(1) }} / 5
+    <small class="text-muted">({{ doctor.ratingStats.totalReviews }} đánh giá)</small>
+  </span>
+  <span v-else>
+    Chưa có đánh giá
   </span>
 </p>
 
@@ -178,15 +182,190 @@
     </div>
 
     <!-- Doctor Detail Modal -->
-    <DoctorDetailModal
-      ref="doctorDetailModal"
-      :doctor-id="selectedDoctorId"
-      @bookConsultation="bookAppointment"
-    />
+    <div v-if="showDoctorModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-user-md me-2"></i>Thông tin chi tiết bác sĩ
+          </h5>
+          <button type="button" class="btn-close" @click="closeDoctorModal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Loading Spinner -->
+          <div v-if="loadingDoctor" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="doctorError" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ doctorError }}
+          </div>
+
+          <!-- Doctor Detail -->
+          <div v-if="!loadingDoctor && !doctorError && selectedDoctor" class="doctor-detail">
+            <!-- Doctor Image and Basic Info -->
+            <div class="doctor-profile mb-4">
+              <div class="doctor-avatar">
+                <img
+                  :src="selectedDoctor.avatar || '/images/default-doctor.jpg'"
+                  :alt="selectedDoctor.fullName"
+                  class="img-fluid rounded-circle"
+                />
+                <div class="doctor-badge">
+                  <i class="fas fa-certificate"></i>
+                </div>
+              </div>
+              <div class="doctor-info ms-4">
+                <h3 class="doctor-name mb-1">{{ selectedDoctor.fullName }}</h3>
+                <p class="doctor-title mb-0">{{ selectedDoctor.academicTitle || 'Bác sĩ' }}</p>
+              </div>
+            </div>
+
+            <!-- Doctor Details -->
+            <div class="doctor-details">
+              <div class="details-section mb-4">
+                <h4 class="section-title mb-3">
+                  <i class="fas fa-graduation-cap me-2"></i>Chuyên môn
+                </h4>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <i class="fas fa-medal me-2 text-primary"></i>
+                    <div>
+                      <span class="label">Chuyên khoa</span>
+                      <span class="value">{{ selectedDoctor.specialty?.name || selectedDoctor.specialty || 'Chưa cập nhật' }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <i class="fas fa-certificate me-2 text-primary"></i>
+                    <div>
+                      <span class="label">Kinh nghiệm</span>
+                      <span class="value">{{ selectedDoctor.experience || 0 }} năm</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <i class="fas fa-star me-2 text-warning"></i>
+                    <div>
+                      <span class="label">Đánh giá</span>
+                      <span class="value">
+                        {{ selectedDoctor.ratingStats?.averageRating?.toFixed(1) || '0.0' }} / 5
+                        <small class="text-muted">({{ selectedDoctor.ratingStats?.totalReviews || 0 }} đánh giá)</small>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rating Distribution -->
+              <div class="details-section mb-4" v-if="selectedDoctor.ratingStats?.ratingDistribution">
+                <h4 class="section-title mb-3">
+                  <i class="fas fa-chart-bar me-2"></i>Phân bố đánh giá
+                </h4>
+                <div class="rating-distribution">
+                  <div v-for="rating in 5" :key="rating" class="rating-bar">
+                    <div class="rating-label">
+                      {{ rating }} <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <div class="progress">
+                      <div 
+                        class="progress-bar bg-warning" 
+                        :style="{ width: calculateRatingPercentage(rating) + '%' }"
+                      ></div>
+                    </div>
+                    <div class="rating-count">
+                      {{ selectedDoctor.ratingStats.ratingDistribution[rating] || 0 }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Latest Reviews -->
+              <div class="details-section" v-if="selectedDoctor.ratingStats?.latestReviews?.length">
+                <h4 class="section-title mb-3">
+                  <i class="fas fa-comments me-2"></i>Đánh giá gần đây
+                </h4>
+                <div class="reviews-list">
+                  <div v-for="review in displayedReviews" :key="review._id" class="review-item">
+                    <div class="review-header">
+                      <div class="reviewer-info">
+                        <img 
+                          :src="review.user.avatar || '/images/default-avatar.jpg'" 
+                          :alt="review.user.fullname"
+                          class="reviewer-avatar"
+                        />
+                        <div class="reviewer-details">
+                          <div class="reviewer-name">{{ review.user.fullname }}</div>
+                          <div class="review-date">{{ formatDate(review.createdAt) }}</div>
+                        </div>
+                      </div>
+                      <div class="review-rating">
+                        <span v-for="star in 5" :key="star">
+                          <i :class="star <= review.rating ? 'fas fa-star text-warning' : 'far fa-star text-warning'"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="review-content">
+                      {{ review.content }}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center mt-3" v-if="selectedDoctor.ratingStats.latestReviews.length > 3">
+                  <button 
+                    class="btn btn-outline-primary" 
+                    @click="toggleShowAllReviews"
+                  >
+                    {{ showAllReviews ? 'Ẩn bớt' : 'Xem thêm' }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="details-section">
+                <h4 class="section-title mb-3">
+                  <i class="fas fa-calendar-alt me-2"></i>Lịch làm việc
+                </h4>
+                <div class="schedule-table">
+                  <table class="table table-bordered">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Thứ</th>
+                        <th>Thời gian làm việc</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(timeSlots, day) in selectedDoctor.schedule" :key="day">
+                        <td class="fw-bold">{{ getDayName(day) }}</td>
+                        <td>
+                          <div v-if="timeSlots && timeSlots.length > 0">
+                            <div v-for="(slot, index) in timeSlots" :key="index" class="time-slot">
+                              {{ slot.startTime }} - {{ slot.endTime }}
+                            </div>
+                          </div>
+                          <div v-else class="text-muted">
+                            Nghỉ
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeDoctorModal">
+            <i class="fas fa-times me-2"></i>Đóng
+          </button>
+          <button type="button" class="btn btn-primary" @click="handleVNPayPayment">
+            <i class="fas fa-calendar-check me-2"></i>Đăng ký tư vấn
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-if="showDoctorModal" class="modal-backdrop"></div>
   </div>
 </template>
-
-
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
@@ -194,8 +373,8 @@ import { useToast } from 'primevue/usetoast';
 import { specialtyService } from '@/services/specialtyService';
 import { doctorService } from '@/services/doctorService';
 import axios from '@/services/axiosInstance.js';
-import DoctorDetailModal from '../../components/DoctorDetailModal.vue';
 import { Modal } from 'bootstrap';
+
 const toast = useToast();
 const loading = ref(false);
 const error = ref(null);
@@ -212,6 +391,51 @@ const symptoms = ref('');
 const consultationError = ref('');
 const consultationLoading = ref(false);
 const orderType=ref('');
+const showDoctorModal = ref(false);
+const loadingDoctor = ref(false);
+const doctorError = ref(null);
+const selectedDoctor = ref(null);
+const showAllReviews = ref(false);
+
+const displayedReviews = computed(() => {
+  if (!selectedDoctor.value?.ratingStats?.latestReviews) return [];
+  return showAllReviews.value 
+    ? selectedDoctor.value.ratingStats.latestReviews 
+    : selectedDoctor.value.ratingStats.latestReviews.slice(0, 3);
+});
+
+const toggleShowAllReviews = () => {
+  showAllReviews.value = !showAllReviews.value;
+};
+
+const calculateRatingPercentage = (rating) => {
+  if (!selectedDoctor.value?.ratingStats?.ratingDistribution || !selectedDoctor.value?.ratingStats?.totalReviews) return 0;
+  const count = selectedDoctor.value.ratingStats.ratingDistribution[rating] || 0;
+  return (count / selectedDoctor.value.ratingStats.totalReviews) * 100;
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const getDayName = (day) => {
+  const days = {
+    monday: 'Thứ 2',
+    tuesday: 'Thứ 3',
+    wednesday: 'Thứ 4',
+    thursday: 'Thứ 5',
+    friday: 'Thứ 6',
+    saturday: 'Thứ 7',
+    sunday: 'Chủ nhật'
+  };
+  return days[day] || day;
+};
+
 const loadSpecialties = async () => {
   try {
     loading.value = true;
@@ -233,6 +457,19 @@ const loadDoctors = async () => {
     error.value = null;
     const response = await doctorService.getAllDoctors();
     doctors.value = response?.data || response || [];
+    
+    // Lấy thông tin đánh giá cho từng bác sĩ
+    for (let doctor of doctors.value) {
+      try {
+        const ratingResponse = await axios.get(`/api/reviews/doctor-statspublicpublic/${doctor._id}`);
+        if (ratingResponse.data.success) {
+          doctor.ratingStats = ratingResponse.data.data;
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy thông tin đánh giá:', err);
+      }
+    }
+    
     console.log('All doctors:', doctors.value);
   } catch (err) {
     error.value = 'Không thể tải danh sách bác sĩ. Vui lòng thử lại sau.';
@@ -242,6 +479,7 @@ const loadDoctors = async () => {
     loading.value = false;
   }
 };
+
 const GetOrrderTypeConsolutionID = async () =>{
   try{
    const resuilt=await axiosInstance.get('/api/order-types/getConsolution')
@@ -250,6 +488,7 @@ const GetOrrderTypeConsolutionID = async () =>{
     console.error('Lỗi lấy thông tin đơn hàng:', err);
     consultationError.value = 'Không thể thực hiện thanh toán. Vui lòng thử lại sau.';}
 };
+
 const handleVNPayPayment = async () => {
   try {
    const result=await axios.get('/api/consultationList/check',{
@@ -319,6 +558,7 @@ const handleVNPayPayment = async () => {
     consultationLoading.value = false;
   }
 };
+
 const handleSearch = async () => {
   if (!searchQuery.value.trim()) {
     if (activeTab.value === 'specialties') {
@@ -404,7 +644,6 @@ const viewDoctorsBySpecialty = async (specialtyId) => {
     error.value = null;
     console.log('Fetching doctors for specialty ID:', specialtyId);
     
-    // Tìm chuyên khoa hiện tại
     currentSpecialty.value = specialties.value.find(s => s._id === specialtyId) || null;
     
     const response = await specialtyService.getDoctorsBySpecialty(specialtyId);
@@ -412,6 +651,18 @@ const viewDoctorsBySpecialty = async (specialtyId) => {
     
     if (Array.isArray(response)) {
       doctors.value = response;
+      
+      // Lấy thông tin đánh giá cho từng bác sĩ
+      for (let doctor of doctors.value) {
+        try {
+          const ratingResponse = await axios.get(`/api/reviews/doctor-stats/${doctor._id}`);
+          if (ratingResponse.data.success) {
+            doctor.ratingStats = ratingResponse.data.data;
+          }
+        } catch (err) {
+          console.error('Lỗi khi lấy thông tin đánh giá:', err);
+        }
+      }
     } else {
       doctors.value = [];
       console.warn('Unexpected response structure:', response);
@@ -443,19 +694,43 @@ const viewDoctorsBySpecialty = async (specialtyId) => {
   }
 };
 
-const showDoctorDetail = (doctorId) => {
+const showDoctorDetail = async (doctorId) => {
   selectedDoctorId.value = doctorId;
-  if (doctorDetailModal.value) {
-    doctorDetailModal.value.show();
-  } else {
-    console.error('Doctor detail modal not initialized');
-    toast.add({
-      severity: 'error',
-      summary: 'Lỗi',
-      detail: 'Không thể hiển thị thông tin bác sĩ. Vui lòng thử lại sau.',
-      life: 3000
-    });
+  showDoctorModal.value = true;
+  loadingDoctor.value = true;
+  doctorError.value = null;
+  showAllReviews.value = false;
+
+  try {
+    const response = await axios.get(`/api/doctors/getPublicDoctorProfile/${doctorId}`);
+    if (response.data) {
+      selectedDoctor.value = response.data.data;
+      
+      // Lấy thông tin đánh giá
+      try {
+        const ratingResponse = await axios.get(`/api/reviews/doctor-statspublicpublic/${doctorId}`);
+        if (ratingResponse.data.success) {
+          selectedDoctor.value.ratingStats = ratingResponse.data.data;
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy thông tin đánh giá:', err);
+      }
+    } else {
+      throw new Error('Dữ liệu bác sĩ không hợp lệ');
+    }
+  } catch (err) {
+    console.error('Error loading doctor detail:', err);
+    doctorError.value = 'Không thể tải thông tin bác sĩ. Vui lòng thử lại sau.';
+  } finally {
+    loadingDoctor.value = false;
   }
+};
+
+const closeDoctorModal = () => {
+  showDoctorModal.value = false;
+  selectedDoctor.value = null;
+  doctorError.value = null;
+  showAllReviews.value = false;
 };
 
 const checkUserInfo = async () => {
@@ -473,7 +748,7 @@ const checkUserInfo = async () => {
     return false;
   }
 };
-//=================================================================
+
 const submitConsultation = async () => {
   try {
     consultationLoading.value = true;
@@ -659,37 +934,320 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
 .modal-content {
+  position: relative;
+  background: white;
+  padding: 20px;
   border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-header {
-  background-color: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
   border-bottom: 1px solid #dee2e6;
 }
 
 .modal-title {
-  color: #0d6efd;
-  font-weight: 600;
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
 }
 
-.form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+.modal-body {
+  margin-bottom: 20px;
 }
 
-.btn-primary {
-  background-color: #0d6efd;
-  border: none;
-  padding: 10px 20px;
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+.doctor-profile {
+  display: flex;
+  align-items: center;
+}
+
+.doctor-avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.doctor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #28a745;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.doctor-name {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.doctor-title {
+  font-size: 1rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.section-title {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.detail-item i {
+  margin-top: 3px;
+}
+
+.detail-item div {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.value {
+  color: #2c3e50;
   font-weight: 500;
 }
 
-.btn-primary:hover {
-  background-color: #0b5ed7;
+.rating-distribution {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
 }
 
-.btn-primary:disabled {
-  background-color: #6c757d;
+.rating-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.rating-label {
+  width: 80px;
+  font-weight: 500;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  margin: 0 1rem;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-count {
+  width: 40px;
+  text-align: right;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reviewer-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviewer-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.review-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.review-content {
+  color: #2c3e50;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.schedule-table {
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.time-slot {
+  background: #e3f2fd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.time-slot:last-child {
+  margin-bottom: 0;
+}
+
+.btn-outline-primary {
+  border-color: #3498db;
+  color: #3498db;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    margin: 10px auto;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .doctor-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .doctor-info {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style> 

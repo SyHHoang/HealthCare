@@ -61,8 +61,82 @@
                     <span class="value">{{ doctor.experience }} năm</span>
                   </div>
                 </div>
+                <div class="detail-item">
+                  <i class="fas fa-star me-2 text-warning"></i>
+                  <div>
+                    <span class="label">Đánh giá</span>
+                    <span class="value">
+                      {{ doctor.ratingStats?.averageRating?.toFixed(1) || '0.0' }} / 5
+                      <small class="text-muted">({{ doctor.ratingStats?.totalReviews || 0 }} đánh giá)</small>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Rating Distribution -->
+            <div class="details-section mb-4" v-if="doctor.ratingStats?.ratingDistribution">
+              <h4 class="section-title mb-3">
+                <i class="fas fa-chart-bar me-2"></i>Phân bố đánh giá
+              </h4>
+              <div class="rating-distribution">
+                <div v-for="rating in 5" :key="rating" class="rating-bar">
+                  <div class="rating-label">
+                    {{ rating }} <i class="fas fa-star text-warning"></i>
+                  </div>
+                  <div class="progress">
+                    <div 
+                      class="progress-bar bg-warning" 
+                      :style="{ width: calculateRatingPercentage(rating) + '%' }"
+                    ></div>
+                  </div>
+                  <div class="rating-count">
+                    {{ doctor.ratingStats.ratingDistribution[rating] || 0 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Latest Reviews -->
+            <div class="details-section" v-if="doctor.ratingStats?.latestReviews?.length">
+              <h4 class="section-title mb-3">
+                <i class="fas fa-comments me-2"></i>Đánh giá gần đây
+              </h4>
+              <div class="reviews-list">
+                <div v-for="review in displayedReviews" :key="review._id" class="review-item">
+                  <div class="review-header">
+                    <div class="reviewer-info">
+                      <img 
+                        :src="review.user.avatar || '/images/default-avatar.jpg'" 
+                        :alt="review.user.fullname"
+                        class="reviewer-avatar"
+                      />
+                      <div class="reviewer-details">
+                        <div class="reviewer-name">{{ review.user.fullname }}</div>
+                        <div class="review-date">{{ formatDate(review.createdAt) }}</div>
+                      </div>
+                    </div>
+                    <div class="review-rating">
+                      <span v-for="star in 5" :key="star">
+                        <i :class="star <= review.rating ? 'fas fa-star text-warning' : 'far fa-star text-warning'"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="review-content">
+                    {{ review.content }}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center mt-3" v-if="doctor.ratingStats.latestReviews.length > 3">
+                <button 
+                  class="btn btn-outline-primary" 
+                  @click="toggleShowAllReviews"
+                >
+                  {{ showAllReviews ? 'Ẩn bớt' : 'Xem thêm' }}
+                </button>
+              </div>
+            </div>
+
             <div class="details-section">
               <h4 class="section-title mb-3">
                 <i class="fas fa-calendar-alt me-2"></i>Lịch làm việc
@@ -109,9 +183,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axiosInstance from '../services/axiosInstance.js';  
+import axios from 'axios';
 
 const props = defineProps({
   doctorId: {
@@ -129,6 +204,18 @@ const loading = ref(false);
 const error = ref(null);
 const doctor = ref(null);
 const isVisible = ref(false);
+const showAllReviews = ref(false);
+
+const displayedReviews = computed(() => {
+  if (!doctor.value?.ratingStats?.latestReviews) return [];
+  return showAllReviews.value 
+    ? doctor.value.ratingStats.latestReviews 
+    : doctor.value.ratingStats.latestReviews.slice(0, 3);
+});
+
+const toggleShowAllReviews = () => {
+  showAllReviews.value = !showAllReviews.value;
+};
 
 const loadDoctorDetail = async () => {
   try {
@@ -141,13 +228,20 @@ const loadDoctorDetail = async () => {
     loading.value = true;
     error.value = null;
     const response = await axiosInstance.get(`/api/doctors/getPublicDoctorProfile/${props.doctorId}`);
-    console.log('response.data',response.data);
-    console.log('response.data.data',response.data.data);
-    console.log('response.data.success',response.data.success);
-    if (response.data ) {
-      doctor.value = response.data.data
-    } 
-     else {
+    
+    if (response.data) {
+      doctor.value = response.data.data;
+      
+      // Lấy thông tin đánh giá
+      try {
+        const ratingResponse = await axios.get(`/api/reviews/doctor-statspublicpublic/${props.doctorId}`);
+        if (ratingResponse.data.success) {
+          doctor.value.ratingStats = ratingResponse.data.data;
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy thông tin đánh giá:', err);
+      }
+    } else {
       throw new Error('Dữ liệu bác sĩ không hợp lệ');
     }
   } catch (err) {
@@ -191,6 +285,21 @@ const getDayName = (day) => {
     sunday: 'Chủ nhật'
   };
   return days[day] || day;
+};
+
+const calculateRatingPercentage = (rating) => {
+  if (!doctor.value?.ratingStats?.ratingDistribution || !doctor.value?.ratingStats?.totalReviews) return 0;
+  const count = doctor.value.ratingStats.ratingDistribution[rating] || 0;
+  return (count / doctor.value.ratingStats.totalReviews) * 100;
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 };
 
 defineExpose({
@@ -400,6 +509,108 @@ defineExpose({
 
 .time-slot:last-child {
   margin-bottom: 0;
+}
+
+.rating-distribution {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.rating-label {
+  width: 80px;
+  font-weight: 500;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  margin: 0 1rem;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-count {
+  width: 40px;
+  text-align: right;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reviewer-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviewer-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.review-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.review-content {
+  color: #2c3e50;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.btn-outline-primary {
+  border-color: #3498db;
+  color: #3498db;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3498db;
+  color: white;
 }
 
 @media (max-width: 768px) {

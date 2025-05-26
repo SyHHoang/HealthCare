@@ -40,8 +40,13 @@
             </div>
             <div class="stat-info">
               <h3>Đánh giá trung bình</h3>
-              <p class="stat-number">{{ 4}} <i class="bi bi-star-fill rating-star"></i></p>
-            
+              <p class="stat-number">
+                {{ ratingCard.averageRating.toFixed(1) }} 
+                <i class="bi bi-star-fill rating-star"></i>
+              </p>
+              <p class="stat-detail">
+                Tổng số đánh giá: {{ ratingCard.totalReviews }}
+              </p>
             </div>
           </div>
 
@@ -134,52 +139,54 @@
 
         <!-- Main Dashboard Grid -->
         <div class="dashboard-grid">
-          <!-- Today's Appointments -->
-          <div class="dashboard-card appointments-section">
+          <!-- Reviews Section -->
+          <div class="dashboard-card reviews-section">
             <div class="card-header">
-              <h2>Lịch hẹn hôm nay</h2>
-              <div class="appointment-filters">
+              <h2>Đánh giá gần đây</h2>
+              <div class="review-filters">
                 <button 
-                  v-for="status in appointmentStatuses" 
-                  :key="status.value"
-                  :class="['filter-btn', { active: currentFilter === status.value }]"
-                  @click="currentFilter = status.value"
+                  v-for="rating in 5" 
+                  :key="rating"
+                  :class="['filter-btn', { active: currentRatingFilter === rating }]"
+                  @click="currentRatingFilter = rating"
                 >
-                  {{ status.label }}
+                  {{ rating }} <i class="bi bi-star-fill"></i>
+                </button>
+                <button 
+                  :class="['filter-btn', { active: currentRatingFilter === 'all' }]"
+                  @click="currentRatingFilter = 'all'"
+                >
+                  Tất cả
                 </button>
               </div>
             </div>
-            <div class="appointments-list">
-              <div v-if="filteredAppointments.length === 0" class="no-appointments">
-                <i class="bi bi-calendar-x"></i>
-                <p>Không có lịch hẹn nào</p>
+            <div class="reviews-list">
+              <div v-if="filteredReviews.length === 0" class="no-reviews">
+                <i class="bi bi-chat-square-text"></i>
+                <p>Chưa có đánh giá nào</p>
               </div>
               <div 
                 v-else
-                v-for="appointment in filteredAppointments" 
-                :key="appointment.id" 
-                class="appointment-item"
+                v-for="review in filteredReviews" 
+                :key="review._id" 
+                class="review-item"
               >
-                <div class="appointment-time">
-                  <i class="bi bi-clock"></i>
-                  <span>{{ appointment.time }}</span>
-                </div>
-                <div class="appointment-info">
-                  <div class="patient-info">
-                    <img :src="appointment.patientAvatar || '../assets/images/default-avatar.png'" :alt="appointment.patientName" class="patient-avatar">
+                <div class="review-header">
+                  <div class="reviewer-info">
+                    <img :src="review.user.avatar || '/images/default-avatar.png'" :alt="review.user.fullname" class="reviewer-avatar">
                     <div>
-                      <h4>{{ appointment.patientName }}</h4>
-                      <p>{{ appointment.reason }}</p>
+                      <h4>{{ review.user.fullname }}</h4>
+                      <div class="review-rating">
+                        <span v-for="star in 5" :key="star">
+                          <i :class="star <= review.rating ? 'bi bi-star-fill' : 'bi bi-star'" class="text-warning"></i>
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <div class="review-date">{{ formatDate(review.createdAt) }}</div>
                 </div>
-                <div class="appointment-actions">
-                  <button class="action-btn video-call" @click="startVideoCall(appointment.id)">
-                    <i class="bi bi-camera-video"></i>
-                  </button>
-                  <button class="action-btn chat" @click="startChat(appointment.id)">
-                    <i class="bi bi-chat-dots"></i>
-                  </button>
+                <div class="review-content">
+                  {{ review.content }}
                 </div>
               </div>
             </div>
@@ -193,6 +200,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axiosInstance from '@/services/axiosInstance';
 
 const router = useRouter();
 
@@ -201,11 +209,10 @@ const todayAppointments = ref(8);
 const appointmentChange = ref(2);
 const totalPatients = ref(156);
 const patientChange = ref(5);
-const averageRating = ref(4.8);
-const ratingChange = ref(0.2);
 const totalRevenue = ref(15000000);
 const revenueChange = ref(15);
 const currentFilter = ref('all');
+const currentRatingFilter = ref('all');
 
 const appointmentStatuses = [
   { label: 'Tất cả', value: 'all' },
@@ -254,6 +261,11 @@ const currentDate = computed(() => {
 const filteredAppointments = computed(() => {
   if (currentFilter.value === 'all') return appointments.value;
   return appointments.value.filter(app => app.status === currentFilter.value);
+});
+
+const filteredReviews = computed(() => {
+  if (currentRatingFilter.value === 'all') return reviews.value;
+  return reviews.value.filter(review => review.rating === currentRatingFilter.value);
 });
 
 // Guide data
@@ -378,6 +390,49 @@ const fetchGuideArticles = async () => {
 
 onMounted(() => {
   fetchGuideArticles();
+});
+
+const ratingCard = ref({
+  averageRating: 0,
+  totalReviews: 0,
+  ratingDistribution: {
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0
+  }
+});
+
+// Hàm lấy thông tin đánh giá
+const fetchRatingStats = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/reviews/doctor-stats`);
+    if (response.data.success) {
+      ratingCard.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin đánh giá:', error);
+  }
+};
+
+const reviews = ref([]);
+
+// Hàm lấy danh sách đánh giá
+const fetchReviews = async () => {
+  try {
+    const response = await axiosInstance.get('/api/reviews/doctor-reviews');
+    if (response.data.success) {
+      reviews.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách đánh giá:', error);
+  }
+};
+
+onMounted(() => {
+  fetchRatingStats();
+  fetchReviews();
 });
 </script>
 
@@ -581,10 +636,13 @@ onMounted(() => {
 }
 
 .stat-number {
-  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 1.8rem;
   font-weight: 600;
   color: #2c3e50;
+  margin: 0.5rem 0;
 }
 
 .stat-change {
@@ -606,6 +664,13 @@ onMounted(() => {
 .rating-star {
   color: #ffc107;
   font-size: 1.2rem;
+  margin-left: 0.3rem;
+}
+
+.stat-detail {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
 }
 
 /* Dashboard Grid */
@@ -1172,5 +1237,97 @@ onMounted(() => {
   color: #7f8c8d;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.reviews-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.review-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.review-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: background-color 0.3s;
+}
+
+.review-item:hover {
+  background: #e9ecef;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reviewer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reviewer-info h4 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+}
+
+.review-date {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.review-content {
+  color: #2c3e50;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.no-reviews i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.no-reviews p {
+  margin: 0;
+  font-size: 1rem;
 }
 </style> 

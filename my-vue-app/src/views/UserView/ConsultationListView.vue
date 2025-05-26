@@ -71,6 +71,9 @@
   <button class="btn btn-warning flex-fill" @click="showRenewModal(doctor)">
     <i class="bi bi-arrow-repeat me-1"></i> Gia hạn
   </button>
+  <button class="btn btn-success flex-fill" @click="openReviewModal(doctor)">
+    <i class="bi bi-star me-1"></i> Đánh giá
+  </button>
 </div>
               </div>
             </div>
@@ -214,13 +217,46 @@
 </div> 
   </div>
   
+  <!-- Modal Đánh giá bác sĩ -->
+  <div v-if="showReviewModal && selectedDoctor" class="modal" @click.self="closeReviewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-star me-2"></i>Đánh giá bác sĩ {{ selectedDoctor.fullName }}
+        </h5>
+        <button type="button" class="btn-close" @click="closeReviewModal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Chọn số sao:</label>
+          <div class="d-flex gap-2">
+            <span v-for="star in 5" :key="star" @click="reviewStars = star" style="cursor:pointer;font-size:2rem;">
+              <i :class="reviewStars >= star ? 'bi bi-star-fill text-warning' : 'bi bi-star text-secondary'"></i>
+            </span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nội dung đánh giá:</label>
+          <textarea v-model="reviewContent" class="form-control" rows="3" placeholder="Nhập nhận xét của bạn..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @click="closeReviewModal">
+          Đóng
+        </button>
+        <button type="button" class="btn btn-success" :disabled="reviewStars === 0 || !reviewContent.trim()" @click="submitReview">
+          Gửi đánh giá
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import axios from '@/services/axiosInstance.js';
+import axiosInstance from '@/services/axiosInstance.js';
 import DoctorDetailModal from '../../components/DoctorDetailModal.vue';
 import PaymentModal from '../../components/PaymentModal.vue';
 
@@ -242,6 +278,10 @@ const availableTimeSlots = ref([]);
 const showAddSessionsInput = ref(false); // Trạng thái hiển thị trường nhập số lượt tư vấn
 const sessionCount = ref(1); // Số lượt tư vấn được chọn
 const showRenew = ref(false); // Trạng thái hiển thị modal gia hạn
+const showReviewModal = ref(false);
+const reviewStars = ref(0);
+const reviewContent = ref('');
+
 const showRenewModal = (doctor) => {
   selectedDoctor.value = doctor; // Lưu thông tin bác sĩ được chọn
   showRenew.value = true; // Hiển thị modal
@@ -277,7 +317,7 @@ const loadConsultationList = async () => {
     loading.value = true;
     error.value = null;
     
-    const response = await axios.get('/api/consultationList/list');
+    const response = await axiosInstance.get('/api/consultationList/list');
     console.log('Consultation list response:', response); // Debug log
     
     if (response.data && response.data.success && response.data.data) {
@@ -325,7 +365,7 @@ const removeDoctor = async (doctorId) => {
     }
     
     loading.value = true;
-    const response = await axios.delete(`/api/consultationList/remove/${doctorId}`);
+    const response = await axiosInstance.delete(`/api/consultationList/remove/${doctorId}`);
     
     if (response.data && response.data.success) {
       toast.add({
@@ -401,7 +441,7 @@ const formatDateForInput = (dateString) => {
 
 const checkBookedTimes = async (doctorId, date) => {
   try {
-    const response = await axios.post('/api/consultationList/check-duplicate', {
+    const response = await axiosInstance.post('/api/consultationList/check-duplicate', {
       doctorId,
       consultationDate: date
     });
@@ -523,7 +563,7 @@ const showBookingModal = (doctor) => {
 const startChat = async (doctorId) => {
   try {
     // Tạo chat mới hoặc lấy chat hiện có
-    const response = await axios.post('/api/chat/create', { doctorId });
+    const response = await axiosInstance.post('/api/chat/create', { doctorId });
     
     // Chuyển đến trang chat với chatId
     router.push({
@@ -552,7 +592,7 @@ const startChat = async (doctorId) => {
 const handleVNPayPayment = async (doctorid,Type,Quantity) => {
   try {
     // Gửi yêu cầu đến API backend để tạo URL thanh toán
-    const response = await axios.post('/api/vnpay/create_payment_url', { // Số tiền thanh toán (ví dụ: 500,000 VNĐ)
+    const response = await axiosInstance.post('/api/vnpay/create_payment_url', { // Số tiền thanh toán (ví dụ: 500,000 VNĐ)
         bankCode: 'NCB',  // Mã ngân hàng nếu có
         language: 'vn',  // Ngôn ngữ
         orderType: Type,
@@ -603,7 +643,7 @@ const handleBooking = async () => {
     const consultationDate = new Date(selectedDate.value);
     consultationDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    const response = await axios.post('/api/consultationList/book', {
+    const response = await axiosInstance.post('/api/consultationList/book', {
       doctorId: selectedDoctor.value._id,
       consultationDate: consultationDate.toISOString()
     });
@@ -627,6 +667,58 @@ const handleBooking = async () => {
       severity: 'error',
       summary: 'Lỗi',
       detail: err.response?.data?.message || 'Không thể đặt lịch tư vấn',
+      life: 3000
+    });
+  }
+};
+
+const openReviewModal = (doctor) => {
+  selectedDoctor.value = doctor;
+  showReviewModal.value = true;
+  reviewStars.value = 0;
+  reviewContent.value = '';
+};
+
+const closeReviewModal = () => {
+  showReviewModal.value = false;
+  selectedDoctor.value = null;
+};
+
+const submitReview = async () => {
+  try {
+    if (!selectedDoctor.value) {
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Không tìm thấy thông tin bác sĩ',
+        life: 3000
+      });
+      return;
+    }
+
+    const response = await axiosInstance.post('/api/reviews', {
+      doctorId: selectedDoctor.value._id,
+      rating: reviewStars.value,
+      content: reviewContent.value
+    });
+
+    if (response.data.success) {
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Cảm ơn bạn đã đánh giá bác sĩ',
+        life: 3000
+      });
+      closeReviewModal();
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (error) {
+    console.error('Lỗi khi gửi đánh giá:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: error.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại sau.',
       life: 3000
     });
   }

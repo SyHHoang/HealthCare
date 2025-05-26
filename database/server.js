@@ -37,6 +37,7 @@ import Message from './models/Message.js';
 import orderTypeRoutes from './routes/orderTypeRoutes.js';
 import videoCallRoutes from './routes/videoCallRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 // Tạo __dirname cho ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -278,6 +279,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/order-types', orderTypeRoutes);
 app.use('/api/video-call', videoCallRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use(fileUpload({
   limits: { fileSize: 10 * 1024 * 1024 },
   useTempFiles: true
