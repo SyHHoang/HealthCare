@@ -163,18 +163,24 @@ router.get('/vnpay_ipn', async (req, res) => {
                 transaction.transactionDate = moment(vnp_Params['vnp_PayDate'], 'YYYYMMDDHHmmss').toDate();
                 const result = await transaction.save();
                 let nameOrderType;
-                if(transaction.orderType == 'consultation'){
-                    nameOrderType='Đăng ký bác sĩ tư vấn y tế'
-                }else if(transaction.orderType == 'Extend'){
-                    nameOrderType='Gia hạn thời gian tư vấn'
-                }else if(transaction.orderType == 'AddCallVideo'){
-                    nameOrderType='Thêm số lượt gọi video trực tuyến với bác sĩ'
+                switch (transaction.orderType) {
+                    case 'consultation':
+                        nameOrderType = 'Đăng ký bác sĩ tư vấn y tế';
+                        break;
+                    case 'Extend':
+                        nameOrderType = 'Gia hạn thời gian tư vấn';
+                        break;
+                    case 'AddCallVideo':
+                        nameOrderType = 'Thêm số lượt gọi video trực tuyến với bác sĩ';
+                        break;
+                    default:
+                        nameOrderType = 'Dịch vụ không xác định';
                 }
                 // Lưu thông báo vào database
                 const notification = new Notification({
                     userId: transaction.userId || transaction.doctorId,
-                    title: 'Thanh toán thành công',
-                    message: 'Thanh toán thành công!',
+                    title: `${nameOrderType} thành công`,
+                    message: `${nameOrderType} thành công`,
                     type: 'payment_success',
                     data: {
                         'Mã đơn hàng':orderId,
@@ -210,7 +216,7 @@ router.get('/vnpay_ipn', async (req, res) => {
                             if (doctor && doctor.fcmToken) {
                                 await sendNotification(
                                     doctor.fcmToken,
-                                    'Thanh toán thành công',
+                                    'Thanh toán thành công ${orderId} ',
                                     `Bệnh nhân đã thanh toán thành công cho giao dịch ${orderId}`,
                                     {
                                         orderId: orderId,

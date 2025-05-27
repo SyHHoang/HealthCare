@@ -72,7 +72,14 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="user in paginatedUsers" :key="user._id">
+                <tr v-if="!paginatedUsers || paginatedUsers.length === 0">
+                  <td colspan="7" class="text-center py-4">
+                    <div class="alert alert-info mb-0">
+                      Không có dữ liệu người dùng
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else v-for="user in paginatedUsers" :key="user._id">
                   <td>{{ user._id }}</td>
                   <td>{{ user.fullname }}</td>
                   <td>{{ user.email }}</td>
@@ -127,21 +134,32 @@
           <nav v-if="totalPages > 1" class="mt-4">
             <ul class="pagination justify-content-center">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage(1)">
+                  <i class="fas fa-angle-double-left"></i>
+                </a>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
                   <i class="fas fa-chevron-left"></i>
                 </a>
               </li>
-              <li 
-                v-for="page in totalPages" 
-                :key="page"
-                class="page-item"
-                :class="{ active: currentPage === page }"
-              >
+              <li v-if="currentPage > 3" class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+              <li v-for="page in paginationPages" :key="page" class="page-item" :class="{ active: currentPage === page }">
                 <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+              </li>
+              <li v-if="currentPage < totalPages - 2" class="page-item disabled">
+                <span class="page-link">...</span>
               </li>
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                 <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
                   <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <a class="page-link" href="#" @click.prevent="changePage(totalPages)">
+                  <i class="fas fa-angle-double-right"></i>
                 </a>
               </li>
             </ul>
@@ -478,13 +496,34 @@ const filteredUsers = computed(() => {
 })
 
 const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredUsers.value.slice(start, end)
+  console.log('Computing paginatedUsers with:', {
+    users: users.value,
+    currentPage: currentPage.value,
+    itemsPerPage: itemsPerPage.value
+  })
+  
+  // Sử dụng trực tiếp dữ liệu từ API thay vì slice
+  return users.value
 })
 
 const sortIcon = computed(() => {
   return sortOrder.value === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'
+})
+
+const paginationPages = computed(() => {
+  const pages = [];
+  if (totalPages.value <= 5) {
+    for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+  } else {
+    if (currentPage.value <= 3) {
+      pages.push(1, 2, 3, 4, 5);
+    } else if (currentPage.value >= totalPages.value - 2) {
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) pages.push(i);
+    } else {
+      for (let i = currentPage.value - 2; i <= currentPage.value + 2; i++) pages.push(i);
+    }
+  }
+  return pages.filter(p => p >= 1 && p <= totalPages.value);
 })
 
 // Methods
@@ -501,11 +540,22 @@ const fetchUsers = async () => {
       search: searchQuery.value
     }
 
+    console.log('Fetching users with params:', params)
     const data = await userService.getUsers(params)
-    users.value = data.users
-    totalItems.value = data.total
-    totalPages.value = data.totalPages
-    currentPage.value = data.currentPage
+    console.log('Received data:', data)
+    
+    // Cập nhật state
+    users.value = data.users || []
+    totalItems.value = data.total || 0
+    totalPages.value = data.totalPages || 1
+    currentPage.value = data.currentPage || 1
+    
+    console.log('Updated state:', {
+      users: users.value.length,
+      totalItems: totalItems.value,
+      totalPages: totalPages.value,
+      currentPage: currentPage.value
+    })
   } catch (err) {
     console.error('Lỗi khi lấy danh sách người dùng:', err)
     if (err.response?.status === 401) {
@@ -667,6 +717,7 @@ const handleSearch = () => {
 }
 
 const changePage = (page) => {
+  console.log('Changing page to:', page)
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
     fetchUsers()

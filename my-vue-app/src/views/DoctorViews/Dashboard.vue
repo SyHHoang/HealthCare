@@ -201,7 +201,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/services/axiosInstance';
-
+import axios from 'axios';
 const router = useRouter();
 
 // Data
@@ -421,7 +421,7 @@ const reviews = ref([]);
 // Hàm lấy danh sách đánh giá
 const fetchReviews = async () => {
   try {
-    const response = await axiosInstance.get('/api/reviews/doctor-reviews');
+    const response = await axios.get('/api/reviews/doctor-reviews');
     if (response.data.success) {
       reviews.value = response.data.data;
     }

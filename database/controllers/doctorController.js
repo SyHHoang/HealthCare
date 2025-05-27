@@ -364,6 +364,7 @@ export const updateAvatar = async (req, res) => {
 // Lấy thông tin chi tiết bác sĩ
 export const getPublicProfileDoctorById = async (req, res) => {
   try {
+    console.log('req.params.id',req.params.id);
     const doctor = await Doctor.findById(req.params.id).select(' _id fullName specialty academicTitle experience otherSpecialties avatar schedule services');
     
     if (!doctor) {

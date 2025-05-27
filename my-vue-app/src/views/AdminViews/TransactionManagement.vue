@@ -228,21 +228,36 @@
         <nav v-if="totalPages > 1" class="mt-4">
           <ul class="pagination justify-content-center">
             <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <a class="page-link" href="#" @click.prevent="changePage(1)">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+            </li>
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
               <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
                 <i class="fas fa-chevron-left"></i>
               </a>
             </li>
-            <li
-              v-for="page in totalPages"
-              :key="page"
-              class="page-item"
-              :class="{ active: page === currentPage }"
-            >
+            
+            <li v-if="currentPage > 3" class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            
+            <li v-for="page in paginationPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
               <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
             </li>
+            
+            <li v-if="currentPage < totalPages - 2" class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            
             <li class="page-item" :class="{ disabled: currentPage === totalPages }">
               <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
                 <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+            <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+              <a class="page-link" href="#" @click.prevent="changePage(totalPages)">
+                <i class="fas fa-angle-double-right"></i>
               </a>
             </li>
           </ul>
@@ -411,6 +426,38 @@ const filteredTransactions = computed(() => {
   return transactions.value
 })
 
+const paginationPages = computed(() => {
+  const pages = [];
+  const maxVisiblePages = 5;
+  
+  if (totalPages.value <= maxVisiblePages) {
+    // Nếu tổng số trang <= 5, hiển thị tất cả
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Nếu đang ở trang đầu
+    if (currentPage.value <= 3) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i);
+      }
+    }
+    // Nếu đang ở trang cuối
+    else if (currentPage.value >= totalPages.value - 2) {
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i);
+      }
+    }
+    // Nếu đang ở giữa
+    else {
+      for (let i = currentPage.value - 2; i <= currentPage.value + 2; i++) {
+        pages.push(i);
+      }
+    }
+  }
+  return pages;
+});
+
 // Methods
 const fetchTransactions = async () => {
   loading.value = true
@@ -559,6 +606,13 @@ const updateStatus = async (id, status) => {
     toast.error('Không thể cập nhật trạng thái giao dịch')
   }
 }
+
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    fetchTransactions();
+  }
+};
 
 // Lifecycle hooks
 onMounted(() => {

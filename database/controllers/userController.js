@@ -72,16 +72,33 @@ export const updateProfile = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = 'fullname', order = 'asc', search = '' } = req.query;
+    console.log('Query params:', { page, limit, sort, order, search });
+    
     const skip = (page - 1) * limit;
     const searchCondition = search ? { $or: [{ fullname: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] } : {};
+    
+    console.log('Search condition:', searchCondition);
+    console.log('Skip:', skip, 'Limit:', limit);
+    
     const total = await User.countDocuments(searchCondition);
+    console.log('Total documents:', total);
+    
     const users = await User.find(searchCondition)
       .select('-password')
       .sort({ [sort]: order === 'desc' ? -1 : 1 })
       .skip(skip)
       .limit(Number(limit));
-    res.json({ total, totalPages: Math.ceil(total / limit), currentPage: Number(page), users });
+      
+    console.log('Found users:', users.length);
+    
+    res.json({ 
+      total, 
+      totalPages: Math.ceil(total / limit), 
+      currentPage: Number(page), 
+      users 
+    });
   } catch (error) {
+    console.error('Error in getAllUsers:', error);
     res.status(500).json({ message: "Lỗi server!", error: error.message });
   }
 };

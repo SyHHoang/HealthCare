@@ -1,0 +1,254 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  margin: auto;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.doctor-detail {
+  padding: 20px;
+}
+
+.doctor-profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.doctor-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 20px;
+}
+
+.doctor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doctor-info {
+  flex: 1;
+}
+
+.doctor-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.doctor-title {
+  color: #666;
+  font-size: 16px;
+}
+
+.details-section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detail-item i {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.detail-item .label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.detail-item .value {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+
+.rating-distribution {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.rating-label {
+  width: 80px;
+  font-weight: 500;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  margin: 0 10px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #ffc107;
+}
+
+.rating-count {
+  width: 40px;
+  text-align: right;
+  color: #666;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.review-item {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+}
+
+.reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.reviewer-name {
+  font-weight: 500;
+}
+
+.review-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.review-rating {
+  color: #ffc107;
+}
+
+.review-content {
+  color: #333;
+  line-height: 1.5;
+}
+
+.schedule-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.schedule-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.schedule-table th,
+.schedule-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #dee2e6;
+}
+
+.schedule-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.time-slot {
+  background: #e3f2fd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    margin: 10px auto;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .doctor-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .doctor-avatar {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+} 

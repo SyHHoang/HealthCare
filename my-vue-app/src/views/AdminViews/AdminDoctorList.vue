@@ -95,6 +95,45 @@
           </div>
         </div>
       </div>
+
+      <!-- Thêm phân trang sau bảng -->
+      <nav v-if="totalPages > 1" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <a class="page-link" href="#" @click.prevent="changePage(1)">
+              <i class="fas fa-angle-double-left"></i>
+            </a>
+          </li>
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          
+          <li v-if="currentPage > 3" class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+          
+          <li v-for="page in paginationPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+            <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+          </li>
+          
+          <li v-if="currentPage < totalPages - 2" class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+          
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <a class="page-link" href="#" @click.prevent="changePage(totalPages)">
+              <i class="fas fa-angle-double-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <!-- Modal thêm bác sĩ -->
@@ -409,6 +448,11 @@ const isSubmitting = ref(false)
 const showViewModal = ref(false)
 const viewingDoctor = ref(null)
 
+// Thêm state cho phân trang
+const currentPage = ref(1)
+const totalPages = ref(1)
+const itemsPerPage = ref(10)
+
 const addFormData = ref({
   fullName: '',
   email: '',
@@ -440,6 +484,39 @@ const filteredDoctors = computed(() => {
   )
 })
 
+// Thêm computed property cho phân trang
+const paginationPages = computed(() => {
+  const pages = [];
+  const maxVisiblePages = 5;
+  
+  if (totalPages.value <= maxVisiblePages) {
+    // Nếu tổng số trang <= 5, hiển thị tất cả
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Nếu đang ở trang đầu
+    if (currentPage.value <= 3) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i);
+      }
+    }
+    // Nếu đang ở trang cuối
+    else if (currentPage.value >= totalPages.value - 2) {
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i);
+      }
+    }
+    // Nếu đang ở giữa
+    else {
+      for (let i = currentPage.value - 2; i <= currentPage.value + 2; i++) {
+        pages.push(i);
+      }
+    }
+  }
+  return pages;
+});
+
 // Methods
 const debouncedSearch = debounce(() => {
   // Filter is handled by computed property
@@ -453,7 +530,30 @@ const loadDoctors = async () => {
   try {
     loading.value = true
     error.value = null
-    doctors.value = await doctorService.getDoctors()
+    const params = {
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: searchQuery.value
+    }
+    console.log('Fetching doctors with params:', params)
+    const response = await doctorService.getDoctors(params)
+    console.log('Doctors response:', response)
+    
+    // Xử lý response an toàn hơn
+    if (response && response.data) {
+      doctors.value = response.data
+      // Kiểm tra và cập nhật totalPages
+      if (response.pagination && typeof response.pagination.totalPages === 'number') {
+        totalPages.value = response.pagination.totalPages
+      } else {
+        // Nếu không có thông tin phân trang, tính toán dựa trên số lượng bác sĩ
+        totalPages.value = Math.ceil(doctors.value.length / itemsPerPage.value)
+      }
+    } else {
+      // Nếu response không đúng format, gán trực tiếp
+      doctors.value = Array.isArray(response) ? response : []
+      totalPages.value = Math.ceil(doctors.value.length / itemsPerPage.value)
+    }
   } catch (err) {
     error.value = 'Không thể tải danh sách bác sĩ. Vui lòng thử lại sau.'
     console.error('Error loading doctors:', err)
@@ -618,6 +718,14 @@ const showToast = (type, message) => {
   }
 }
 
+// Thêm hàm changePage
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    loadDoctors();
+  }
+};
+
 // Lifecycle hooks
 onMounted(() => {
   loadDoctors()
@@ -688,5 +796,42 @@ onMounted(() => {
 
 .modal-body p {
   margin-bottom: 1rem;
+}
+
+/* Thêm styles cho phân trang */
+.pagination {
+  margin-bottom: 0;
+}
+
+.pagination .page-link {
+  color: #0d6efd;
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  margin: 0 2px;
+  border-radius: 4px;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+  border-color: #dee2e6;
+}
+
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0d6efd;
+  color: white;
 }
 </style> 

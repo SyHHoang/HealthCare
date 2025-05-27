@@ -47,7 +47,10 @@
                   </div>
                   <p class="notification-message">{{ notification.message }}</p>
                   <div v-if="notification.data" class="notification-data">
-                    <pre>{{ JSON.stringify(notification.data, null, 2) }}</pre>
+                    <div v-for="(value, key) in notification.data" :key="key" class="data-item">
+                      <span class="data-label">{{ formatDataLabel(key) }}:</span>
+                      <span class="data-value">{{ formatDataValue(value) }}</span>
+                    </div>
                   </div>
                 </div>
                 <div class="notification-actions">
@@ -116,6 +119,36 @@ const formatTime = (time) => {
   } catch (error) {
     return 'Không rõ thời gian';
   }
+};
+
+// Thêm hàm format label
+const formatDataLabel = (key) => {
+  const labels = {
+    'Mã đơn hàng': 'Mã đơn hàng',
+    'Số tiền': 'Số tiền',
+    'Loại giao dịch': 'Loại giao dịch',
+    'Ngày thanh toán': 'Ngày thanh toán'
+  };
+  return labels[key] || key;
+};
+
+// Thêm hàm format value
+const formatDataValue = (value) => {
+  if (typeof value === 'number' && value >= 1000) {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(value);
+  }
+  if (value instanceof Date || (typeof value === 'string' && value.includes('T'))) {
+    try {
+      const date = new Date(value);
+      return format(date, 'dd/MM/yyyy HH:mm', { locale: vi });
+    } catch (e) {
+      return value;
+    }
+  }
+  return value;
 };
 
 // Lấy danh sách thông báo
@@ -251,34 +284,37 @@ onMounted(() => {
 .notification-item {
   display: flex;
   align-items: flex-start;
-  padding: 1rem;
+  padding: 1.25rem;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: all 0.3s ease;
   cursor: pointer;
+  margin-bottom: 1rem;
 }
 
 .notification-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .notification-item.unread {
-  background-color: #ebf5fb;
+  background-color: #f0f7ff;
+  border-left: 4px solid #3498db;
 }
 
 .notification-icon {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background-color: #e8f4fc;
   color: #3498db;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 1rem;
+  margin-right: 1.25rem;
   flex-shrink: 0;
+  font-size: 1.25rem;
 }
 
 .notification-content {
@@ -295,7 +331,7 @@ onMounted(() => {
 
 .notification-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
 }
@@ -308,24 +344,40 @@ onMounted(() => {
 }
 
 .notification-message {
-  margin: 0;
+  margin: 0.5rem 0;
   color: #34495e;
   font-size: 0.9375rem;
   line-height: 1.5;
 }
 
 .notification-data {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
   background-color: #f8f9fa;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.875rem;
 }
 
-.notification-data pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+.data-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.data-item:last-child {
+  margin-bottom: 0;
+}
+
+.data-label {
+  font-weight: 600;
+  color: #495057;
+  min-width: 120px;
+  margin-right: 0.5rem;
+}
+
+.data-value {
+  color: #6c757d;
+  flex: 1;
 }
 
 .notification-actions {
