@@ -198,32 +198,40 @@ router.get('/vnpay_ipn', async (req, res) => {
                         // Lấy FCM token của user từ database
                         const user = await User.findById(transaction.userId).select('fcmToken');
                         if (user && user.fcmToken) {
-                            await sendNotification(
-                                user.fcmToken,
-                                'Thanh toán thành công',
-                                `Giao dịch ${orderId} đã được thanh toán thành công`,
-                                'Mã giao dịch: ' + orderId,
-                                'Số lượng: ' + transaction.quantity||1,
-                                'Ngày thanh toán: ' + transaction.transactionDate.toISOString(),
-                                'Tên bác sĩ: ' + transaction.doctorId.name,
-                                'Loại giao dịch: ' + transaction.orderType,
-                            );
+                          const data = {
+                            orderId: orderId.toString(),
+                            quantity: String(transaction.quantity || 1),
+                            transactionDate: transaction.transactionDate.toISOString(),
+                            doctorName: transaction.doctorId?.name || '',
+                            orderType: transaction.orderType || '',
+                            type: 'payment_success'
+                          };
+                        
+                          await sendNotification(
+                            user.fcmToken,
+                            'Thanh toán thành công',
+                            `Giao dịch ${orderId} đã được thanh toán thành công`,
+                            data
+                          );
                         }
 
                         // Gửi thông báo cho bác sĩ nếu có
                         if (transaction.doctorId) {
                             const doctor = await Doctor.findById(transaction.doctorId).select('fcmToken');
                             if (doctor && doctor.fcmToken) {
+                                const doctorData = {
+                                    orderId: orderId.toString(),
+                                    amount: amount.toString(),
+                                    orderType: transaction.orderType,
+                                    transactionDate: transaction.transactionDate.toISOString(),
+                                    type: 'payment_success'
+                                };
+                                
                                 await sendNotification(
                                     doctor.fcmToken,
-                                    'Thanh toán thành công ${orderId} ',
+                                    'Thanh toán thành công',
                                     `Bệnh nhân đã thanh toán thành công cho giao dịch ${orderId}`,
-                                    {
-                                        orderId: orderId,
-                                        amount: amount.toString(),
-                                        orderType: transaction.orderType,
-                                        transactionDate: transaction.transactionDate.toISOString()
-                                    }
+                                    doctorData
                                 );
                             }
                         }

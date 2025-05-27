@@ -15,12 +15,66 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Xử lý thông báo khi app đang chạy
+messaging.onMessage(function(payload) {
+  console.log('Message received in foreground:', payload);
+  showNotification(payload);
+});
+
+// Xử lý thông báo khi app đang chạy ngầm
 messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  const notificationTitle = payload.notification.title;
+  console.log('Message received in background:', payload);
+  showNotification(payload);
+});
+
+// Hàm hiển thị thông báo
+function showNotification(payload) {
+  console.log('Processing notification payload:', payload);
+  
+  // Lấy thông tin từ notification hoặc data
+  const notificationTitle = payload.notification?.title || payload.data?.title || 'Thông báo mới';
+  const notificationBody = payload.notification?.body || payload.data?.body || '';
+  
+  // Chuẩn bị options cho thông báo
   const notificationOptions = {
-    body: payload.notification.body
+    icon: '/logo.png',
+    badge: '/logo.png',
+    body: notificationBody,
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
+    data: payload.data || {},
+    tag: 'payment-notification',
+    actions: [
+      {
+        action: 'view',
+        title: 'Xem chi tiết'
+      }
+    ]
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  // Hiển thị thông báo
+  return self.registration.showNotification(notificationTitle, notificationOptions);
+}
+
+// Xử lý khi click vào thông báo
+self.addEventListener('notificationclick', function(event) {
+  console.log('Notification click received:', event);
+
+  event.notification.close();
+
+  // Focus vào cửa sổ hiện tại hoặc mở cửa sổ mới
+  event.waitUntil(
+    clients.matchAll({type: 'window'}).then(function(clientList) {
+      // Nếu có cửa sổ đang mở, focus vào cửa sổ đó
+      for (let client of clientList) {
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Nếu không có cửa sổ nào đang mở, mở cửa sổ mới
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
 });

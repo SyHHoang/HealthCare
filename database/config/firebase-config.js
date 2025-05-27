@@ -57,20 +57,54 @@ export const sendNotification = async (token, title, body, data = {}) => {
       return null;
     }
 
-    // Đảm bảo luôn có trường notification để foreground nhận được
+    // Chuẩn bị message với cấu trúc mới
     const message = {
+      token,
       notification: {
-        title: title || (data && data.title) || 'Thông báo',
-        body: body || (data && data.body) || ''
+        title,
+        body
       },
       data: {
         ...data,
-        title: title || (data && data.title) || 'Thông báo',
-        body: body || (data && data.body) || ''
+        title: title,
+        body: body,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        sound: 'default',
+        status: 'done',
+        screen: 'payment_success',
+        icon: '/logo.png',
+        badge: '/logo.png',
+        tag: 'payment-notification',
+        requireInteraction: 'true',
+        vibrate: '[200,100,200]',
+        actions: JSON.stringify([
+          {
+            action: 'view',
+            title: 'Xem chi tiết'
+          }
+        ])
       },
-      token
+      webpush: {
+        headers: {
+          Urgency: 'high'
+        },
+        notification: {
+          icon: '/logo.png',
+          badge: '/logo.png',
+          tag: 'payment-notification',
+          requireInteraction: true,
+          vibrate: [200, 100, 200],
+          actions: [
+            {
+              action: 'view',
+              title: 'Xem chi tiết'
+            }
+          ]
+        }
+      }
     };
 
+    console.log('Sending notification with payload:', JSON.stringify(message, null, 2));
     const response = await messaging.send(message);
     console.log('Successfully sent notification:', response);
     return response;
