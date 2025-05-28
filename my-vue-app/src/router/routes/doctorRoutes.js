@@ -59,6 +59,11 @@ export default [
         path: 'consultation-history',
         name: 'doctor-consultation-history',
         component: () => import('@/views/DoctorViews/DoctorConsultationHistoryView.vue'), // Lazy load
+      },
+      {
+        path: 'notifications',
+        name: 'DoctorNotifications',
+        component: () => import('@/views/DoctorViews/Notifications.vue') // Lazy load
       }
     ]
   }

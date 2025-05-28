@@ -233,16 +233,16 @@ router.get('/vnpay_ipn', async (req, res) => {
                                 
                                 await sendNotification(
                                     doctor.fcmToken,
-                                    'Thanh toán thành công',
-                                        `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã thanh toán thành công cho giao dịch ${orderId}`,
+                                    'Bạn có người đăng ký tư vấn mới',
+                                        `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã đăng ký tư vấn, số tiền sẽ được chuyển lại sau`,
                                     doctorData
                                 );
 
                                 // Lưu thông báo vào database
                                 const notification = new Notification({
                                     userId: transaction.doctorId,
-                                    title: 'Thanh toán thành công',
-                                    message: `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã thanh toán thành công cho giao dịch ${orderId}`,
+                                    title: 'Bạn có bệnh nhân mới',
+                                    message: `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã đăng ký tư vấn`,
                                     type: 'payment_success',
                                     data: {
                                         orderId: orderId,

@@ -64,16 +64,16 @@ export default [
     name: 'chat',
     component: () => import('@/views/UserView/ChatView.vue') // Lazy load
       },
-      {
-        path: 'doctors/:doctorId',
-        name: 'DoctorDetails',
-        component: () => import('@/views/PublicView/DoctorDetailsView.vue') // Lazy load
-      },
-      {
-        path: 'specialties/:specialtyId',
-        name: 'SpecialtyDetails',
-        component: () => import('@/views/PublicView/SpecialtyDetailsView.vue') // Lazy load
-      }
+      // {
+      //   path: 'doctors/:doctorId',
+      //   name: 'DoctorDetails',
+      //   component: () => import('@/views/PublicView/DoctorDetailsView.vue') // Lazy load
+      // },
+      // {
+      //   path: 'specialties/:specialtyId',
+      //   name: 'SpecialtyDetails',
+      //   component: () => import('@/views/PublicView/SpecialtyDetailsView.vue') // Lazy load
+      // }
     ]
   },
   {

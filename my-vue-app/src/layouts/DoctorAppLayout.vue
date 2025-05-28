@@ -52,12 +52,20 @@
             <div class="notification-dropdown" v-if="showNotifications">
               <div class="notification-header">
                 <h3>Thông báo</h3>
-                <button @click="markAllAsRead">Đánh dấu đã đọc</button>
+                <button 
+                  @click="markAllAsRead" 
+                  :disabled="!notifications.some(n => !n.read)"
+                  class="mark-all-read-btn"
+                >
+                  Đánh dấu đã đọc
+                </button>
               </div>
               <div class="notification-list" v-if="notifications.length > 0">
-                <div v-for="(notification, index) in notifications" :key="index" 
+                <div v-for="(notification, index) in notifications" 
+                     :key="index" 
                      class="notification-item" 
-                     :class="{ 'unread': !notification.read }">
+                     :class="{ 'unread': !notification.read }"
+                     @click="handleNotificationClick(notification)">
                   <div class="notification-icon">
                     <i :class="getNotificationIcon(notification.type)"></i>
                   </div>
@@ -196,7 +204,11 @@ const handleNewNotification = (data) => {
   };
   
   notifications.value.unshift(newNotification);
-  unreadNotifications.value++;
+  
+  // Chỉ tăng số thông báo chưa đọc nếu không phải là thông báo tin nhắn
+  if (data.type !== 'message') {
+    unreadNotifications.value++;
+  }
   
   // Hiển thị toast thông báo
   toast.add({
@@ -225,14 +237,6 @@ const handleNewMessage = (data) => {
   };
   
   notifications.value.unshift(newNotification);
-  unreadNotifications.value++;
-  
-  toast.add({
-    severity: 'info',
-    summary: 'Tin nhắn mới',
-    detail: data.message || 'Bạn có tin nhắn mới',
-    life: 3000
-  });
 };
 
 const handleAppointmentNotification = (data) => {
@@ -295,14 +299,66 @@ const toggleUserMenu = () => {
 
 const markAllAsRead = async () => {
   try {
-    await axiosInstance.put('/api/notifications/mark-all-read');
+    await axiosInstance.patch('/api/notifications/doctor/read-all');
     notifications.value.forEach(notification => {
       notification.read = true;
     });
     unreadNotifications.value = 0;
+    toast.add({
+      severity: 'success',
+      summary: 'Thành công',
+      detail: 'Đã đánh dấu tất cả thông báo đã đọc',
+      life: 2000
+    });
   } catch (error) {
-    console.error('Lỗi khi đánh dấu đã đọc:', error);
+    console.error('Lỗi khi đánh dấu tất cả đã đọc:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể đánh dấu tất cả thông báo đã đọc',
+      life: 3000
+    });
   }
+};
+
+const handleNotificationClick = async (notification) => {
+  if (!notification.read) {
+    try {
+      await axiosInstance.patch(`/api/notifications/doctor/${notification._id}/read`);
+      notification.read = true;
+      
+      // Giảm số lượng thông báo chưa đọc tương ứng
+      if (notification.type === 'message') {
+        unreadMessages.value = Math.max(0, unreadMessages.value - 1);
+      } else {
+        unreadNotifications.value = Math.max(0, unreadNotifications.value - 1);
+      }
+    } catch (error) {
+      console.error('Lỗi khi đánh dấu đã đọc:', error);
+    }
+  }
+
+  // Xử lý điều hướng dựa vào loại thông báo
+  if (notification.data) {
+    switch (notification.type) {
+      case 'appointment':
+        router.push(`/doctor/appointments/${notification.data.appointmentId}`);
+        break;
+      case 'message':
+        router.push(`/doctor/chat/${notification.data.chatId}`);
+        break;
+      case 'prescription':
+        router.push(`/doctor/prescriptions/${notification.data.prescriptionId}`);
+        break;
+      case 'feedback':
+        router.push('/doctor/feedback');
+        break;
+      case 'payment_success':
+        router.push('/doctor/transactions');
+        break;
+    }
+  }
+  showNotifications.value = false;
 };
 
 const getNotificationIcon = (type) => {
@@ -561,6 +617,7 @@ onBeforeUnmount(() => {
 }
 
 .nav-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -570,7 +627,6 @@ onBeforeUnmount(() => {
   padding: 5px 12px;
   border-radius: 8px;
   transition: all 0.3s;
-  position: relative;
 }
 
 .nav-item i {
@@ -1000,5 +1056,25 @@ onBeforeUnmount(() => {
 
 .logo span {
   color: gold;
+}
+
+.mark-all-read-btn {
+  background: none;
+  border: none;
+  color: #27ae60;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.mark-all-read-btn:hover:not(:disabled) {
+  background-color: #eafaf1;
+}
+
+.mark-all-read-btn:disabled {
+  color: #95a5a6;
+  cursor: not-allowed;
 }
 </style> 

@@ -30,6 +30,7 @@
                    <router-link to="/user/chat" class="nav-item">
             <i class="bi bi-chat-dots-fill"></i>
             <span>Nhắn tin</span>
+            <span v-if="unreadMessages > 0" class="message-badge">{{ unreadMessages }}</span>
           </router-link>
           <router-link to="/user/news" class="nav-item">
             <i class="bi bi-newspaper"></i>
@@ -160,6 +161,7 @@ export default {
     // User menu
     const showUserMenu = ref(false);
     const showChatbot = ref(false);
+    const unreadMessages = ref(0);
 
     const requestNotificationPermission = async () => {
       try {
@@ -268,6 +270,10 @@ export default {
 
     const handleMessageNotification = (data) => {
       console.log('Nhận thông báo tin nhắn mới:', data);
+      if (!window.location.pathname.includes('/user/chat')) {
+        unreadMessages.value++;
+      }
+      
       notifications.value.unshift({
         type: 'message',
         title: 'Tin nhắn mới',
@@ -275,15 +281,6 @@ export default {
         time: new Date(),
         read: false,
         data: data
-      });
-      unreadNotifications.value++;
-
-      // Chỉ hiển thị toast một lần
-      toast.add({
-        severity: 'info',
-        summary: 'Tin nhắn mới',
-        detail: `Bạn có tin nhắn mới từ ${data.senderName}`,
-        life: 5000
       });
     };
 
@@ -496,7 +493,8 @@ export default {
       performSearch,
       logout,
       showChatbot,
-      toggleChatbot
+      toggleChatbot,
+      unreadMessages
     };
   }
 };
@@ -574,6 +572,7 @@ export default {
 }
 
 .nav-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -975,5 +974,21 @@ export default {
     min-width: 140px;
     right: -20px;
   }
+}
+
+.message-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 </style>

@@ -12,9 +12,12 @@ export const createNotification = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Không tìm thấy người dùng' });
     }
-
+    const doctor = await Doctor.findById(userId || req.doctor.id);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Không tìm thấy bác sĩ' });
+    }
     const notification = new Notification({
-      userId: userId || req.user.userId,
+      userId: userId || req.user.userId || req.doctor.id,
       title,
       message,
       type,
@@ -158,5 +161,59 @@ export const getDoctorNotifications = async (req, res) => {
   } catch (error) {
     console.error('Error getting doctor notifications:', error);
     res.status(500).json({ message: 'Lỗi khi lấy thông báo của bác sĩ' });
+  }
+};
+
+// Đánh dấu thông báo đã đọc cho bác sĩ
+export const markDoctorNotificationAsRead = async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: req.doctor.id },
+      { read: true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: 'Không tìm thấy thông báo' });
+    }
+
+    res.json(notification);
+  } catch (error) {
+    console.error('Error marking doctor notification as read:', error);
+    res.status(500).json({ message: 'Lỗi khi đánh dấu thông báo đã đọc' });
+  }
+};
+
+// Đánh dấu tất cả thông báo đã đọc cho bác sĩ
+export const markAllDoctorNotificationsAsRead = async (req, res) => {
+  try {
+    await Notification.updateMany(
+      { userId: req.doctor.id, read: false },
+      { read: true }
+    );
+
+    res.json({ message: 'Đã đánh dấu tất cả thông báo đã đọc' });
+  } catch (error) {
+    console.error('Error marking all doctor notifications as read:', error);
+    res.status(500).json({ message: 'Lỗi khi đánh dấu tất cả thông báo đã đọc' });
+  }
+};
+
+// Xóa thông báo của bác sĩ
+export const deleteDoctorNotification = async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.doctor.id
+    });
+
+    if (!notification) {
+      return res.status(404).json({ message: 'Không tìm thấy thông báo' });
+    }
+
+    res.json({ message: 'Đã xóa thông báo' });
+  } catch (error) {
+    console.error('Error deleting doctor notification:', error);
+    res.status(500).json({ message: 'Lỗi khi xóa thông báo' });
   }
 }; 
