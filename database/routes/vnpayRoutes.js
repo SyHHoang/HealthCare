@@ -154,6 +154,7 @@ router.get('/vnpay_ipn', async (req, res) => {
             // Kiểm tra và cập nhật giao dịch trong database
             console.log("orderId",orderId);
             const transaction = await Transaction.findOne({ txnRef: orderId });
+            console.log("=======================================transaction",transaction)
             if (transaction) {
                 // Cập nhật thông tin giao dịch
                 transaction.status = rspCode === "00" ? "success" : "failed";
@@ -217,22 +218,42 @@ router.get('/vnpay_ipn', async (req, res) => {
 
                         // Gửi thông báo cho bác sĩ nếu có
                         if (transaction.doctorId) {
-                            const doctor = await Doctor.findById(transaction.doctorId).select('fcmToken');
+                            const doctor = await Doctor.findById(transaction.doctorId).select('fcmToken fullNName');
+                            console.log("=======================================doctor",doctor)
                             if (doctor && doctor.fcmToken) {
                                 const doctorData = {
                                     orderId: orderId.toString(),
                                     amount: amount.toString(),
                                     orderType: transaction.orderType,
                                     transactionDate: transaction.transactionDate.toISOString(),
-                                    type: 'payment_success'
+                                    type: 'payment_success',
+                                    userId: transaction.userId.toString(),
+                                    userName: doctor.fullName || 'Người dùng'
                                 };
                                 
                                 await sendNotification(
                                     doctor.fcmToken,
                                     'Thanh toán thành công',
-                                    `Bệnh nhân đã thanh toán thành công cho giao dịch ${orderId}`,
+                                        `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã thanh toán thành công cho giao dịch ${orderId}`,
                                     doctorData
                                 );
+
+                                // Lưu thông báo vào database
+                                const notification = new Notification({
+                                    userId: transaction.doctorId,
+                                    title: 'Thanh toán thành công',
+                                    message: `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã thanh toán thành công cho giao dịch ${orderId}`,
+                                    type: 'payment_success',
+                                    data: {
+                                        orderId: orderId,
+                                        amount: amount,
+                                        orderType: transaction.orderType,
+                                        transactionDate: transaction.transactionDate,
+                                        userId: transaction.userId,
+                                        userName: doctor.fullName
+                                    }
+                                });
+                                await notification.save();
                             }
                         }
                     } catch (error) {

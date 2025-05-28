@@ -27,6 +27,7 @@ import {
 import { authenticateDoctor } from '../middlewares/doctorAuthMiddleware.js';
 import { upload } from '../utils/upload.js';
 import { authenticateToken, isAdmin } from '../middlewares/authMiddleware.js';
+import { sendNotification } from '../config/firebase-config.js';
 
 const router = express.Router();
 
@@ -64,5 +65,39 @@ router.post('/services', authenticateDoctor, saveServices);
 
 // Thêm route mới để lấy toàn bộ thông tin bác sĩ
 router.get('/full-info/:id', authenticateToken, isAdmin, getFullDoctorInfo);
+
+// Cập nhật FCM token cho bác sĩ
+router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    const doctor = req.doctor;
+
+    doctor.fcmToken = fcmToken;
+    await doctor.save();
+
+    res.json({ message: 'Cập nhật FCM token thành công' });
+  } catch (error) {
+    console.error('Error updating FCM token:', error);
+    res.status(500).json({ message: 'Lỗi khi cập nhật FCM token' });
+  }
+});
+
+// Gửi thông báo cho bác sĩ
+router.post('/send-notification', authenticateDoctor, async (req, res) => {
+  try {
+    const { title, body, data } = req.body;
+    const doctor = req.doctor;
+
+    if (!doctor.fcmToken) {
+      return res.status(400).json({ message: 'Bác sĩ chưa có FCM token' });
+    }
+
+    await sendNotification(doctor.fcmToken, title, body, data);
+    res.json({ message: 'Gửi thông báo thành công' });
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    res.status(500).json({ message: 'Lỗi khi gửi thông báo' });
+  }
+});
 
 export default router;

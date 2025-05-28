@@ -1,5 +1,6 @@
 import Notification from '../models/notificationModel.js';
 import User from '../models/User.js';
+import Doctor from '../models/Doctor.js';
 
 // Tạo thông báo mới
 export const createNotification = async (req, res) => {
@@ -137,5 +138,25 @@ export const deleteNotification = async (req, res) => {
   } catch (error) {
     console.error('Error deleting notification:', error);
     res.status(500).json({ message: 'Lỗi khi xóa thông báo' });
+  }
+};
+
+// Lấy danh sách thông báo cho bác sĩ
+export const getDoctorNotifications = async (req, res) => {
+  try {
+    const doctorId = req.doctor._id;
+    
+    // Lấy thông báo của bác sĩ
+    const notifications = await Notification.find({ 
+      userId: doctorId,
+      type: { $in: ['payment_success', 'appointment', 'message', 'feedback'] }
+    })
+    .sort({ createdAt: -1 })
+    .limit(50);
+
+    res.json(notifications);
+  } catch (error) {
+    console.error('Error getting doctor notifications:', error);
+    res.status(500).json({ message: 'Lỗi khi lấy thông báo của bác sĩ' });
   }
 }; 

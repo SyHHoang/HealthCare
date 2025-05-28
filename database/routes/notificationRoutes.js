@@ -5,9 +5,11 @@ import {
   getNotifications, 
   markAsRead, 
   markAllAsRead, 
-  deleteNotification 
+  deleteNotification,
+  getDoctorNotifications 
 } from '../controllers/notificationController.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
+import { authenticateDoctor } from '../middlewares/doctorAuthMiddleware.js';
 
 const router = express.Router();
 
@@ -17,8 +19,11 @@ router.post('/', authenticateToken, createNotification);
 // Tạo nhiều thông báo cùng lúc
 router.post('/bulk', authenticateToken, createBulkNotifications);
 
-// Lấy danh sách thông báo
+// Lấy danh sách thông báo cho user
 router.get('/', authenticateToken, getNotifications);
+
+// Lấy danh sách thông báo cho bác sĩ
+router.get('/doctor', authenticateDoctor, getDoctorNotifications);
 
 // Đánh dấu thông báo đã đọc
 router.patch('/:id/read', authenticateToken, markAsRead);

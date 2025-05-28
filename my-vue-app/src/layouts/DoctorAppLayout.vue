@@ -1,5 +1,6 @@
 <template>
   <div id="doctor-app">
+    <NotificationHandler />
     <header class="doctor-app-header">
       <div class="header-container">
         <div class="header-left">
@@ -102,7 +103,7 @@
       <router-view />
     </main>
     
-    <Toast />
+    <Toast ref="toast" />
     <!-- Chatbot Tooltip & Popup -->
     <Teleport to="body">
   <div class="chatbot-tooltip" @click="toggleChatbot" v-tooltip="'Chat với AI'">
@@ -122,13 +123,17 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import socketService from '../services/socketService';
 import axiosInstance from '../services/axiosInstance';
 import ChatbotView from '../components/ChatbotView.vue';
+import NotificationHandler from '../components/NotificationHandler.vue';
+import { getFCMToken } from '../firebase-config';
 
 const router = useRouter();
+const toast = useToast();
 const doctorName = ref('Nguyễn Văn A');
 const doctorAvatar = ref(null);
 const searchQuery = ref('');
@@ -145,6 +150,40 @@ const unreadMessages = ref(0);
 // Chatbot
 const showChatbot = ref(false);
 
+const requestNotificationPermission = async () => {
+  try {
+    console.log('Requesting notification permission', Notification.permission);
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const token = await getFCMToken();
+      if (token) {
+        await axiosInstance.post('/api/doctors/update-fcm-token', { fcmToken: token });
+        toast.add({
+          severity: 'success',
+          summary: 'Thành công',
+          detail: 'Bạn đã cho phép nhận thông báo',
+          life: 3000
+        });
+      }
+    } else {
+      toast.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Bạn cần cho phép thông báo để nhận thông tin về giao dịch',
+        life: 5000
+      });
+    }
+  } catch (error) {
+    console.error('Error requesting notification permission:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể yêu cầu quyền thông báo',
+      life: 3000
+    });
+  }
+};
+
 // Socket handlers
 const handleNewNotification = (data) => {
   console.log('Nhận thông báo mới:', data);
@@ -160,15 +199,12 @@ const handleNewNotification = (data) => {
   unreadNotifications.value++;
   
   // Hiển thị toast thông báo
-  const toast = document.querySelector('.p-toast');
-  if (toast) {
-    toast.add({
-      severity: 'info',
-      summary: 'Thông báo mới',
-      detail: data.message,
-      life: 3000
-    });
-  }
+  toast.add({
+    severity: 'info',
+    summary: 'Thông báo mới',
+    detail: data.message,
+    life: 3000
+  });
 };
 
 const handleNewMessage = (data) => {
@@ -190,6 +226,13 @@ const handleNewMessage = (data) => {
   
   notifications.value.unshift(newNotification);
   unreadNotifications.value++;
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Tin nhắn mới',
+    detail: data.message || 'Bạn có tin nhắn mới',
+    life: 3000
+  });
 };
 
 const handleAppointmentNotification = (data) => {
@@ -207,6 +250,13 @@ const handleAppointmentNotification = (data) => {
   
   notifications.value.unshift(newNotification);
   unreadNotifications.value++;
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Lịch hẹn mới',
+    detail: data.message,
+    life: 3000
+  });
 };
 
 const handleFeedbackNotification = (data) => {
@@ -224,6 +274,13 @@ const handleFeedbackNotification = (data) => {
   
   notifications.value.unshift(newNotification);
   unreadNotifications.value++;
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Phản hồi mới',
+    detail: data.message,
+    life: 3000
+  });
 };
 
 const toggleNotifications = () => {
@@ -332,6 +389,9 @@ onMounted(async () => {
     const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo') || '{}');
     doctorName.value = doctorInfo.fullName || doctorInfo.name || 'Bác sĩ';
     doctorAvatar.value = doctorInfo.avatar;
+
+    // Xin quyền thông báo khi component được mount
+    await requestNotificationPermission();
 
     // Kết nối socket và lấy thông báo
     socketService.connect();
