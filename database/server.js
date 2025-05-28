@@ -215,20 +215,81 @@ io.on('connection', (socket) => {
   });
 
   // Video call events
+  socket.on('join_video_call', (data) => {
+    const { consultationId } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Tham gia vào room video call
+    socket.join(roomId);
+    console.log(`${socket.role} ${socket.userId} joined video call room ${roomId}`);
+
+    // Thông báo cho người kia biết đã vào phòng
+    socket.to(roomId).emit('participant_joined', {
+      userId: socket.userId,
+      role: socket.role
+    });
+  });
+
+  socket.on('leave_video_call', (data) => {
+    const { consultationId } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Rời khỏi room video call
+    socket.leave(roomId);
+    console.log(`${socket.role} ${socket.userId} left video call room ${roomId}`);
+
+    // Thông báo cho người kia biết đã rời phòng
+    socket.to(roomId).emit('participant_left', {
+      userId: socket.userId,
+      role: socket.role
+    });
+  });
+
   socket.on('video_call_offer', (data) => {
-    socket.broadcast.emit('video_call_offer', data);
+    const { consultationId, offer } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Gửi offer đến người kia trong room
+    socket.to(roomId).emit('video_call_offer', {
+      offer,
+      from: socket.userId,
+      role: socket.role
+    });
   });
 
   socket.on('video_call_answer', (data) => {
-    socket.broadcast.emit('video_call_answer', data);
+    const { consultationId, answer } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Gửi answer đến người kia trong room
+    socket.to(roomId).emit('video_call_answer', {
+      answer,
+      from: socket.userId,
+      role: socket.role
+    });
   });
 
   socket.on('video_call_ice_candidate', (data) => {
-    socket.broadcast.emit('video_call_ice_candidate', data);
+    const { consultationId, candidate } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Gửi ICE candidate đến người kia trong room
+    socket.to(roomId).emit('video_call_ice_candidate', {
+      candidate,
+      from: socket.userId,
+      role: socket.role
+    });
   });
 
   socket.on('video_call_end', (data) => {
-    socket.broadcast.emit('video_call_end', data);
+    const { consultationId } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    // Thông báo kết thúc cuộc gọi cho tất cả trong room
+    io.to(roomId).emit('video_call_ended', {
+      by: socket.userId,
+      role: socket.role
+    });
   });
 
   socket.on('connect', () => {

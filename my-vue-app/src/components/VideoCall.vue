@@ -118,8 +118,7 @@ const initializeCall = async () => {
       if (event.candidate) {
         socketService.emit('video_call_ice_candidate', {
           consultationId: props.consultationId,
-          candidate: event.candidate,
-          isDoctor: isDoctor.value
+          candidate: event.candidate
         });
       }
     };
@@ -127,21 +126,35 @@ const initializeCall = async () => {
     // Kết nối với socket
     socketService.connect();
     
+    // Tham gia vào room video call
+    socketService.emit('join_video_call', {
+      consultationId: props.consultationId
+    });
+    
     // Lắng nghe các sự kiện từ socket
+    socketService.on('participant_joined', handleParticipantJoined);
+    socketService.on('participant_left', handleParticipantLeft);
     socketService.on('video_call_offer', handleOffer);
     socketService.on('video_call_answer', handleAnswer);
     socketService.on('video_call_ice_candidate', handleIceCandidate);
-    socketService.on('video_call_end', handleCallEnd);
+    socketService.on('video_call_ended', handleCallEnd);
 
-    // Nếu là bác sĩ, tạo offer
+    // Nếu là bác sĩ, đợi offer từ user
     if (isDoctor.value) {
+      toast.add({
+        severity: 'info',
+        summary: 'Đang chờ bệnh nhân',
+        detail: 'Vui lòng đợi bệnh nhân tham gia cuộc gọi',
+        life: 3000
+      });
+    } else {
+      // User tạo offer
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       
       socketService.emit('video_call_offer', {
         consultationId: props.consultationId,
-        offer: offer,
-        isDoctor: true
+        offer: offer
       });
     }
 
@@ -158,8 +171,29 @@ const initializeCall = async () => {
   }
 };
 
+const handleParticipantJoined = (data) => {
+  console.log('Người tham gia đã vào:', data);
+  toast.add({
+    severity: 'success',
+    summary: 'Thông báo',
+    detail: `${data.role === 'doctor' ? 'Bác sĩ' : 'Bệnh nhân'} đã tham gia cuộc gọi`,
+    life: 3000
+  });
+};
+
+const handleParticipantLeft = (data) => {
+  console.log('Người tham gia đã rời:', data);
+  toast.add({
+    severity: 'warn',
+    summary: 'Thông báo',
+    detail: `${data.role === 'doctor' ? 'Bác sĩ' : 'Bệnh nhân'} đã rời cuộc gọi`,
+    life: 3000
+  });
+  endCall();
+};
+
 const handleOffer = async (data) => {
-  if (data.consultationId !== props.consultationId || !isDoctor.value) return;
+  if (data.from === socketService.id) return;
   
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
@@ -168,8 +202,7 @@ const handleOffer = async (data) => {
     
     socketService.emit('video_call_answer', {
       consultationId: props.consultationId,
-      answer: answer,
-      isDoctor: true
+      answer: answer
     });
   } catch (error) {
     console.error('Lỗi xử lý offer:', error);
@@ -177,7 +210,7 @@ const handleOffer = async (data) => {
 };
 
 const handleAnswer = async (data) => {
-  if (data.consultationId !== props.consultationId || isDoctor.value) return;
+  if (data.from === socketService.id) return;
   
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
@@ -187,7 +220,7 @@ const handleAnswer = async (data) => {
 };
 
 const handleIceCandidate = async (data) => {
-  if (data.consultationId !== props.consultationId) return;
+  if (data.from === socketService.id) return;
   
   try {
     await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -197,7 +230,7 @@ const handleIceCandidate = async (data) => {
 };
 
 const handleCallEnd = (data) => {
-  if (data.consultationId !== props.consultationId) return;
+  if (data.by === socketService.id) return;
   endCall();
 };
 
@@ -213,9 +246,14 @@ const endCall = async () => {
       clearInterval(timerInterval);
     }
     
+    // Rời khỏi room video call
+    socketService.emit('leave_video_call', {
+      consultationId: props.consultationId
+    });
+    
+    // Thông báo kết thúc cuộc gọi
     socketService.emit('video_call_end', {
-      consultationId: props.consultationId,
-      isDoctor: isDoctor.value
+      consultationId: props.consultationId
     });
     
     router.back();
@@ -254,18 +292,26 @@ onUnmounted(() => {
   if (timerInterval) {
     clearInterval(timerInterval);
   }
+  // Rời khỏi room video call
+  socketService.emit('leave_video_call', {
+    consultationId: props.consultationId
+  });
   socketService.disconnect();
 });
 </script>
 
 <style scoped>
 .video-call-container {
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #1a1a1a;
+  background-color: #000;
   color: white;
+  z-index: 9999;
 }
 
 .video-grid {
@@ -274,14 +320,15 @@ onUnmounted(() => {
   gap: 20px;
   padding: 20px;
   flex-grow: 1;
+  height: calc(100vh - 100px);
 }
 
 .video-box {
   position: relative;
-  background-color: #2a2a2a;
+  background-color: #1a1a1a;
   border-radius: 10px;
   overflow: hidden;
-  aspect-ratio: 16/9;
+  height: 100%;
 }
 
 .video-box video {
@@ -292,43 +339,63 @@ onUnmounted(() => {
 
 .video-label {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 5px 10px;
-  border-radius: 5px;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(5px);
 }
 
 .controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background-color: #2a2a2a;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
 }
 
 .controls button {
-  padding: 10px 20px;
-  border-radius: 20px;
+  padding: 12px 24px;
+  border-radius: 50px;
   font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls button:hover {
+  transform: translateY(-2px);
 }
 
 .controls button i {
-  margin-right: 5px;
+  font-size: 1.2rem;
 }
 
 .timer {
   font-size: 1.2rem;
   font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 20px;
-  background-color: #28a745;
+  padding: 12px 24px;
+  border-radius: 50px;
+  background-color: rgba(40, 167, 69, 0.9);
   color: white;
+  backdrop-filter: blur(5px);
 }
 
 .timer.warning {
-  background-color: #ffc107;
+  background-color: rgba(255, 193, 7, 0.9);
   color: black;
   animation: pulse 1s infinite;
 }
@@ -347,11 +414,52 @@ onUnmounted(() => {
 
 .btn-danger {
   background-color: #dc3545;
-  border-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Thêm hiệu ứng cho các nút điều khiển */
+.controls button:active {
+  transform: scale(0.95);
+}
+
+/* Thêm hiệu ứng hover cho video box */
+.video-box:hover .video-label {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 768px) {
+  .video-grid {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .controls {
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .controls button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .timer {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
 }
 </style> 
