@@ -1,3 +1,5 @@
+import VideoCall from '@/components/VideoCall.vue'
+
 // Định tuyến cho người dùng đã đăng nhập với lazy loading
 export default [
   {
@@ -84,5 +86,18 @@ export default [
         meta: { requiresAuth: true, requiresUser: true }
       }
     ]
+  },
+  {
+    path: '/video-call',
+    name: 'video-call',
+    component: () => import('@/components/VideoCall.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresUser: true
+    },
+    props: (route) => ({
+      consultationId: route.query.consultationId,
+      isDoctor: route.query.isDoctor === 'true'
+    })
   }
 ]; 

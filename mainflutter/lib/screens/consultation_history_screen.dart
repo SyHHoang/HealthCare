@@ -396,7 +396,11 @@ class ConsultationHistoryScreen extends ConsumerWidget {
 
   void _joinVideoCall(BuildContext context, Consultation consultation, WidgetRef ref) async {
     try {
+      debugPrint('=== FLUTTER STARTING VIDEO CALL ===');
+      debugPrint('Consultation ID: ${consultation.id}');
+      
       if (!_canJoinVideoCall(consultation)) {
+        debugPrint('Không đúng thời gian tư vấn');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Chưa đến thời gian tư vấn hoặc đã quá thời gian cho phép'),
@@ -407,8 +411,10 @@ class ConsultationHistoryScreen extends ConsumerWidget {
       }
 
       // Kiểm tra và yêu cầu quyền truy cập
+      debugPrint('Đang kiểm tra quyền truy cập...');
       final hasPermissions = await _checkAndRequestPermissions();
       if (!hasPermissions) {
+        debugPrint('Không có quyền truy cập camera/microphone');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -420,6 +426,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
         return;
       }
 
+      debugPrint('Quyền truy cập đã được cấp, đang chuyển đến màn hình video call...');
       if (context.mounted) {
         Navigator.push(
           context,
@@ -430,6 +437,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
             ),
           ),
         ).then((_) {
+          debugPrint('Đã quay lại từ màn hình video call');
           // Refresh lại danh sách khi quay lại màn hình
           ref.refresh(consultationHistoryProvider);
         });

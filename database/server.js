@@ -215,19 +215,50 @@ io.on('connection', (socket) => {
   });
 
   // Video call events
-  socket.on('join_video_call', (data) => {
+  socket.on('join_video_call', (data, callback) => {
     const { consultationId } = data;
+    
+    if (!consultationId) {
+      console.error('=== VIDEO CALL ERROR ===');
+      console.error('Consultation ID is undefined');
+      console.error('User ID:', socket.userId);
+      console.error('Role:', socket.role);
+      console.error('Socket ID:', socket.id);
+      if (callback) {
+        callback({ success: false, message: 'Consultation ID is required' });
+      }
+      socket.emit('error', { message: 'Consultation ID is required' });
+      return;
+    }
+
     const roomId = `video_call_${consultationId}`;
     
     // Tham gia vào room video call
     socket.join(roomId);
-    console.log(`${socket.role} ${socket.userId} joined video call room ${roomId}`);
+    console.log('=== VIDEO CALL JOIN ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`User ID: ${socket.userId}`);
+    console.log(`Role: ${socket.role}`);
+    console.log(`Socket ID: ${socket.id}`);
+    console.log('=====================');
 
     // Thông báo cho người kia biết đã vào phòng
     socket.to(roomId).emit('participant_joined', {
       userId: socket.userId,
-      role: socket.role
+      role: socket.role,
+      socketId: socket.id
     });
+
+    // Gọi callback để thông báo thành công
+    if (callback) {
+      callback({ 
+        success: true, 
+        roomId: roomId,
+        userId: socket.userId,
+        role: socket.role,
+        socketId: socket.id
+      });
+    }
   });
 
   socket.on('leave_video_call', (data) => {
@@ -236,12 +267,18 @@ io.on('connection', (socket) => {
     
     // Rời khỏi room video call
     socket.leave(roomId);
-    console.log(`${socket.role} ${socket.userId} left video call room ${roomId}`);
+    console.log('=== VIDEO CALL LEAVE ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`User ID: ${socket.userId}`);
+    console.log(`Role: ${socket.role}`);
+    console.log(`Socket ID: ${socket.id}`);
+    console.log('======================');
 
     // Thông báo cho người kia biết đã rời phòng
     socket.to(roomId).emit('participant_left', {
       userId: socket.userId,
-      role: socket.role
+      role: socket.role,
+      socketId: socket.id
     });
   });
 
@@ -249,11 +286,19 @@ io.on('connection', (socket) => {
     const { consultationId, offer } = data;
     const roomId = `video_call_${consultationId}`;
     
+    console.log('=== VIDEO CALL OFFER ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`From User ID: ${socket.userId}`);
+    console.log(`From Role: ${socket.role}`);
+    console.log(`From Socket ID: ${socket.id}`);
+    console.log('======================');
+    
     // Gửi offer đến người kia trong room
     socket.to(roomId).emit('video_call_offer', {
       offer,
       from: socket.userId,
-      role: socket.role
+      role: socket.role,
+      socketId: socket.id
     });
   });
 
@@ -261,11 +306,19 @@ io.on('connection', (socket) => {
     const { consultationId, answer } = data;
     const roomId = `video_call_${consultationId}`;
     
+    console.log('=== VIDEO CALL ANSWER ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`From User ID: ${socket.userId}`);
+    console.log(`From Role: ${socket.role}`);
+    console.log(`From Socket ID: ${socket.id}`);
+    console.log('=======================');
+    
     // Gửi answer đến người kia trong room
     socket.to(roomId).emit('video_call_answer', {
       answer,
       from: socket.userId,
-      role: socket.role
+      role: socket.role,
+      socketId: socket.id
     });
   });
 
@@ -273,11 +326,19 @@ io.on('connection', (socket) => {
     const { consultationId, candidate } = data;
     const roomId = `video_call_${consultationId}`;
     
+    console.log('=== VIDEO CALL ICE CANDIDATE ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`From User ID: ${socket.userId}`);
+    console.log(`From Role: ${socket.role}`);
+    console.log(`From Socket ID: ${socket.id}`);
+    console.log('=============================');
+    
     // Gửi ICE candidate đến người kia trong room
     socket.to(roomId).emit('video_call_ice_candidate', {
       candidate,
       from: socket.userId,
-      role: socket.role
+      role: socket.role,
+      socketId: socket.id
     });
   });
 

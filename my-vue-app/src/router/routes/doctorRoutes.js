@@ -1,3 +1,5 @@
+import VideoCall from '@/components/VideoCall.vue'
+
 // Định tuyến dành cho bác sĩ với lazy loading
 export default [
   {
@@ -66,5 +68,18 @@ export default [
         component: () => import('@/views/DoctorViews/Notifications.vue') // Lazy load
       }
     ]
+  },
+  {
+    path: '/video-call',
+    name: 'doctor-video-call',
+    component: () => import('@/components/VideoCall.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresDoctor: true
+    },
+    props: (route) => ({
+      consultationId: route.query.consultationId,
+      isDoctor: route.query.isDoctor === 'true'
+    })
   }
 ];
