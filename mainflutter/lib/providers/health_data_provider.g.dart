@@ -12,12 +12,15 @@ String _$healthDataNotifierHash() =>
 /// See also [HealthDataNotifier].
 @ProviderFor(HealthDataNotifier)
 final healthDataNotifierProvider = AutoDisposeAsyncNotifierProvider<
-    HealthDataNotifier, List<HealthData>>.internal(
+  HealthDataNotifier,
+  List<HealthData>
+>.internal(
   HealthDataNotifier.new,
   name: r'healthDataNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$healthDataNotifierHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$healthDataNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

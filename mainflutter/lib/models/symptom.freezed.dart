@@ -12,7 +12,8 @@ part of 'symptom.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Symptom _$SymptomFromJson(Map<String, dynamic> json) {
   return _Symptom.fromJson(json);
@@ -43,15 +44,16 @@ abstract class $SymptomCopyWith<$Res> {
   factory $SymptomCopyWith(Symptom value, $Res Function(Symptom) then) =
       _$SymptomCopyWithImpl<$Res, Symptom>;
   @useResult
-  $Res call(
-      {String? id,
-      String? userId,
-      String name,
-      String severity,
-      DateTime startDate,
-      String? notes,
-      DateTime? createdAt,
-      DateTime? updatedAt});
+  $Res call({
+    String? id,
+    String? userId,
+    String name,
+    String severity,
+    DateTime startDate,
+    String? notes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  });
 }
 
 /// @nodoc
@@ -78,59 +80,72 @@ class _$SymptomCopyWithImpl<$Res, $Val extends Symptom>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      severity: null == severity
-          ? _value.severity
-          : severity // ignore: cast_nullable_to_non_nullable
-              as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                freezed == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            userId:
+                freezed == userId
+                    ? _value.userId
+                    : userId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            name:
+                null == name
+                    ? _value.name
+                    : name // ignore: cast_nullable_to_non_nullable
+                        as String,
+            severity:
+                null == severity
+                    ? _value.severity
+                    : severity // ignore: cast_nullable_to_non_nullable
+                        as String,
+            startDate:
+                null == startDate
+                    ? _value.startDate
+                    : startDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            createdAt:
+                freezed == createdAt
+                    ? _value.createdAt
+                    : createdAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            updatedAt:
+                freezed == updatedAt
+                    ? _value.updatedAt
+                    : updatedAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$SymptomImplCopyWith<$Res> implements $SymptomCopyWith<$Res> {
   factory _$$SymptomImplCopyWith(
-          _$SymptomImpl value, $Res Function(_$SymptomImpl) then) =
-      __$$SymptomImplCopyWithImpl<$Res>;
+    _$SymptomImpl value,
+    $Res Function(_$SymptomImpl) then,
+  ) = __$$SymptomImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String? id,
-      String? userId,
-      String name,
-      String severity,
-      DateTime startDate,
-      String? notes,
-      DateTime? createdAt,
-      DateTime? updatedAt});
+  $Res call({
+    String? id,
+    String? userId,
+    String name,
+    String severity,
+    DateTime startDate,
+    String? notes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  });
 }
 
 /// @nodoc
@@ -138,8 +153,9 @@ class __$$SymptomImplCopyWithImpl<$Res>
     extends _$SymptomCopyWithImpl<$Res, _$SymptomImpl>
     implements _$$SymptomImplCopyWith<$Res> {
   __$$SymptomImplCopyWithImpl(
-      _$SymptomImpl _value, $Res Function(_$SymptomImpl) _then)
-      : super(_value, _then);
+    _$SymptomImpl _value,
+    $Res Function(_$SymptomImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Symptom
   /// with the given fields replaced by the non-null parameter values.
@@ -155,55 +171,66 @@ class __$$SymptomImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$SymptomImpl(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      severity: null == severity
-          ? _value.severity
-          : severity // ignore: cast_nullable_to_non_nullable
-              as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ));
+    return _then(
+      _$SymptomImpl(
+        id:
+            freezed == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        userId:
+            freezed == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        name:
+            null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                    as String,
+        severity:
+            null == severity
+                ? _value.severity
+                : severity // ignore: cast_nullable_to_non_nullable
+                    as String,
+        startDate:
+            null == startDate
+                ? _value.startDate
+                : startDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        createdAt:
+            freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        updatedAt:
+            freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SymptomImpl with DiagnosticableTreeMixin implements _Symptom {
-  const _$SymptomImpl(
-      {this.id,
-      this.userId,
-      required this.name,
-      required this.severity,
-      required this.startDate,
-      this.notes,
-      this.createdAt,
-      this.updatedAt});
+  const _$SymptomImpl({
+    this.id,
+    this.userId,
+    required this.name,
+    required this.severity,
+    required this.startDate,
+    this.notes,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   factory _$SymptomImpl.fromJson(Map<String, dynamic> json) =>
       _$$SymptomImplFromJson(json);
@@ -266,8 +293,17 @@ class _$SymptomImpl with DiagnosticableTreeMixin implements _Symptom {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, name, severity,
-      startDate, notes, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    userId,
+    name,
+    severity,
+    startDate,
+    notes,
+    createdAt,
+    updatedAt,
+  );
 
   /// Create a copy of Symptom
   /// with the given fields replaced by the non-null parameter values.
@@ -279,22 +315,21 @@ class _$SymptomImpl with DiagnosticableTreeMixin implements _Symptom {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SymptomImplToJson(
-      this,
-    );
+    return _$$SymptomImplToJson(this);
   }
 }
 
 abstract class _Symptom implements Symptom {
-  const factory _Symptom(
-      {final String? id,
-      final String? userId,
-      required final String name,
-      required final String severity,
-      required final DateTime startDate,
-      final String? notes,
-      final DateTime? createdAt,
-      final DateTime? updatedAt}) = _$SymptomImpl;
+  const factory _Symptom({
+    final String? id,
+    final String? userId,
+    required final String name,
+    required final String severity,
+    required final DateTime startDate,
+    final String? notes,
+    final DateTime? createdAt,
+    final DateTime? updatedAt,
+  }) = _$SymptomImpl;
 
   factory _Symptom.fromJson(Map<String, dynamic> json) = _$SymptomImpl.fromJson;
 

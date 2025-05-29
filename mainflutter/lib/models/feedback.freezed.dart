@@ -12,7 +12,8 @@ part of 'feedback.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Feedback _$FeedbackFromJson(Map<String, dynamic> json) {
   return _Feedback.fromJson(json);
@@ -49,20 +50,21 @@ abstract class $FeedbackCopyWith<$Res> {
   factory $FeedbackCopyWith(Feedback value, $Res Function(Feedback) then) =
       _$FeedbackCopyWithImpl<$Res, Feedback>;
   @useResult
-  $Res call(
-      {String? id,
-      double rating,
-      String service,
-      String title,
-      String content,
-      String? pros,
-      String? cons,
-      String? suggestions,
-      String? email,
-      String? phone,
-      List<String>? images,
-      String? userId,
-      DateTime? createdAt});
+  $Res call({
+    String? id,
+    double rating,
+    String service,
+    String title,
+    String content,
+    String? pros,
+    String? cons,
+    String? suggestions,
+    String? email,
+    String? phone,
+    List<String>? images,
+    String? userId,
+    DateTime? createdAt,
+  });
 }
 
 /// @nodoc
@@ -94,60 +96,76 @@ class _$FeedbackCopyWithImpl<$Res, $Val extends Feedback>
     Object? userId = freezed,
     Object? createdAt = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      rating: null == rating
-          ? _value.rating
-          : rating // ignore: cast_nullable_to_non_nullable
-              as double,
-      service: null == service
-          ? _value.service
-          : service // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
-          ? _value.content
-          : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      pros: freezed == pros
-          ? _value.pros
-          : pros // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cons: freezed == cons
-          ? _value.cons
-          : cons // ignore: cast_nullable_to_non_nullable
-              as String?,
-      suggestions: freezed == suggestions
-          ? _value.suggestions
-          : suggestions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      images: freezed == images
-          ? _value.images
-          : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                freezed == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            rating:
+                null == rating
+                    ? _value.rating
+                    : rating // ignore: cast_nullable_to_non_nullable
+                        as double,
+            service:
+                null == service
+                    ? _value.service
+                    : service // ignore: cast_nullable_to_non_nullable
+                        as String,
+            title:
+                null == title
+                    ? _value.title
+                    : title // ignore: cast_nullable_to_non_nullable
+                        as String,
+            content:
+                null == content
+                    ? _value.content
+                    : content // ignore: cast_nullable_to_non_nullable
+                        as String,
+            pros:
+                freezed == pros
+                    ? _value.pros
+                    : pros // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            cons:
+                freezed == cons
+                    ? _value.cons
+                    : cons // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            suggestions:
+                freezed == suggestions
+                    ? _value.suggestions
+                    : suggestions // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            email:
+                freezed == email
+                    ? _value.email
+                    : email // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            phone:
+                freezed == phone
+                    ? _value.phone
+                    : phone // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            images:
+                freezed == images
+                    ? _value.images
+                    : images // ignore: cast_nullable_to_non_nullable
+                        as List<String>?,
+            userId:
+                freezed == userId
+                    ? _value.userId
+                    : userId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            createdAt:
+                freezed == createdAt
+                    ? _value.createdAt
+                    : createdAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -155,24 +173,26 @@ class _$FeedbackCopyWithImpl<$Res, $Val extends Feedback>
 abstract class _$$FeedbackImplCopyWith<$Res>
     implements $FeedbackCopyWith<$Res> {
   factory _$$FeedbackImplCopyWith(
-          _$FeedbackImpl value, $Res Function(_$FeedbackImpl) then) =
-      __$$FeedbackImplCopyWithImpl<$Res>;
+    _$FeedbackImpl value,
+    $Res Function(_$FeedbackImpl) then,
+  ) = __$$FeedbackImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String? id,
-      double rating,
-      String service,
-      String title,
-      String content,
-      String? pros,
-      String? cons,
-      String? suggestions,
-      String? email,
-      String? phone,
-      List<String>? images,
-      String? userId,
-      DateTime? createdAt});
+  $Res call({
+    String? id,
+    double rating,
+    String service,
+    String title,
+    String content,
+    String? pros,
+    String? cons,
+    String? suggestions,
+    String? email,
+    String? phone,
+    List<String>? images,
+    String? userId,
+    DateTime? createdAt,
+  });
 }
 
 /// @nodoc
@@ -180,8 +200,9 @@ class __$$FeedbackImplCopyWithImpl<$Res>
     extends _$FeedbackCopyWithImpl<$Res, _$FeedbackImpl>
     implements _$$FeedbackImplCopyWith<$Res> {
   __$$FeedbackImplCopyWithImpl(
-      _$FeedbackImpl _value, $Res Function(_$FeedbackImpl) _then)
-      : super(_value, _then);
+    _$FeedbackImpl _value,
+    $Res Function(_$FeedbackImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Feedback
   /// with the given fields replaced by the non-null parameter values.
@@ -202,81 +223,96 @@ class __$$FeedbackImplCopyWithImpl<$Res>
     Object? userId = freezed,
     Object? createdAt = freezed,
   }) {
-    return _then(_$FeedbackImpl(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
-      rating: null == rating
-          ? _value.rating
-          : rating // ignore: cast_nullable_to_non_nullable
-              as double,
-      service: null == service
-          ? _value.service
-          : service // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
-          ? _value.content
-          : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      pros: freezed == pros
-          ? _value.pros
-          : pros // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cons: freezed == cons
-          ? _value.cons
-          : cons // ignore: cast_nullable_to_non_nullable
-              as String?,
-      suggestions: freezed == suggestions
-          ? _value.suggestions
-          : suggestions // ignore: cast_nullable_to_non_nullable
-              as String?,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      images: freezed == images
-          ? _value._images
-          : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ));
+    return _then(
+      _$FeedbackImpl(
+        id:
+            freezed == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        rating:
+            null == rating
+                ? _value.rating
+                : rating // ignore: cast_nullable_to_non_nullable
+                    as double,
+        service:
+            null == service
+                ? _value.service
+                : service // ignore: cast_nullable_to_non_nullable
+                    as String,
+        title:
+            null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                    as String,
+        content:
+            null == content
+                ? _value.content
+                : content // ignore: cast_nullable_to_non_nullable
+                    as String,
+        pros:
+            freezed == pros
+                ? _value.pros
+                : pros // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        cons:
+            freezed == cons
+                ? _value.cons
+                : cons // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        suggestions:
+            freezed == suggestions
+                ? _value.suggestions
+                : suggestions // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        email:
+            freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        phone:
+            freezed == phone
+                ? _value.phone
+                : phone // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        images:
+            freezed == images
+                ? _value._images
+                : images // ignore: cast_nullable_to_non_nullable
+                    as List<String>?,
+        userId:
+            freezed == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        createdAt:
+            freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$FeedbackImpl implements _Feedback {
-  const _$FeedbackImpl(
-      {this.id,
-      required this.rating,
-      required this.service,
-      required this.title,
-      required this.content,
-      this.pros,
-      this.cons,
-      this.suggestions,
-      this.email,
-      this.phone,
-      final List<String>? images,
-      this.userId,
-      this.createdAt})
-      : _images = images;
+  const _$FeedbackImpl({
+    this.id,
+    required this.rating,
+    required this.service,
+    required this.title,
+    required this.content,
+    this.pros,
+    this.cons,
+    this.suggestions,
+    this.email,
+    this.phone,
+    final List<String>? images,
+    this.userId,
+    this.createdAt,
+  }) : _images = images;
 
   factory _$FeedbackImpl.fromJson(Map<String, dynamic> json) =>
       _$$FeedbackImplFromJson(json);
@@ -346,20 +382,21 @@ class _$FeedbackImpl implements _Feedback {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      rating,
-      service,
-      title,
-      content,
-      pros,
-      cons,
-      suggestions,
-      email,
-      phone,
-      const DeepCollectionEquality().hash(_images),
-      userId,
-      createdAt);
+    runtimeType,
+    id,
+    rating,
+    service,
+    title,
+    content,
+    pros,
+    cons,
+    suggestions,
+    email,
+    phone,
+    const DeepCollectionEquality().hash(_images),
+    userId,
+    createdAt,
+  );
 
   /// Create a copy of Feedback
   /// with the given fields replaced by the non-null parameter values.
@@ -371,27 +408,26 @@ class _$FeedbackImpl implements _Feedback {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FeedbackImplToJson(
-      this,
-    );
+    return _$$FeedbackImplToJson(this);
   }
 }
 
 abstract class _Feedback implements Feedback {
-  const factory _Feedback(
-      {final String? id,
-      required final double rating,
-      required final String service,
-      required final String title,
-      required final String content,
-      final String? pros,
-      final String? cons,
-      final String? suggestions,
-      final String? email,
-      final String? phone,
-      final List<String>? images,
-      final String? userId,
-      final DateTime? createdAt}) = _$FeedbackImpl;
+  const factory _Feedback({
+    final String? id,
+    required final double rating,
+    required final String service,
+    required final String title,
+    required final String content,
+    final String? pros,
+    final String? cons,
+    final String? suggestions,
+    final String? email,
+    final String? phone,
+    final List<String>? images,
+    final String? userId,
+    final DateTime? createdAt,
+  }) = _$FeedbackImpl;
 
   factory _Feedback.fromJson(Map<String, dynamic> json) =
       _$FeedbackImpl.fromJson;

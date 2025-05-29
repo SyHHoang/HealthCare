@@ -7,24 +7,25 @@ part of 'doctor.dart';
 // **************************************************************************
 
 _$DoctorImpl _$$DoctorImplFromJson(Map<String, dynamic> json) => _$DoctorImpl(
-      id: json['_id'] as String,
-      fullName: json['fullName'] as String,
-      specialty: json['specialty'] as String?,
-      otherSpecialties: json['otherSpecialties'] as String?,
-      education: json['education'] as String?,
-      email: json['email'] as String?,
-      graduationYear: (json['graduationYear'] as num?)?.toInt(),
-      licenseNumber: json['licenseNumber'] as String?,
-      experience: (json['experience'] as num?)?.toInt(),
-      currentWorkplace: json['currentWorkplace'] as String?,
-      phone: json['phone'] as String?,
-      address: json['address'] as String?,
-      verifiID: json['verifiID'] as String?,
-      status: json['status'] as String? ?? 'pending',
-      isVerified: json['isVerified'] as bool? ?? false,
-      avatar: json['avatar'] as String?,
-      schedule: json['schedule'] as Map<String, dynamic>?,
-    );
+  id: json['_id'] as String,
+  fullName: json['fullName'] as String,
+  specialty: json['specialty'] as String?,
+  otherSpecialties: json['otherSpecialties'] as String?,
+  education: json['education'] as String?,
+  email: json['email'] as String?,
+  graduationYear: (json['graduationYear'] as num?)?.toInt(),
+  licenseNumber: json['licenseNumber'] as String?,
+  experience: (json['experience'] as num?)?.toInt(),
+  currentWorkplace: json['currentWorkplace'] as String?,
+  phone: json['phone'] as String?,
+  address: json['address'] as String?,
+  verifiID: json['verifiID'] as String?,
+  status: json['status'] as String? ?? 'pending',
+  isVerified: json['isVerified'] as bool? ?? false,
+  avatar: json['avatar'] as String?,
+  schedule: json['schedule'] as Map<String, dynamic>?,
+  role: json['role'] as String? ?? 'Doctor',
+);
 
 Map<String, dynamic> _$$DoctorImplToJson(_$DoctorImpl instance) =>
     <String, dynamic>{
@@ -45,4 +46,5 @@ Map<String, dynamic> _$$DoctorImplToJson(_$DoctorImpl instance) =>
       'isVerified': instance.isVerified,
       'avatar': instance.avatar,
       'schedule': instance.schedule,
+      'role': instance.role,
     };

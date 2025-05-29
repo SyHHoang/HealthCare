@@ -11,12 +11,15 @@ String _$treatmentNotifierHash() => r'952bd8219daeaef10761d4572863c65f408d67ac';
 /// See also [TreatmentNotifier].
 @ProviderFor(TreatmentNotifier)
 final treatmentNotifierProvider = AutoDisposeAsyncNotifierProvider<
-    TreatmentNotifier, List<Treatment>>.internal(
+  TreatmentNotifier,
+  List<Treatment>
+>.internal(
   TreatmentNotifier.new,
   name: r'treatmentNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$treatmentNotifierHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$treatmentNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

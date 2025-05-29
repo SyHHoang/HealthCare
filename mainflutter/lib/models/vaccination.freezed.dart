@@ -12,7 +12,8 @@ part of 'vaccination.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 SideEffect _$SideEffectFromJson(Map<String, dynamic> json) {
   return _SideEffect.fromJson(json);
@@ -37,8 +38,9 @@ mixin _$SideEffect {
 /// @nodoc
 abstract class $SideEffectCopyWith<$Res> {
   factory $SideEffectCopyWith(
-          SideEffect value, $Res Function(SideEffect) then) =
-      _$SideEffectCopyWithImpl<$Res, SideEffect>;
+    SideEffect value,
+    $Res Function(SideEffect) then,
+  ) = _$SideEffectCopyWithImpl<$Res, SideEffect>;
   @useResult
   $Res call({String description, String severity, String? duration});
 }
@@ -62,20 +64,26 @@ class _$SideEffectCopyWithImpl<$Res, $Val extends SideEffect>
     Object? severity = null,
     Object? duration = freezed,
   }) {
-    return _then(_value.copyWith(
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      severity: null == severity
-          ? _value.severity
-          : severity // ignore: cast_nullable_to_non_nullable
-              as String,
-      duration: freezed == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            description:
+                null == description
+                    ? _value.description
+                    : description // ignore: cast_nullable_to_non_nullable
+                        as String,
+            severity:
+                null == severity
+                    ? _value.severity
+                    : severity // ignore: cast_nullable_to_non_nullable
+                        as String,
+            duration:
+                freezed == duration
+                    ? _value.duration
+                    : duration // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -83,8 +91,9 @@ class _$SideEffectCopyWithImpl<$Res, $Val extends SideEffect>
 abstract class _$$SideEffectImplCopyWith<$Res>
     implements $SideEffectCopyWith<$Res> {
   factory _$$SideEffectImplCopyWith(
-          _$SideEffectImpl value, $Res Function(_$SideEffectImpl) then) =
-      __$$SideEffectImplCopyWithImpl<$Res>;
+    _$SideEffectImpl value,
+    $Res Function(_$SideEffectImpl) then,
+  ) = __$$SideEffectImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String description, String severity, String? duration});
@@ -95,8 +104,9 @@ class __$$SideEffectImplCopyWithImpl<$Res>
     extends _$SideEffectCopyWithImpl<$Res, _$SideEffectImpl>
     implements _$$SideEffectImplCopyWith<$Res> {
   __$$SideEffectImplCopyWithImpl(
-      _$SideEffectImpl _value, $Res Function(_$SideEffectImpl) _then)
-      : super(_value, _then);
+    _$SideEffectImpl _value,
+    $Res Function(_$SideEffectImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of SideEffect
   /// with the given fields replaced by the non-null parameter values.
@@ -107,28 +117,36 @@ class __$$SideEffectImplCopyWithImpl<$Res>
     Object? severity = null,
     Object? duration = freezed,
   }) {
-    return _then(_$SideEffectImpl(
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      severity: null == severity
-          ? _value.severity
-          : severity // ignore: cast_nullable_to_non_nullable
-              as String,
-      duration: freezed == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$SideEffectImpl(
+        description:
+            null == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                    as String,
+        severity:
+            null == severity
+                ? _value.severity
+                : severity // ignore: cast_nullable_to_non_nullable
+                    as String,
+        duration:
+            freezed == duration
+                ? _value.duration
+                : duration // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SideEffectImpl implements _SideEffect {
-  const _$SideEffectImpl(
-      {required this.description, required this.severity, this.duration});
+  const _$SideEffectImpl({
+    required this.description,
+    required this.severity,
+    this.duration,
+  });
 
   factory _$SideEffectImpl.fromJson(Map<String, dynamic> json) =>
       _$$SideEffectImplFromJson(json);
@@ -172,17 +190,16 @@ class _$SideEffectImpl implements _SideEffect {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SideEffectImplToJson(
-      this,
-    );
+    return _$$SideEffectImplToJson(this);
   }
 }
 
 abstract class _SideEffect implements SideEffect {
-  const factory _SideEffect(
-      {required final String description,
-      required final String severity,
-      final String? duration}) = _$SideEffectImpl;
+  const factory _SideEffect({
+    required final String description,
+    required final String severity,
+    final String? duration,
+  }) = _$SideEffectImpl;
 
   factory _SideEffect.fromJson(Map<String, dynamic> json) =
       _$SideEffectImpl.fromJson;
@@ -235,22 +252,24 @@ mixin _$Vaccination {
 /// @nodoc
 abstract class $VaccinationCopyWith<$Res> {
   factory $VaccinationCopyWith(
-          Vaccination value, $Res Function(Vaccination) then) =
-      _$VaccinationCopyWithImpl<$Res, Vaccination>;
+    Vaccination value,
+    $Res Function(Vaccination) then,
+  ) = _$VaccinationCopyWithImpl<$Res, Vaccination>;
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String vaccineName,
-      String vaccineType,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime? dateAdministered,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime? nextDoseDate,
-      String? batchNumber,
-      String? manufacturer,
-      List<SideEffect>? sideEffects,
-      String? notes,
-      String? status});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String vaccineName,
+    String vaccineType,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime? dateAdministered,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime? nextDoseDate,
+    String? batchNumber,
+    String? manufacturer,
+    List<SideEffect>? sideEffects,
+    String? notes,
+    String? status,
+  });
 }
 
 /// @nodoc
@@ -279,48 +298,61 @@ class _$VaccinationCopyWithImpl<$Res, $Val extends Vaccination>
     Object? notes = freezed,
     Object? status = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      vaccineName: null == vaccineName
-          ? _value.vaccineName
-          : vaccineName // ignore: cast_nullable_to_non_nullable
-              as String,
-      vaccineType: null == vaccineType
-          ? _value.vaccineType
-          : vaccineType // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateAdministered: freezed == dateAdministered
-          ? _value.dateAdministered
-          : dateAdministered // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      nextDoseDate: freezed == nextDoseDate
-          ? _value.nextDoseDate
-          : nextDoseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      batchNumber: freezed == batchNumber
-          ? _value.batchNumber
-          : batchNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      manufacturer: freezed == manufacturer
-          ? _value.manufacturer
-          : manufacturer // ignore: cast_nullable_to_non_nullable
-              as String?,
-      sideEffects: freezed == sideEffects
-          ? _value.sideEffects
-          : sideEffects // ignore: cast_nullable_to_non_nullable
-              as List<SideEffect>?,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-      status: freezed == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            vaccineName:
+                null == vaccineName
+                    ? _value.vaccineName
+                    : vaccineName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            vaccineType:
+                null == vaccineType
+                    ? _value.vaccineType
+                    : vaccineType // ignore: cast_nullable_to_non_nullable
+                        as String,
+            dateAdministered:
+                freezed == dateAdministered
+                    ? _value.dateAdministered
+                    : dateAdministered // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            nextDoseDate:
+                freezed == nextDoseDate
+                    ? _value.nextDoseDate
+                    : nextDoseDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            batchNumber:
+                freezed == batchNumber
+                    ? _value.batchNumber
+                    : batchNumber // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            manufacturer:
+                freezed == manufacturer
+                    ? _value.manufacturer
+                    : manufacturer // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            sideEffects:
+                freezed == sideEffects
+                    ? _value.sideEffects
+                    : sideEffects // ignore: cast_nullable_to_non_nullable
+                        as List<SideEffect>?,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            status:
+                freezed == status
+                    ? _value.status
+                    : status // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -328,23 +360,25 @@ class _$VaccinationCopyWithImpl<$Res, $Val extends Vaccination>
 abstract class _$$VaccinationImplCopyWith<$Res>
     implements $VaccinationCopyWith<$Res> {
   factory _$$VaccinationImplCopyWith(
-          _$VaccinationImpl value, $Res Function(_$VaccinationImpl) then) =
-      __$$VaccinationImplCopyWithImpl<$Res>;
+    _$VaccinationImpl value,
+    $Res Function(_$VaccinationImpl) then,
+  ) = __$$VaccinationImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String vaccineName,
-      String vaccineType,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime? dateAdministered,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime? nextDoseDate,
-      String? batchNumber,
-      String? manufacturer,
-      List<SideEffect>? sideEffects,
-      String? notes,
-      String? status});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String vaccineName,
+    String vaccineType,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime? dateAdministered,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime? nextDoseDate,
+    String? batchNumber,
+    String? manufacturer,
+    List<SideEffect>? sideEffects,
+    String? notes,
+    String? status,
+  });
 }
 
 /// @nodoc
@@ -352,8 +386,9 @@ class __$$VaccinationImplCopyWithImpl<$Res>
     extends _$VaccinationCopyWithImpl<$Res, _$VaccinationImpl>
     implements _$$VaccinationImplCopyWith<$Res> {
   __$$VaccinationImplCopyWithImpl(
-      _$VaccinationImpl _value, $Res Function(_$VaccinationImpl) _then)
-      : super(_value, _then);
+    _$VaccinationImpl _value,
+    $Res Function(_$VaccinationImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Vaccination
   /// with the given fields replaced by the non-null parameter values.
@@ -371,68 +406,80 @@ class __$$VaccinationImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? status = freezed,
   }) {
-    return _then(_$VaccinationImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      vaccineName: null == vaccineName
-          ? _value.vaccineName
-          : vaccineName // ignore: cast_nullable_to_non_nullable
-              as String,
-      vaccineType: null == vaccineType
-          ? _value.vaccineType
-          : vaccineType // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateAdministered: freezed == dateAdministered
-          ? _value.dateAdministered
-          : dateAdministered // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      nextDoseDate: freezed == nextDoseDate
-          ? _value.nextDoseDate
-          : nextDoseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      batchNumber: freezed == batchNumber
-          ? _value.batchNumber
-          : batchNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      manufacturer: freezed == manufacturer
-          ? _value.manufacturer
-          : manufacturer // ignore: cast_nullable_to_non_nullable
-              as String?,
-      sideEffects: freezed == sideEffects
-          ? _value._sideEffects
-          : sideEffects // ignore: cast_nullable_to_non_nullable
-              as List<SideEffect>?,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-      status: freezed == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$VaccinationImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        vaccineName:
+            null == vaccineName
+                ? _value.vaccineName
+                : vaccineName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        vaccineType:
+            null == vaccineType
+                ? _value.vaccineType
+                : vaccineType // ignore: cast_nullable_to_non_nullable
+                    as String,
+        dateAdministered:
+            freezed == dateAdministered
+                ? _value.dateAdministered
+                : dateAdministered // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        nextDoseDate:
+            freezed == nextDoseDate
+                ? _value.nextDoseDate
+                : nextDoseDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        batchNumber:
+            freezed == batchNumber
+                ? _value.batchNumber
+                : batchNumber // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        manufacturer:
+            freezed == manufacturer
+                ? _value.manufacturer
+                : manufacturer // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        sideEffects:
+            freezed == sideEffects
+                ? _value._sideEffects
+                : sideEffects // ignore: cast_nullable_to_non_nullable
+                    as List<SideEffect>?,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        status:
+            freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$VaccinationImpl implements _Vaccination {
-  const _$VaccinationImpl(
-      {@JsonKey(name: '_id') required this.id,
-      required this.vaccineName,
-      required this.vaccineType,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      this.dateAdministered,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      this.nextDoseDate,
-      this.batchNumber,
-      this.manufacturer,
-      final List<SideEffect>? sideEffects,
-      this.notes,
-      this.status})
-      : _sideEffects = sideEffects;
+  const _$VaccinationImpl({
+    @JsonKey(name: '_id') required this.id,
+    required this.vaccineName,
+    required this.vaccineType,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    this.dateAdministered,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    this.nextDoseDate,
+    this.batchNumber,
+    this.manufacturer,
+    final List<SideEffect>? sideEffects,
+    this.notes,
+    this.status,
+  }) : _sideEffects = sideEffects;
 
   factory _$VaccinationImpl.fromJson(Map<String, dynamic> json) =>
       _$$VaccinationImplFromJson(json);
@@ -492,8 +539,10 @@ class _$VaccinationImpl implements _Vaccination {
                 other.batchNumber == batchNumber) &&
             (identical(other.manufacturer, manufacturer) ||
                 other.manufacturer == manufacturer) &&
-            const DeepCollectionEquality()
-                .equals(other._sideEffects, _sideEffects) &&
+            const DeepCollectionEquality().equals(
+              other._sideEffects,
+              _sideEffects,
+            ) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.status, status) || other.status == status));
   }
@@ -501,17 +550,18 @@ class _$VaccinationImpl implements _Vaccination {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      vaccineName,
-      vaccineType,
-      dateAdministered,
-      nextDoseDate,
-      batchNumber,
-      manufacturer,
-      const DeepCollectionEquality().hash(_sideEffects),
-      notes,
-      status);
+    runtimeType,
+    id,
+    vaccineName,
+    vaccineType,
+    dateAdministered,
+    nextDoseDate,
+    batchNumber,
+    manufacturer,
+    const DeepCollectionEquality().hash(_sideEffects),
+    notes,
+    status,
+  );
 
   /// Create a copy of Vaccination
   /// with the given fields replaced by the non-null parameter values.
@@ -523,26 +573,25 @@ class _$VaccinationImpl implements _Vaccination {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$VaccinationImplToJson(
-      this,
-    );
+    return _$$VaccinationImplToJson(this);
   }
 }
 
 abstract class _Vaccination implements Vaccination {
-  const factory _Vaccination(
-      {@JsonKey(name: '_id') required final String id,
-      required final String vaccineName,
-      required final String vaccineType,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      final DateTime? dateAdministered,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      final DateTime? nextDoseDate,
-      final String? batchNumber,
-      final String? manufacturer,
-      final List<SideEffect>? sideEffects,
-      final String? notes,
-      final String? status}) = _$VaccinationImpl;
+  const factory _Vaccination({
+    @JsonKey(name: '_id') required final String id,
+    required final String vaccineName,
+    required final String vaccineType,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    final DateTime? dateAdministered,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    final DateTime? nextDoseDate,
+    final String? batchNumber,
+    final String? manufacturer,
+    final List<SideEffect>? sideEffects,
+    final String? notes,
+    final String? status,
+  }) = _$VaccinationImpl;
 
   factory _Vaccination.fromJson(Map<String, dynamic> json) =
       _$VaccinationImpl.fromJson;

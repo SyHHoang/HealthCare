@@ -28,13 +28,15 @@ String _$drugLoadedHash() => r'5203211c0f02251f6feccc2f636e4f8f6945560c';
 @ProviderFor(DrugLoaded)
 final drugLoadedProvider =
     AutoDisposeNotifierProvider<DrugLoaded, bool>.internal(
-  DrugLoaded.new,
-  name: r'drugLoadedProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$drugLoadedHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      DrugLoaded.new,
+      name: r'drugLoadedProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$drugLoadedHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$DrugLoaded = AutoDisposeNotifier<bool>;
 String _$drugSearchHash() => r'9cd9d4ccb4e7fd00e23f3b772c1e56af8bd722c4';
@@ -43,13 +45,15 @@ String _$drugSearchHash() => r'9cd9d4ccb4e7fd00e23f3b772c1e56af8bd722c4';
 @ProviderFor(DrugSearch)
 final drugSearchProvider =
     AsyncNotifierProvider<DrugSearch, List<Drug>>.internal(
-  DrugSearch.new,
-  name: r'drugSearchProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$drugSearchHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      DrugSearch.new,
+      name: r'drugSearchProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$drugSearchHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$DrugSearch = AsyncNotifier<List<Drug>>;
 // ignore_for_file: type=lint

@@ -12,7 +12,8 @@ part of 'treatment.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Treatment _$TreatmentFromJson(Map<String, dynamic> json) {
   return _Treatment.fromJson(json);
@@ -49,20 +50,23 @@ abstract class $TreatmentCopyWith<$Res> {
   factory $TreatmentCopyWith(Treatment value, $Res Function(Treatment) then) =
       _$TreatmentCopyWithImpl<$Res, Treatment>;
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String diagnosis,
-      String treatmentPlan,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime startDate,
-      @JsonKey(
-          fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
-      DateTime? endDate,
-      String status,
-      List<Medication> medications,
-      List<Procedure> procedures,
-      FollowUp? followUp,
-      String? notes});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String diagnosis,
+    String treatmentPlan,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime startDate,
+    @JsonKey(
+      fromJson: _nullableDateTimeFromJson,
+      toJson: _nullableDateTimeToJson,
+    )
+    DateTime? endDate,
+    String status,
+    List<Medication> medications,
+    List<Procedure> procedures,
+    FollowUp? followUp,
+    String? notes,
+  });
 
   $FollowUpCopyWith<$Res>? get followUp;
 }
@@ -93,48 +97,61 @@ class _$TreatmentCopyWithImpl<$Res, $Val extends Treatment>
     Object? followUp = freezed,
     Object? notes = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      diagnosis: null == diagnosis
-          ? _value.diagnosis
-          : diagnosis // ignore: cast_nullable_to_non_nullable
-              as String,
-      treatmentPlan: null == treatmentPlan
-          ? _value.treatmentPlan
-          : treatmentPlan // ignore: cast_nullable_to_non_nullable
-              as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      endDate: freezed == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      medications: null == medications
-          ? _value.medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<Medication>,
-      procedures: null == procedures
-          ? _value.procedures
-          : procedures // ignore: cast_nullable_to_non_nullable
-              as List<Procedure>,
-      followUp: freezed == followUp
-          ? _value.followUp
-          : followUp // ignore: cast_nullable_to_non_nullable
-              as FollowUp?,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            diagnosis:
+                null == diagnosis
+                    ? _value.diagnosis
+                    : diagnosis // ignore: cast_nullable_to_non_nullable
+                        as String,
+            treatmentPlan:
+                null == treatmentPlan
+                    ? _value.treatmentPlan
+                    : treatmentPlan // ignore: cast_nullable_to_non_nullable
+                        as String,
+            startDate:
+                null == startDate
+                    ? _value.startDate
+                    : startDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime,
+            endDate:
+                freezed == endDate
+                    ? _value.endDate
+                    : endDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            status:
+                null == status
+                    ? _value.status
+                    : status // ignore: cast_nullable_to_non_nullable
+                        as String,
+            medications:
+                null == medications
+                    ? _value.medications
+                    : medications // ignore: cast_nullable_to_non_nullable
+                        as List<Medication>,
+            procedures:
+                null == procedures
+                    ? _value.procedures
+                    : procedures // ignore: cast_nullable_to_non_nullable
+                        as List<Procedure>,
+            followUp:
+                freezed == followUp
+                    ? _value.followUp
+                    : followUp // ignore: cast_nullable_to_non_nullable
+                        as FollowUp?,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 
   /// Create a copy of Treatment
@@ -156,24 +173,28 @@ class _$TreatmentCopyWithImpl<$Res, $Val extends Treatment>
 abstract class _$$TreatmentImplCopyWith<$Res>
     implements $TreatmentCopyWith<$Res> {
   factory _$$TreatmentImplCopyWith(
-          _$TreatmentImpl value, $Res Function(_$TreatmentImpl) then) =
-      __$$TreatmentImplCopyWithImpl<$Res>;
+    _$TreatmentImpl value,
+    $Res Function(_$TreatmentImpl) then,
+  ) = __$$TreatmentImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String diagnosis,
-      String treatmentPlan,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime startDate,
-      @JsonKey(
-          fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
-      DateTime? endDate,
-      String status,
-      List<Medication> medications,
-      List<Procedure> procedures,
-      FollowUp? followUp,
-      String? notes});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String diagnosis,
+    String treatmentPlan,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime startDate,
+    @JsonKey(
+      fromJson: _nullableDateTimeFromJson,
+      toJson: _nullableDateTimeToJson,
+    )
+    DateTime? endDate,
+    String status,
+    List<Medication> medications,
+    List<Procedure> procedures,
+    FollowUp? followUp,
+    String? notes,
+  });
 
   @override
   $FollowUpCopyWith<$Res>? get followUp;
@@ -184,8 +205,9 @@ class __$$TreatmentImplCopyWithImpl<$Res>
     extends _$TreatmentCopyWithImpl<$Res, _$TreatmentImpl>
     implements _$$TreatmentImplCopyWith<$Res> {
   __$$TreatmentImplCopyWithImpl(
-      _$TreatmentImpl _value, $Res Function(_$TreatmentImpl) _then)
-      : super(_value, _then);
+    _$TreatmentImpl _value,
+    $Res Function(_$TreatmentImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Treatment
   /// with the given fields replaced by the non-null parameter values.
@@ -203,70 +225,84 @@ class __$$TreatmentImplCopyWithImpl<$Res>
     Object? followUp = freezed,
     Object? notes = freezed,
   }) {
-    return _then(_$TreatmentImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      diagnosis: null == diagnosis
-          ? _value.diagnosis
-          : diagnosis // ignore: cast_nullable_to_non_nullable
-              as String,
-      treatmentPlan: null == treatmentPlan
-          ? _value.treatmentPlan
-          : treatmentPlan // ignore: cast_nullable_to_non_nullable
-              as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      endDate: freezed == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      medications: null == medications
-          ? _value._medications
-          : medications // ignore: cast_nullable_to_non_nullable
-              as List<Medication>,
-      procedures: null == procedures
-          ? _value._procedures
-          : procedures // ignore: cast_nullable_to_non_nullable
-              as List<Procedure>,
-      followUp: freezed == followUp
-          ? _value.followUp
-          : followUp // ignore: cast_nullable_to_non_nullable
-              as FollowUp?,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$TreatmentImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        diagnosis:
+            null == diagnosis
+                ? _value.diagnosis
+                : diagnosis // ignore: cast_nullable_to_non_nullable
+                    as String,
+        treatmentPlan:
+            null == treatmentPlan
+                ? _value.treatmentPlan
+                : treatmentPlan // ignore: cast_nullable_to_non_nullable
+                    as String,
+        startDate:
+            null == startDate
+                ? _value.startDate
+                : startDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime,
+        endDate:
+            freezed == endDate
+                ? _value.endDate
+                : endDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        status:
+            null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                    as String,
+        medications:
+            null == medications
+                ? _value._medications
+                : medications // ignore: cast_nullable_to_non_nullable
+                    as List<Medication>,
+        procedures:
+            null == procedures
+                ? _value._procedures
+                : procedures // ignore: cast_nullable_to_non_nullable
+                    as List<Procedure>,
+        followUp:
+            freezed == followUp
+                ? _value.followUp
+                : followUp // ignore: cast_nullable_to_non_nullable
+                    as FollowUp?,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$TreatmentImpl with DiagnosticableTreeMixin implements _Treatment {
-  const _$TreatmentImpl(
-      {@JsonKey(name: '_id') required this.id,
-      required this.diagnosis,
-      required this.treatmentPlan,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required this.startDate,
-      @JsonKey(
-          fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
-      this.endDate,
-      required this.status,
-      final List<Medication> medications = const [],
-      final List<Procedure> procedures = const [],
-      this.followUp,
-      this.notes})
-      : _medications = medications,
-        _procedures = procedures;
+  const _$TreatmentImpl({
+    @JsonKey(name: '_id') required this.id,
+    required this.diagnosis,
+    required this.treatmentPlan,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required this.startDate,
+    @JsonKey(
+      fromJson: _nullableDateTimeFromJson,
+      toJson: _nullableDateTimeToJson,
+    )
+    this.endDate,
+    required this.status,
+    final List<Medication> medications = const [],
+    final List<Procedure> procedures = const [],
+    this.followUp,
+    this.notes,
+  }) : _medications = medications,
+       _procedures = procedures;
 
   factory _$TreatmentImpl.fromJson(Map<String, dynamic> json) =>
       _$$TreatmentImplFromJson(json);
@@ -345,10 +381,14 @@ class _$TreatmentImpl with DiagnosticableTreeMixin implements _Treatment {
                 other.startDate == startDate) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
             (identical(other.status, status) || other.status == status) &&
-            const DeepCollectionEquality()
-                .equals(other._medications, _medications) &&
-            const DeepCollectionEquality()
-                .equals(other._procedures, _procedures) &&
+            const DeepCollectionEquality().equals(
+              other._medications,
+              _medications,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._procedures,
+              _procedures,
+            ) &&
             (identical(other.followUp, followUp) ||
                 other.followUp == followUp) &&
             (identical(other.notes, notes) || other.notes == notes));
@@ -357,17 +397,18 @@ class _$TreatmentImpl with DiagnosticableTreeMixin implements _Treatment {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      diagnosis,
-      treatmentPlan,
-      startDate,
-      endDate,
-      status,
-      const DeepCollectionEquality().hash(_medications),
-      const DeepCollectionEquality().hash(_procedures),
-      followUp,
-      notes);
+    runtimeType,
+    id,
+    diagnosis,
+    treatmentPlan,
+    startDate,
+    endDate,
+    status,
+    const DeepCollectionEquality().hash(_medications),
+    const DeepCollectionEquality().hash(_procedures),
+    followUp,
+    notes,
+  );
 
   /// Create a copy of Treatment
   /// with the given fields replaced by the non-null parameter values.
@@ -379,27 +420,28 @@ class _$TreatmentImpl with DiagnosticableTreeMixin implements _Treatment {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TreatmentImplToJson(
-      this,
-    );
+    return _$$TreatmentImplToJson(this);
   }
 }
 
 abstract class _Treatment implements Treatment {
-  const factory _Treatment(
-      {@JsonKey(name: '_id') required final String id,
-      required final String diagnosis,
-      required final String treatmentPlan,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required final DateTime startDate,
-      @JsonKey(
-          fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
-      final DateTime? endDate,
-      required final String status,
-      final List<Medication> medications,
-      final List<Procedure> procedures,
-      final FollowUp? followUp,
-      final String? notes}) = _$TreatmentImpl;
+  const factory _Treatment({
+    @JsonKey(name: '_id') required final String id,
+    required final String diagnosis,
+    required final String treatmentPlan,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required final DateTime startDate,
+    @JsonKey(
+      fromJson: _nullableDateTimeFromJson,
+      toJson: _nullableDateTimeToJson,
+    )
+    final DateTime? endDate,
+    required final String status,
+    final List<Medication> medications,
+    final List<Procedure> procedures,
+    final FollowUp? followUp,
+    final String? notes,
+  }) = _$TreatmentImpl;
 
   factory _Treatment.fromJson(Map<String, dynamic> json) =
       _$TreatmentImpl.fromJson;
@@ -460,8 +502,9 @@ mixin _$Medication {
 /// @nodoc
 abstract class $MedicationCopyWith<$Res> {
   factory $MedicationCopyWith(
-          Medication value, $Res Function(Medication) then) =
-      _$MedicationCopyWithImpl<$Res, Medication>;
+    Medication value,
+    $Res Function(Medication) then,
+  ) = _$MedicationCopyWithImpl<$Res, Medication>;
   @useResult
   $Res call({String name, String dosage, String frequency, String duration});
 }
@@ -486,24 +529,31 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
     Object? frequency = null,
     Object? duration = null,
   }) {
-    return _then(_value.copyWith(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dosage: null == dosage
-          ? _value.dosage
-          : dosage // ignore: cast_nullable_to_non_nullable
-              as String,
-      frequency: null == frequency
-          ? _value.frequency
-          : frequency // ignore: cast_nullable_to_non_nullable
-              as String,
-      duration: null == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            name:
+                null == name
+                    ? _value.name
+                    : name // ignore: cast_nullable_to_non_nullable
+                        as String,
+            dosage:
+                null == dosage
+                    ? _value.dosage
+                    : dosage // ignore: cast_nullable_to_non_nullable
+                        as String,
+            frequency:
+                null == frequency
+                    ? _value.frequency
+                    : frequency // ignore: cast_nullable_to_non_nullable
+                        as String,
+            duration:
+                null == duration
+                    ? _value.duration
+                    : duration // ignore: cast_nullable_to_non_nullable
+                        as String,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -511,8 +561,9 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
 abstract class _$$MedicationImplCopyWith<$Res>
     implements $MedicationCopyWith<$Res> {
   factory _$$MedicationImplCopyWith(
-          _$MedicationImpl value, $Res Function(_$MedicationImpl) then) =
-      __$$MedicationImplCopyWithImpl<$Res>;
+    _$MedicationImpl value,
+    $Res Function(_$MedicationImpl) then,
+  ) = __$$MedicationImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String name, String dosage, String frequency, String duration});
@@ -523,8 +574,9 @@ class __$$MedicationImplCopyWithImpl<$Res>
     extends _$MedicationCopyWithImpl<$Res, _$MedicationImpl>
     implements _$$MedicationImplCopyWith<$Res> {
   __$$MedicationImplCopyWithImpl(
-      _$MedicationImpl _value, $Res Function(_$MedicationImpl) _then)
-      : super(_value, _then);
+    _$MedicationImpl _value,
+    $Res Function(_$MedicationImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Medication
   /// with the given fields replaced by the non-null parameter values.
@@ -536,35 +588,42 @@ class __$$MedicationImplCopyWithImpl<$Res>
     Object? frequency = null,
     Object? duration = null,
   }) {
-    return _then(_$MedicationImpl(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dosage: null == dosage
-          ? _value.dosage
-          : dosage // ignore: cast_nullable_to_non_nullable
-              as String,
-      frequency: null == frequency
-          ? _value.frequency
-          : frequency // ignore: cast_nullable_to_non_nullable
-              as String,
-      duration: null == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      _$MedicationImpl(
+        name:
+            null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                    as String,
+        dosage:
+            null == dosage
+                ? _value.dosage
+                : dosage // ignore: cast_nullable_to_non_nullable
+                    as String,
+        frequency:
+            null == frequency
+                ? _value.frequency
+                : frequency // ignore: cast_nullable_to_non_nullable
+                    as String,
+        duration:
+            null == duration
+                ? _value.duration
+                : duration // ignore: cast_nullable_to_non_nullable
+                    as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$MedicationImpl with DiagnosticableTreeMixin implements _Medication {
-  const _$MedicationImpl(
-      {required this.name,
-      required this.dosage,
-      required this.frequency,
-      required this.duration});
+  const _$MedicationImpl({
+    required this.name,
+    required this.dosage,
+    required this.frequency,
+    required this.duration,
+  });
 
   factory _$MedicationImpl.fromJson(Map<String, dynamic> json) =>
       _$$MedicationImplFromJson(json);
@@ -622,18 +681,17 @@ class _$MedicationImpl with DiagnosticableTreeMixin implements _Medication {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MedicationImplToJson(
-      this,
-    );
+    return _$$MedicationImplToJson(this);
   }
 }
 
 abstract class _Medication implements Medication {
-  const factory _Medication(
-      {required final String name,
-      required final String dosage,
-      required final String frequency,
-      required final String duration}) = _$MedicationImpl;
+  const factory _Medication({
+    required final String name,
+    required final String dosage,
+    required final String frequency,
+    required final String duration,
+  }) = _$MedicationImpl;
 
   factory _Medication.fromJson(Map<String, dynamic> json) =
       _$MedicationImpl.fromJson;
@@ -681,11 +739,12 @@ abstract class $ProcedureCopyWith<$Res> {
   factory $ProcedureCopyWith(Procedure value, $Res Function(Procedure) then) =
       _$ProcedureCopyWithImpl<$Res, Procedure>;
   @useResult
-  $Res call(
-      {String name,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime date,
-      String? notes});
+  $Res call({
+    String name,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime date,
+    String? notes,
+  });
 }
 
 /// @nodoc
@@ -707,20 +766,26 @@ class _$ProcedureCopyWithImpl<$Res, $Val extends Procedure>
     Object? date = null,
     Object? notes = freezed,
   }) {
-    return _then(_value.copyWith(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            name:
+                null == name
+                    ? _value.name
+                    : name // ignore: cast_nullable_to_non_nullable
+                        as String,
+            date:
+                null == date
+                    ? _value.date
+                    : date // ignore: cast_nullable_to_non_nullable
+                        as DateTime,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -728,15 +793,17 @@ class _$ProcedureCopyWithImpl<$Res, $Val extends Procedure>
 abstract class _$$ProcedureImplCopyWith<$Res>
     implements $ProcedureCopyWith<$Res> {
   factory _$$ProcedureImplCopyWith(
-          _$ProcedureImpl value, $Res Function(_$ProcedureImpl) then) =
-      __$$ProcedureImplCopyWithImpl<$Res>;
+    _$ProcedureImpl value,
+    $Res Function(_$ProcedureImpl) then,
+  ) = __$$ProcedureImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String name,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime date,
-      String? notes});
+  $Res call({
+    String name,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime date,
+    String? notes,
+  });
 }
 
 /// @nodoc
@@ -744,8 +811,9 @@ class __$$ProcedureImplCopyWithImpl<$Res>
     extends _$ProcedureCopyWithImpl<$Res, _$ProcedureImpl>
     implements _$$ProcedureImplCopyWith<$Res> {
   __$$ProcedureImplCopyWithImpl(
-      _$ProcedureImpl _value, $Res Function(_$ProcedureImpl) _then)
-      : super(_value, _then);
+    _$ProcedureImpl _value,
+    $Res Function(_$ProcedureImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Procedure
   /// with the given fields replaced by the non-null parameter values.
@@ -756,31 +824,37 @@ class __$$ProcedureImplCopyWithImpl<$Res>
     Object? date = null,
     Object? notes = freezed,
   }) {
-    return _then(_$ProcedureImpl(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$ProcedureImpl(
+        name:
+            null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                    as String,
+        date:
+            null == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                    as DateTime,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ProcedureImpl with DiagnosticableTreeMixin implements _Procedure {
-  const _$ProcedureImpl(
-      {required this.name,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required this.date,
-      this.notes});
+  const _$ProcedureImpl({
+    required this.name,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required this.date,
+    this.notes,
+  });
 
   factory _$ProcedureImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProcedureImplFromJson(json);
@@ -832,18 +906,17 @@ class _$ProcedureImpl with DiagnosticableTreeMixin implements _Procedure {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ProcedureImplToJson(
-      this,
-    );
+    return _$$ProcedureImplToJson(this);
   }
 }
 
 abstract class _Procedure implements Procedure {
-  const factory _Procedure(
-      {required final String name,
-      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required final DateTime date,
-      final String? notes}) = _$ProcedureImpl;
+  const factory _Procedure({
+    required final String name,
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required final DateTime date,
+    final String? notes,
+  }) = _$ProcedureImpl;
 
   factory _Procedure.fromJson(Map<String, dynamic> json) =
       _$ProcedureImpl.fromJson;
@@ -889,10 +962,11 @@ abstract class $FollowUpCopyWith<$Res> {
   factory $FollowUpCopyWith(FollowUp value, $Res Function(FollowUp) then) =
       _$FollowUpCopyWithImpl<$Res, FollowUp>;
   @useResult
-  $Res call(
-      {@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime date,
-      String? notes});
+  $Res call({
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime date,
+    String? notes,
+  });
 }
 
 /// @nodoc
@@ -909,20 +983,22 @@ class _$FollowUpCopyWithImpl<$Res, $Val extends FollowUp>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? date = null,
-    Object? notes = freezed,
-  }) {
-    return _then(_value.copyWith(
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+  $Res call({Object? date = null, Object? notes = freezed}) {
+    return _then(
+      _value.copyWith(
+            date:
+                null == date
+                    ? _value.date
+                    : date // ignore: cast_nullable_to_non_nullable
+                        as DateTime,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -930,14 +1006,16 @@ class _$FollowUpCopyWithImpl<$Res, $Val extends FollowUp>
 abstract class _$$FollowUpImplCopyWith<$Res>
     implements $FollowUpCopyWith<$Res> {
   factory _$$FollowUpImplCopyWith(
-          _$FollowUpImpl value, $Res Function(_$FollowUpImpl) then) =
-      __$$FollowUpImplCopyWithImpl<$Res>;
+    _$FollowUpImpl value,
+    $Res Function(_$FollowUpImpl) then,
+  ) = __$$FollowUpImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      DateTime date,
-      String? notes});
+  $Res call({
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    DateTime date,
+    String? notes,
+  });
 }
 
 /// @nodoc
@@ -945,37 +1023,40 @@ class __$$FollowUpImplCopyWithImpl<$Res>
     extends _$FollowUpCopyWithImpl<$Res, _$FollowUpImpl>
     implements _$$FollowUpImplCopyWith<$Res> {
   __$$FollowUpImplCopyWithImpl(
-      _$FollowUpImpl _value, $Res Function(_$FollowUpImpl) _then)
-      : super(_value, _then);
+    _$FollowUpImpl _value,
+    $Res Function(_$FollowUpImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of FollowUp
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? date = null,
-    Object? notes = freezed,
-  }) {
-    return _then(_$FollowUpImpl(
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+  $Res call({Object? date = null, Object? notes = freezed}) {
+    return _then(
+      _$FollowUpImpl(
+        date:
+            null == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                    as DateTime,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$FollowUpImpl with DiagnosticableTreeMixin implements _FollowUp {
-  const _$FollowUpImpl(
-      {@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required this.date,
-      this.notes});
+  const _$FollowUpImpl({
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required this.date,
+    this.notes,
+  });
 
   factory _$FollowUpImpl.fromJson(Map<String, dynamic> json) =>
       _$$FollowUpImplFromJson(json);
@@ -1023,17 +1104,16 @@ class _$FollowUpImpl with DiagnosticableTreeMixin implements _FollowUp {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FollowUpImplToJson(
-      this,
-    );
+    return _$$FollowUpImplToJson(this);
   }
 }
 
 abstract class _FollowUp implements FollowUp {
-  const factory _FollowUp(
-      {@JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-      required final DateTime date,
-      final String? notes}) = _$FollowUpImpl;
+  const factory _FollowUp({
+    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+    required final DateTime date,
+    final String? notes,
+  }) = _$FollowUpImpl;
 
   factory _FollowUp.fromJson(Map<String, dynamic> json) =
       _$FollowUpImpl.fromJson;

@@ -111,63 +111,11 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
 
   ChatMessagesNotifier(this._messageService, this._socketService, this._useMockMessages) : super([]) {
     // Khi khởi tạo, mở kết nối socket và đăng ký lắng nghe
-    _initialize();
   }
 
-  Future<void> _initialize() async {
-    if (_isInitialized) return;
-    
-    if (!_useMockMessages) {
-      await _socketService.connect();
-      _registerSocketListeners();
-    } else {
-      debugPrint('Sử dụng chế độ tin nhắn giả lập, không kết nối socket');
-    }
-    
-    _isInitialized = true;
-  }
 
-  void _registerSocketListeners() {
-    debugPrint('Đăng ký lắng nghe sự kiện tin nhắn mới socket');
-    
-    // Lắng nghe sự kiện từ socket service
-    _socketService.addMessageListener(_handleNewMessage);
-  }
-
-  void _disposeSocketListeners() {
-    if (!_useMockMessages) {
-      _socketService.removeMessageListener(_handleNewMessage);
-      debugPrint('Đã hủy đăng ký lắng nghe sự kiện socket');
-    }
-    
-    if (_mockMessageTimer != null) {
-      _mockMessageTimer!.cancel();
-      _mockMessageTimer = null;
-    }
-  }
-
-  void _handleNewMessage(Map<String, dynamic> data) {
-    debugPrint('📩 Nhận tin nhắn mới trong MessageProvider:');
-    debugPrint('  - Dữ liệu: $data');
-    debugPrint('  - Chat ID: ${data['chatId']}');
-    debugPrint('  - Sender: ${data['sender']}');
-    debugPrint('  - Content: ${data['content']}');
-    
-    try {
-      // Kiểm tra xem tin nhắn có thuộc chat hiện tại không
-      if (data['chatId'] == _currentChatId) {
-        debugPrint('✅ Tin nhắn thuộc chat hiện tại');
-        _processNewMessage(data);
-      } else {
-        debugPrint('❌ Tin nhắn không thuộc chat hiện tại');
-        debugPrint('  - Chat hiện tại: $_currentChatId');
-        debugPrint('  - Chat của tin nhắn: ${data['chatId']}');
-      }
-    } catch (e) {
-      debugPrint('❌ Lỗi khi xử lý tin nhắn trong MessageProvider: $e');
-      debugPrint('  - Dữ liệu gốc: $data');
-    }
-  }
+  
+  
   
   void _processNewMessage(Map<String, dynamic> messageData) {
     try {
@@ -309,11 +257,6 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
   // Tải lịch sử chat với bác sĩ
   Future<void> loadChatHistory(String doctorId) async {
     debugPrint('Bắt đầu tải lịch sử chat với bác sĩ: $doctorId');
-    
-    if (!_isInitialized) {
-      await _initialize();
-    }
-    
     try {
       // Lưu ID bác sĩ hiện tại
       _currentDoctorId = doctorId;
@@ -466,8 +409,6 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
     if (!_useMockMessages && _currentChatId != null) {
       _socketService.leaveChat(_currentChatId!);
     }
-    
-    _disposeSocketListeners();
     super.dispose();
   }
 }

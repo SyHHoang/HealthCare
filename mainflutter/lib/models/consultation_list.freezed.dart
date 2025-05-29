@@ -12,7 +12,8 @@ part of 'consultation_list.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 ConsultationList _$ConsultationListFromJson(Map<String, dynamic> json) {
   return _ConsultationList.fromJson(json);
@@ -50,22 +51,24 @@ mixin _$ConsultationList {
 /// @nodoc
 abstract class $ConsultationListCopyWith<$Res> {
   factory $ConsultationListCopyWith(
-          ConsultationList value, $Res Function(ConsultationList) then) =
-      _$ConsultationListCopyWithImpl<$Res, ConsultationList>;
+    ConsultationList value,
+    $Res Function(ConsultationList) then,
+  ) = _$ConsultationListCopyWithImpl<$Res, ConsultationList>;
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String userId,
-      String doctorId,
-      String doctorFullName,
-      String? doctorSpecialty,
-      String? doctorAvatar,
-      int? doctorExperience,
-      String? doctorCurrentWorkplace,
-      @JsonKey(name: 'StartDate') String startDate,
-      @JsonKey(name: 'EndDate') String endDate,
-      @JsonKey(name: 'call') int callRemaining,
-      String? createdAt});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String userId,
+    String doctorId,
+    String doctorFullName,
+    String? doctorSpecialty,
+    String? doctorAvatar,
+    int? doctorExperience,
+    String? doctorCurrentWorkplace,
+    @JsonKey(name: 'StartDate') String startDate,
+    @JsonKey(name: 'EndDate') String endDate,
+    @JsonKey(name: 'call') int callRemaining,
+    String? createdAt,
+  });
 }
 
 /// @nodoc
@@ -96,89 +99,107 @@ class _$ConsultationListCopyWithImpl<$Res, $Val extends ConsultationList>
     Object? callRemaining = null,
     Object? createdAt = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorId: null == doctorId
-          ? _value.doctorId
-          : doctorId // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorFullName: null == doctorFullName
-          ? _value.doctorFullName
-          : doctorFullName // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorSpecialty: freezed == doctorSpecialty
-          ? _value.doctorSpecialty
-          : doctorSpecialty // ignore: cast_nullable_to_non_nullable
-              as String?,
-      doctorAvatar: freezed == doctorAvatar
-          ? _value.doctorAvatar
-          : doctorAvatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      doctorExperience: freezed == doctorExperience
-          ? _value.doctorExperience
-          : doctorExperience // ignore: cast_nullable_to_non_nullable
-              as int?,
-      doctorCurrentWorkplace: freezed == doctorCurrentWorkplace
-          ? _value.doctorCurrentWorkplace
-          : doctorCurrentWorkplace // ignore: cast_nullable_to_non_nullable
-              as String?,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as String,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as String,
-      callRemaining: null == callRemaining
-          ? _value.callRemaining
-          : callRemaining // ignore: cast_nullable_to_non_nullable
-              as int,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            userId:
+                null == userId
+                    ? _value.userId
+                    : userId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            doctorId:
+                null == doctorId
+                    ? _value.doctorId
+                    : doctorId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            doctorFullName:
+                null == doctorFullName
+                    ? _value.doctorFullName
+                    : doctorFullName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            doctorSpecialty:
+                freezed == doctorSpecialty
+                    ? _value.doctorSpecialty
+                    : doctorSpecialty // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            doctorAvatar:
+                freezed == doctorAvatar
+                    ? _value.doctorAvatar
+                    : doctorAvatar // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            doctorExperience:
+                freezed == doctorExperience
+                    ? _value.doctorExperience
+                    : doctorExperience // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            doctorCurrentWorkplace:
+                freezed == doctorCurrentWorkplace
+                    ? _value.doctorCurrentWorkplace
+                    : doctorCurrentWorkplace // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            startDate:
+                null == startDate
+                    ? _value.startDate
+                    : startDate // ignore: cast_nullable_to_non_nullable
+                        as String,
+            endDate:
+                null == endDate
+                    ? _value.endDate
+                    : endDate // ignore: cast_nullable_to_non_nullable
+                        as String,
+            callRemaining:
+                null == callRemaining
+                    ? _value.callRemaining
+                    : callRemaining // ignore: cast_nullable_to_non_nullable
+                        as int,
+            createdAt:
+                freezed == createdAt
+                    ? _value.createdAt
+                    : createdAt // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$ConsultationListImplCopyWith<$Res>
     implements $ConsultationListCopyWith<$Res> {
-  factory _$$ConsultationListImplCopyWith(_$ConsultationListImpl value,
-          $Res Function(_$ConsultationListImpl) then) =
-      __$$ConsultationListImplCopyWithImpl<$Res>;
+  factory _$$ConsultationListImplCopyWith(
+    _$ConsultationListImpl value,
+    $Res Function(_$ConsultationListImpl) then,
+  ) = __$$ConsultationListImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String userId,
-      String doctorId,
-      String doctorFullName,
-      String? doctorSpecialty,
-      String? doctorAvatar,
-      int? doctorExperience,
-      String? doctorCurrentWorkplace,
-      @JsonKey(name: 'StartDate') String startDate,
-      @JsonKey(name: 'EndDate') String endDate,
-      @JsonKey(name: 'call') int callRemaining,
-      String? createdAt});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String userId,
+    String doctorId,
+    String doctorFullName,
+    String? doctorSpecialty,
+    String? doctorAvatar,
+    int? doctorExperience,
+    String? doctorCurrentWorkplace,
+    @JsonKey(name: 'StartDate') String startDate,
+    @JsonKey(name: 'EndDate') String endDate,
+    @JsonKey(name: 'call') int callRemaining,
+    String? createdAt,
+  });
 }
 
 /// @nodoc
 class __$$ConsultationListImplCopyWithImpl<$Res>
     extends _$ConsultationListCopyWithImpl<$Res, _$ConsultationListImpl>
     implements _$$ConsultationListImplCopyWith<$Res> {
-  __$$ConsultationListImplCopyWithImpl(_$ConsultationListImpl _value,
-      $Res Function(_$ConsultationListImpl) _then)
-      : super(_value, _then);
+  __$$ConsultationListImplCopyWithImpl(
+    _$ConsultationListImpl _value,
+    $Res Function(_$ConsultationListImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of ConsultationList
   /// with the given fields replaced by the non-null parameter values.
@@ -198,75 +219,90 @@ class __$$ConsultationListImplCopyWithImpl<$Res>
     Object? callRemaining = null,
     Object? createdAt = freezed,
   }) {
-    return _then(_$ConsultationListImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorId: null == doctorId
-          ? _value.doctorId
-          : doctorId // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorFullName: null == doctorFullName
-          ? _value.doctorFullName
-          : doctorFullName // ignore: cast_nullable_to_non_nullable
-              as String,
-      doctorSpecialty: freezed == doctorSpecialty
-          ? _value.doctorSpecialty
-          : doctorSpecialty // ignore: cast_nullable_to_non_nullable
-              as String?,
-      doctorAvatar: freezed == doctorAvatar
-          ? _value.doctorAvatar
-          : doctorAvatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      doctorExperience: freezed == doctorExperience
-          ? _value.doctorExperience
-          : doctorExperience // ignore: cast_nullable_to_non_nullable
-              as int?,
-      doctorCurrentWorkplace: freezed == doctorCurrentWorkplace
-          ? _value.doctorCurrentWorkplace
-          : doctorCurrentWorkplace // ignore: cast_nullable_to_non_nullable
-              as String?,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as String,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as String,
-      callRemaining: null == callRemaining
-          ? _value.callRemaining
-          : callRemaining // ignore: cast_nullable_to_non_nullable
-              as int,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$ConsultationListImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        userId:
+            null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        doctorId:
+            null == doctorId
+                ? _value.doctorId
+                : doctorId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        doctorFullName:
+            null == doctorFullName
+                ? _value.doctorFullName
+                : doctorFullName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        doctorSpecialty:
+            freezed == doctorSpecialty
+                ? _value.doctorSpecialty
+                : doctorSpecialty // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        doctorAvatar:
+            freezed == doctorAvatar
+                ? _value.doctorAvatar
+                : doctorAvatar // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        doctorExperience:
+            freezed == doctorExperience
+                ? _value.doctorExperience
+                : doctorExperience // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        doctorCurrentWorkplace:
+            freezed == doctorCurrentWorkplace
+                ? _value.doctorCurrentWorkplace
+                : doctorCurrentWorkplace // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        startDate:
+            null == startDate
+                ? _value.startDate
+                : startDate // ignore: cast_nullable_to_non_nullable
+                    as String,
+        endDate:
+            null == endDate
+                ? _value.endDate
+                : endDate // ignore: cast_nullable_to_non_nullable
+                    as String,
+        callRemaining:
+            null == callRemaining
+                ? _value.callRemaining
+                : callRemaining // ignore: cast_nullable_to_non_nullable
+                    as int,
+        createdAt:
+            freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ConsultationListImpl implements _ConsultationList {
-  const _$ConsultationListImpl(
-      {@JsonKey(name: '_id') required this.id,
-      required this.userId,
-      required this.doctorId,
-      required this.doctorFullName,
-      this.doctorSpecialty,
-      this.doctorAvatar,
-      this.doctorExperience,
-      this.doctorCurrentWorkplace,
-      @JsonKey(name: 'StartDate') required this.startDate,
-      @JsonKey(name: 'EndDate') required this.endDate,
-      @JsonKey(name: 'call') required this.callRemaining,
-      this.createdAt});
+  const _$ConsultationListImpl({
+    @JsonKey(name: '_id') required this.id,
+    required this.userId,
+    required this.doctorId,
+    required this.doctorFullName,
+    this.doctorSpecialty,
+    this.doctorAvatar,
+    this.doctorExperience,
+    this.doctorCurrentWorkplace,
+    @JsonKey(name: 'StartDate') required this.startDate,
+    @JsonKey(name: 'EndDate') required this.endDate,
+    @JsonKey(name: 'call') required this.callRemaining,
+    this.createdAt,
+  });
 
   factory _$ConsultationListImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConsultationListImplFromJson(json);
@@ -336,19 +372,20 @@ class _$ConsultationListImpl implements _ConsultationList {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      doctorId,
-      doctorFullName,
-      doctorSpecialty,
-      doctorAvatar,
-      doctorExperience,
-      doctorCurrentWorkplace,
-      startDate,
-      endDate,
-      callRemaining,
-      createdAt);
+    runtimeType,
+    id,
+    userId,
+    doctorId,
+    doctorFullName,
+    doctorSpecialty,
+    doctorAvatar,
+    doctorExperience,
+    doctorCurrentWorkplace,
+    startDate,
+    endDate,
+    callRemaining,
+    createdAt,
+  );
 
   /// Create a copy of ConsultationList
   /// with the given fields replaced by the non-null parameter values.
@@ -357,30 +394,31 @@ class _$ConsultationListImpl implements _ConsultationList {
   @pragma('vm:prefer-inline')
   _$$ConsultationListImplCopyWith<_$ConsultationListImpl> get copyWith =>
       __$$ConsultationListImplCopyWithImpl<_$ConsultationListImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ConsultationListImplToJson(
-      this,
-    );
+    return _$$ConsultationListImplToJson(this);
   }
 }
 
 abstract class _ConsultationList implements ConsultationList {
-  const factory _ConsultationList(
-      {@JsonKey(name: '_id') required final String id,
-      required final String userId,
-      required final String doctorId,
-      required final String doctorFullName,
-      final String? doctorSpecialty,
-      final String? doctorAvatar,
-      final int? doctorExperience,
-      final String? doctorCurrentWorkplace,
-      @JsonKey(name: 'StartDate') required final String startDate,
-      @JsonKey(name: 'EndDate') required final String endDate,
-      @JsonKey(name: 'call') required final int callRemaining,
-      final String? createdAt}) = _$ConsultationListImpl;
+  const factory _ConsultationList({
+    @JsonKey(name: '_id') required final String id,
+    required final String userId,
+    required final String doctorId,
+    required final String doctorFullName,
+    final String? doctorSpecialty,
+    final String? doctorAvatar,
+    final int? doctorExperience,
+    final String? doctorCurrentWorkplace,
+    @JsonKey(name: 'StartDate') required final String startDate,
+    @JsonKey(name: 'EndDate') required final String endDate,
+    @JsonKey(name: 'call') required final int callRemaining,
+    final String? createdAt,
+  }) = _$ConsultationListImpl;
 
   factory _ConsultationList.fromJson(Map<String, dynamic> json) =
       _$ConsultationListImpl.fromJson;

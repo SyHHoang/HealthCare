@@ -14,12 +14,14 @@ _$SymptomImpl _$$SymptomImplFromJson(Map<String, dynamic> json) =>
       severity: json['severity'] as String,
       startDate: DateTime.parse(json['startDate'] as String),
       notes: json['notes'] as String?,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt:
+          json['createdAt'] == null
+              ? null
+              : DateTime.parse(json['createdAt'] as String),
+      updatedAt:
+          json['updatedAt'] == null
+              ? null
+              : DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$$SymptomImplToJson(_$SymptomImpl instance) =>

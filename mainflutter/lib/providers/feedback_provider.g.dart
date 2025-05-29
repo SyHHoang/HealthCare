@@ -12,14 +12,15 @@ String _$feedbackNotifierHash() => r'efc43eccd3132bfa47ec1ce46bfaf4e7ceb55e73';
 @ProviderFor(FeedbackNotifier)
 final feedbackNotifierProvider =
     AutoDisposeAsyncNotifierProvider<FeedbackNotifier, List<Feedback>>.internal(
-  FeedbackNotifier.new,
-  name: r'feedbackNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$feedbackNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      FeedbackNotifier.new,
+      name: r'feedbackNotifierProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$feedbackNotifierHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$FeedbackNotifier = AutoDisposeAsyncNotifier<List<Feedback>>;
 // ignore_for_file: type=lint

@@ -84,19 +84,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         final Map<String, dynamic> messageData = data is Map 
             ? Map<String, dynamic>.from(data) 
             : {};
-        
-        // Kiểm tra xem tin nhắn có thuộc chat hiện tại không
-        if (messageData['chatId'] == widget.partnerId || 
-            messageData['sender'] == widget.partnerId || 
-            messageData['receiver'] == widget.partnerId) {
-          debugPrint('✅ Tin nhắn thuộc chat hiện tại');
-          setState(() {
-            _messages.add(messageData);
-          });
-          _scrollToBottom();
-        } else {
-          debugPrint('❌ Tin nhắn không thuộc chat hiện tại');
-        }
       } catch (e) {
         debugPrint('❌ Lỗi khi xử lý tin nhắn trong ChatScreen: $e');
         debugPrint('  - Dữ liệu gốc: $data');
@@ -119,77 +106,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         });
       }
     });
-
-    // Thêm listener cho trạng thái đang nhập
-    _socketService.addTypingListener((userId) {
-      if (userId == widget.partnerId) {
-        setState(() {
-          _isTyping = true;
-          _typingUserId = userId;
-        });
-        // Tự động tắt trạng thái đang nhập sau 3 giây
-        _typingTimer?.cancel();
-        _typingTimer = Timer(const Duration(seconds: 3), () {
-          setState(() {
-            _isTyping = false;
-            _typingUserId = '';
-          });
-        });
-      }
-    });
-
-    _socketService.addStopTypingListener((userId) {
-      if (userId == widget.partnerId) {
-        setState(() {
-          _isTyping = false;
-          _typingUserId = '';
-        });
-      }
-    });
   }
+ 
 
-  @override
-  void dispose() {
-    debugPrint('🛑 Đang cleanup ChatScreen...');
-    _messageController.dispose();
-    _scrollController.dispose();
-    
-    // Xóa message listener
-    _socketService.removeMessageListener((data) {
-      debugPrint('📩 Xóa message listener');
-      try {
-        final Map<String, dynamic> messageData = data is Map 
-            ? Map<String, dynamic>.from(data) 
-            : {};
-        
-        if (messageData['chatId'] == widget.partnerId) {
-          setState(() {
-            _messages.remove(messageData);
-          });
-          _scrollToBottom();
-        }
-      } catch (e) {
-        debugPrint('❌ Lỗi khi xử lý tin nhắn trong dispose: $e');
-      }
-    });
-    
-    _typingTimer?.cancel();
-    _stopTypingTimer?.cancel();
-    super.dispose();
-  }
-
-  void _handleTyping() {
-    // Gửi sự kiện đang nhập
-    _socketService.emitTyping(widget.partnerId);
-    
-    // Hủy timer cũ nếu có
-    _stopTypingTimer?.cancel();
-    
-    // Tạo timer mới để gửi sự kiện dừng nhập sau 1 giây
-    _stopTypingTimer = Timer(const Duration(seconds: 1), () {
-      _socketService.emitStopTyping(widget.partnerId);
-    });
-  }
 
   Future<void> _loadChatHistory() async {
     if (!mounted) return; // Kiểm tra widget còn mounted không
@@ -327,37 +246,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ],
         ),
-        actions: [
-          // Thêm nút chuyển đổi chế độ demo khi ở chế độ phát triển
-          if (isDevMode)
-            IconButton(
-              icon: Icon(
-                ref.watch(mockMessagesProvider) ? Icons.cloud_off : Icons.cloud_done,
-                color: ref.watch(mockMessagesProvider) ? Colors.red : Colors.green,
-              ),
-              onPressed: () {
-                ref.read(mockMessagesProvider.notifier).state = !ref.watch(mockMessagesProvider);
-                // Tải lại lịch sử chat sau khi chuyển đổi chế độ
-                _loadChatHistory();
-              },
-              tooltip: ref.watch(mockMessagesProvider) ? 'Đang sử dụng dữ liệu mẫu' : 'Đang sử dụng server thật',
-            ),
-          
-          // Thêm nút mô phỏng bác sĩ đang nhập khi ở chế độ phát triển
-          if (isDevMode)
-            IconButton(
-              icon: const Icon(Icons.keyboard),
-              onPressed: () {
-                final isTyping = ref.read(doctorTypingProvider.notifier).isDoctorTyping(widget.partnerId);
-                ref.read(doctorTypingProvider.notifier).setDoctorTyping(widget.partnerId, !isTyping);
-              },
-            ),
-            
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadChatHistory,
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -370,37 +258,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
           // Khung nhập tin nhắn
           _buildMessageInput(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyChat() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Chưa có tin nhắn nào',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              _messageController.text = 'Xin chào bác sĩ, tôi cần tư vấn!';
-              _sendMessage();
-            },
-            child: const Text('Bắt đầu trò chuyện'),
-          ),
         ],
       ),
     );
@@ -476,7 +333,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
-      children: messageWidgets.reversed.toList(), // Đảo ngược danh sách để hiển thị mới nhất ở dưới cùng
+      children: messageWidgets.toList(), // Đảo ngược danh sách để hiển thị mới nhất ở dưới cùng
     );
   }
 

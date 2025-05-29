@@ -14,17 +14,20 @@ _$TreatmentImpl _$$TreatmentImplFromJson(Map<String, dynamic> json) =>
       startDate: _dateTimeFromJson(json['startDate'] as String),
       endDate: _nullableDateTimeFromJson(json['endDate'] as String?),
       status: json['status'] as String,
-      medications: (json['medications'] as List<dynamic>?)
+      medications:
+          (json['medications'] as List<dynamic>?)
               ?.map((e) => Medication.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      procedures: (json['procedures'] as List<dynamic>?)
+      procedures:
+          (json['procedures'] as List<dynamic>?)
               ?.map((e) => Procedure.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      followUp: json['followUp'] == null
-          ? null
-          : FollowUp.fromJson(json['followUp'] as Map<String, dynamic>),
+      followUp:
+          json['followUp'] == null
+              ? null
+              : FollowUp.fromJson(json['followUp'] as Map<String, dynamic>),
       notes: json['notes'] as String?,
     );
 

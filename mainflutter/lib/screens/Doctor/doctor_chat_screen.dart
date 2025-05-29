@@ -85,62 +85,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
         });
       }
     });
-
-    // Thêm listener cho trạng thái đang nhập
-    _socketService.addTypingListener((userId) {
-      if (userId == widget.patientId) {
-        setState(() {
-          _isTyping = true;
-          _typingUserId = userId;
-        });
-        // Tự động tắt trạng thái đang nhập sau 3 giây
-        _typingTimer?.cancel();
-        _typingTimer = Timer(const Duration(seconds: 3), () {
-          setState(() {
-            _isTyping = false;
-            _typingUserId = '';
-          });
-        });
-      }
-    });
-
-    _socketService.addStopTypingListener((userId) {
-      if (userId == widget.patientId) {
-        setState(() {
-          _isTyping = false;
-          _typingUserId = '';
-        });
-      }
-    });
   }
-
-  @override
-  void dispose() {
-    debugPrint('🛑 Đang cleanup DoctorChatScreen...');
-    _messageController.dispose();
-    _scrollController.dispose();
-    
-    // Rời khỏi chat room
-    _socketService.leaveChat(widget.chatId);
-    
-    _typingTimer?.cancel();
-    _stopTypingTimer?.cancel();
-    super.dispose();
-  }
-
-  void _handleTyping() {
-    // Gửi sự kiện đang nhập
-    _socketService.emitTyping(widget.patientId);
-    
-    // Hủy timer cũ nếu có
-    _stopTypingTimer?.cancel();
-    
-    // Tạo timer mới để gửi sự kiện dừng nhập sau 1 giây
-    _stopTypingTimer = Timer(const Duration(seconds: 1), () {
-      _socketService.emitStopTyping(widget.patientId);
-    });
-  }
-
   Future<void> _loadChatHistory() async {
     if (!mounted) return; // Kiểm tra widget còn mounted không
     
@@ -150,7 +95,9 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     
     try {
       await ref.read(doctorChatMessagesProvider(widget.chatId).notifier).loadMessages();
-      
+      debugPrint('==================================================================================================');
+      debugPrint('tin nhắn lấy từ flutter2: ${ref.read(doctorChatMessagesProvider(widget.chatId))}');
+      debugPrint('==================================================================================================');
       // Cuộn xuống dưới sau khi tải tin nhắn
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -188,37 +135,15 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
-
-    // Thêm tin nhắn tạm thời vào UI để hiển thị ngay lập tức
-    final tempMessage = {
-      '_id': 'temp-${DateTime.now().millisecondsSinceEpoch}',
-      'sender': 'doctor-temp',
-      'senderModel': 'Doctor',
-      'receiver': widget.patientId,
-      'receiverModel': 'User',
-      'content': content,
-      'createdAt': DateTime.now().toIso8601String(),
-      'chatId': widget.chatId,
-    };
-
-    // Thêm tin nhắn tạm thời vào state
-    ref.read(doctorChatMessagesProvider(widget.chatId).notifier).state.whenData((messages) {
-      final updatedMessages = List<dynamic>.from(messages);
-      updatedMessages.add(tempMessage);
-      ref.read(doctorChatMessagesProvider(widget.chatId).notifier).state = AsyncValue.data(updatedMessages);
-      
       // Xóa nội dung trong ô nhập và cuộn xuống dưới
       _messageController.clear();
-      
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToBottom();
       });
-    });
 
     try {
       // Gửi tin nhắn qua socket
       await ref.read(doctorChatMessagesProvider(widget.chatId).notifier).sendMessage(content);
-      
       // Tin nhắn thực sẽ được cập nhật thông qua socket listener
     } catch (e) {
       // Hiển thị thông báo lỗi
@@ -237,12 +162,15 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
   Widget build(BuildContext context) {
     final messagesAsync = ref.watch(doctorChatMessagesProvider(widget.chatId));
     
-    // Lắng nghe thay đổi tin nhắn mới để cuộn xuống dưới nếu cần
+    // Lắng nghe thay đổi tin nhắn mới
     ref.listen(doctorChatMessagesProvider(widget.chatId), (previous, next) {
       if (previous != null && next is AsyncData && previous is AsyncData) {
         if ((next.value?.length ?? 0) > (previous.value?.length ?? 0)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollToBottom();
+          // Đợi frame tiếp theo để đảm bảo UI đã được cập nhật
+          Future.microtask(() {
+            if (mounted) {
+              _scrollToBottom();
+            }
           });
         }
       }
@@ -376,34 +304,23 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
   }
 
   Widget _buildMessageList(List<dynamic> messageData) {
+    // Chuyển đổi dữ liệu thành Message objects
     final messages = messageData.map((data) {
-      // Nếu là tin nhắn tạm thời (vừa gửi)
-      if (data['_id']?.toString().startsWith('temp-') == true) {
-        return Message(
-          id: data['_id'] ?? 'temp',
-          sender: 'doctor-temp',
-          senderModel: 'Doctor',
-          receiver: widget.patientId,
-          receiverModel: 'User',
-          content: data['content'] ?? '',
-          isRead: false,
-          createdAt: data['createdAt'] != null 
-              ? DateTime.parse(data['createdAt']) 
-              : DateTime.now(),
-        );
+      try {
+        return Message.fromJson(data as Map<String, dynamic>);
+      } catch (e) {
+        debugPrint('Lỗi chuyển đổi tin nhắn: $e');
+        return null;
       }
-      // Tin nhắn bình thường
-      return Message.fromJson(data as Map<String, dynamic>);
-    }).toList();
+    }).where((msg) => msg != null).toList();
     
     final DateTime now = DateTime.now();
     String? currentDay;
-    
-    // Xây dựng danh sách tin nhắn có phân nhóm theo ngày
     List<Widget> messageWidgets = [];
     
+    // Không cần sắp xếp lại vì đã sắp xếp trong provider
     for (int i = 0; i < messages.length; i++) {
-      final message = messages[i];
+      final message = messages[i]!; // Thêm ! vì đã lọc null ở trên
       final messageDay = '${message.createdAt.day}/${message.createdAt.month}/${message.createdAt.year}';
       
       // Thêm separator hiển thị ngày nếu khác ngày hiện tại hoặc tin nhắn đầu tiên
@@ -428,13 +345,13 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
       }
       
       // Phân biệt tin nhắn của bệnh nhân và bác sĩ
-      // Tin nhắn của bác sĩ (Doctor) là tin nhắn của mình
       final isMe = message.senderModel == 'Doctor';
+      debugPrint('tin nhắn của bác sĩ: $isMe');
       
       // Kiểm tra nếu cần hiển thị thời gian giữa các tin nhắn
       bool showTime = true;
       if (i < messages.length - 1) {
-        final nextMessage = messages[i + 1];
+        final nextMessage = messages[i + 1]!;
         final timeDiff = nextMessage.createdAt.difference(message.createdAt).inMinutes;
         if (timeDiff < 5 && nextMessage.senderModel == message.senderModel && nextMessage.sender == message.sender) {
           showTime = false;
@@ -453,7 +370,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     return ListView(
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
-      children: messageWidgets,
+      children: messageWidgets.toList(), 
     );
   }
 
@@ -512,7 +429,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
                   vertical: 8,
                 ),
               ),
-              onChanged: (_) => _handleTyping(),
+              
               maxLines: null,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),

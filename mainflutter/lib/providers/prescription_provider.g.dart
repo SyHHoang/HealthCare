@@ -12,12 +12,15 @@ String _$prescriptionNotifierHash() =>
 /// See also [PrescriptionNotifier].
 @ProviderFor(PrescriptionNotifier)
 final prescriptionNotifierProvider = AutoDisposeAsyncNotifierProvider<
-    PrescriptionNotifier, List<Prescription>>.internal(
+  PrescriptionNotifier,
+  List<Prescription>
+>.internal(
   PrescriptionNotifier.new,
   name: r'prescriptionNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$prescriptionNotifierHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$prescriptionNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

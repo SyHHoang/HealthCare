@@ -12,7 +12,8 @@ part of 'doctor.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Doctor _$DoctorFromJson(Map<String, dynamic> json) {
   return _Doctor.fromJson(json);
@@ -38,6 +39,7 @@ mixin _$Doctor {
   bool get isVerified => throw _privateConstructorUsedError;
   String? get avatar => throw _privateConstructorUsedError;
   Map<String, dynamic>? get schedule => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
 
   /// Serializes this Doctor to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -53,24 +55,26 @@ abstract class $DoctorCopyWith<$Res> {
   factory $DoctorCopyWith(Doctor value, $Res Function(Doctor) then) =
       _$DoctorCopyWithImpl<$Res, Doctor>;
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String fullName,
-      String? specialty,
-      String? otherSpecialties,
-      String? education,
-      String? email,
-      int? graduationYear,
-      String? licenseNumber,
-      int? experience,
-      String? currentWorkplace,
-      String? phone,
-      String? address,
-      String? verifiID,
-      String status,
-      bool isVerified,
-      String? avatar,
-      Map<String, dynamic>? schedule});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String fullName,
+    String? specialty,
+    String? otherSpecialties,
+    String? education,
+    String? email,
+    int? graduationYear,
+    String? licenseNumber,
+    int? experience,
+    String? currentWorkplace,
+    String? phone,
+    String? address,
+    String? verifiID,
+    String status,
+    bool isVerified,
+    String? avatar,
+    Map<String, dynamic>? schedule,
+    String role,
+  });
 }
 
 /// @nodoc
@@ -105,105 +109,134 @@ class _$DoctorCopyWithImpl<$Res, $Val extends Doctor>
     Object? isVerified = null,
     Object? avatar = freezed,
     Object? schedule = freezed,
+    Object? role = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      fullName: null == fullName
-          ? _value.fullName
-          : fullName // ignore: cast_nullable_to_non_nullable
-              as String,
-      specialty: freezed == specialty
-          ? _value.specialty
-          : specialty // ignore: cast_nullable_to_non_nullable
-              as String?,
-      otherSpecialties: freezed == otherSpecialties
-          ? _value.otherSpecialties
-          : otherSpecialties // ignore: cast_nullable_to_non_nullable
-              as String?,
-      education: freezed == education
-          ? _value.education
-          : education // ignore: cast_nullable_to_non_nullable
-              as String?,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      graduationYear: freezed == graduationYear
-          ? _value.graduationYear
-          : graduationYear // ignore: cast_nullable_to_non_nullable
-              as int?,
-      licenseNumber: freezed == licenseNumber
-          ? _value.licenseNumber
-          : licenseNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      experience: freezed == experience
-          ? _value.experience
-          : experience // ignore: cast_nullable_to_non_nullable
-              as int?,
-      currentWorkplace: freezed == currentWorkplace
-          ? _value.currentWorkplace
-          : currentWorkplace // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      address: freezed == address
-          ? _value.address
-          : address // ignore: cast_nullable_to_non_nullable
-              as String?,
-      verifiID: freezed == verifiID
-          ? _value.verifiID
-          : verifiID // ignore: cast_nullable_to_non_nullable
-              as String?,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      isVerified: null == isVerified
-          ? _value.isVerified
-          : isVerified // ignore: cast_nullable_to_non_nullable
-              as bool,
-      avatar: freezed == avatar
-          ? _value.avatar
-          : avatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      schedule: freezed == schedule
-          ? _value.schedule
-          : schedule // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            fullName:
+                null == fullName
+                    ? _value.fullName
+                    : fullName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            specialty:
+                freezed == specialty
+                    ? _value.specialty
+                    : specialty // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            otherSpecialties:
+                freezed == otherSpecialties
+                    ? _value.otherSpecialties
+                    : otherSpecialties // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            education:
+                freezed == education
+                    ? _value.education
+                    : education // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            email:
+                freezed == email
+                    ? _value.email
+                    : email // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            graduationYear:
+                freezed == graduationYear
+                    ? _value.graduationYear
+                    : graduationYear // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            licenseNumber:
+                freezed == licenseNumber
+                    ? _value.licenseNumber
+                    : licenseNumber // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            experience:
+                freezed == experience
+                    ? _value.experience
+                    : experience // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            currentWorkplace:
+                freezed == currentWorkplace
+                    ? _value.currentWorkplace
+                    : currentWorkplace // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            phone:
+                freezed == phone
+                    ? _value.phone
+                    : phone // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            address:
+                freezed == address
+                    ? _value.address
+                    : address // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            verifiID:
+                freezed == verifiID
+                    ? _value.verifiID
+                    : verifiID // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            status:
+                null == status
+                    ? _value.status
+                    : status // ignore: cast_nullable_to_non_nullable
+                        as String,
+            isVerified:
+                null == isVerified
+                    ? _value.isVerified
+                    : isVerified // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            avatar:
+                freezed == avatar
+                    ? _value.avatar
+                    : avatar // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            schedule:
+                freezed == schedule
+                    ? _value.schedule
+                    : schedule // ignore: cast_nullable_to_non_nullable
+                        as Map<String, dynamic>?,
+            role:
+                null == role
+                    ? _value.role
+                    : role // ignore: cast_nullable_to_non_nullable
+                        as String,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$DoctorImplCopyWith<$Res> implements $DoctorCopyWith<$Res> {
   factory _$$DoctorImplCopyWith(
-          _$DoctorImpl value, $Res Function(_$DoctorImpl) then) =
-      __$$DoctorImplCopyWithImpl<$Res>;
+    _$DoctorImpl value,
+    $Res Function(_$DoctorImpl) then,
+  ) = __$$DoctorImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: '_id') String id,
-      String fullName,
-      String? specialty,
-      String? otherSpecialties,
-      String? education,
-      String? email,
-      int? graduationYear,
-      String? licenseNumber,
-      int? experience,
-      String? currentWorkplace,
-      String? phone,
-      String? address,
-      String? verifiID,
-      String status,
-      bool isVerified,
-      String? avatar,
-      Map<String, dynamic>? schedule});
+  $Res call({
+    @JsonKey(name: '_id') String id,
+    String fullName,
+    String? specialty,
+    String? otherSpecialties,
+    String? education,
+    String? email,
+    int? graduationYear,
+    String? licenseNumber,
+    int? experience,
+    String? currentWorkplace,
+    String? phone,
+    String? address,
+    String? verifiID,
+    String status,
+    bool isVerified,
+    String? avatar,
+    Map<String, dynamic>? schedule,
+    String role,
+  });
 }
 
 /// @nodoc
@@ -211,8 +244,9 @@ class __$$DoctorImplCopyWithImpl<$Res>
     extends _$DoctorCopyWithImpl<$Res, _$DoctorImpl>
     implements _$$DoctorImplCopyWith<$Res> {
   __$$DoctorImplCopyWithImpl(
-      _$DoctorImpl _value, $Res Function(_$DoctorImpl) _then)
-      : super(_value, _then);
+    _$DoctorImpl _value,
+    $Res Function(_$DoctorImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Doctor
   /// with the given fields replaced by the non-null parameter values.
@@ -236,102 +270,128 @@ class __$$DoctorImplCopyWithImpl<$Res>
     Object? isVerified = null,
     Object? avatar = freezed,
     Object? schedule = freezed,
+    Object? role = null,
   }) {
-    return _then(_$DoctorImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      fullName: null == fullName
-          ? _value.fullName
-          : fullName // ignore: cast_nullable_to_non_nullable
-              as String,
-      specialty: freezed == specialty
-          ? _value.specialty
-          : specialty // ignore: cast_nullable_to_non_nullable
-              as String?,
-      otherSpecialties: freezed == otherSpecialties
-          ? _value.otherSpecialties
-          : otherSpecialties // ignore: cast_nullable_to_non_nullable
-              as String?,
-      education: freezed == education
-          ? _value.education
-          : education // ignore: cast_nullable_to_non_nullable
-              as String?,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      graduationYear: freezed == graduationYear
-          ? _value.graduationYear
-          : graduationYear // ignore: cast_nullable_to_non_nullable
-              as int?,
-      licenseNumber: freezed == licenseNumber
-          ? _value.licenseNumber
-          : licenseNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      experience: freezed == experience
-          ? _value.experience
-          : experience // ignore: cast_nullable_to_non_nullable
-              as int?,
-      currentWorkplace: freezed == currentWorkplace
-          ? _value.currentWorkplace
-          : currentWorkplace // ignore: cast_nullable_to_non_nullable
-              as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      address: freezed == address
-          ? _value.address
-          : address // ignore: cast_nullable_to_non_nullable
-              as String?,
-      verifiID: freezed == verifiID
-          ? _value.verifiID
-          : verifiID // ignore: cast_nullable_to_non_nullable
-              as String?,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      isVerified: null == isVerified
-          ? _value.isVerified
-          : isVerified // ignore: cast_nullable_to_non_nullable
-              as bool,
-      avatar: freezed == avatar
-          ? _value.avatar
-          : avatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      schedule: freezed == schedule
-          ? _value._schedule
-          : schedule // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-    ));
+    return _then(
+      _$DoctorImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        fullName:
+            null == fullName
+                ? _value.fullName
+                : fullName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        specialty:
+            freezed == specialty
+                ? _value.specialty
+                : specialty // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        otherSpecialties:
+            freezed == otherSpecialties
+                ? _value.otherSpecialties
+                : otherSpecialties // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        education:
+            freezed == education
+                ? _value.education
+                : education // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        email:
+            freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        graduationYear:
+            freezed == graduationYear
+                ? _value.graduationYear
+                : graduationYear // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        licenseNumber:
+            freezed == licenseNumber
+                ? _value.licenseNumber
+                : licenseNumber // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        experience:
+            freezed == experience
+                ? _value.experience
+                : experience // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        currentWorkplace:
+            freezed == currentWorkplace
+                ? _value.currentWorkplace
+                : currentWorkplace // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        phone:
+            freezed == phone
+                ? _value.phone
+                : phone // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        address:
+            freezed == address
+                ? _value.address
+                : address // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        verifiID:
+            freezed == verifiID
+                ? _value.verifiID
+                : verifiID // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        status:
+            null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                    as String,
+        isVerified:
+            null == isVerified
+                ? _value.isVerified
+                : isVerified // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        avatar:
+            freezed == avatar
+                ? _value.avatar
+                : avatar // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        schedule:
+            freezed == schedule
+                ? _value._schedule
+                : schedule // ignore: cast_nullable_to_non_nullable
+                    as Map<String, dynamic>?,
+        role:
+            null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                    as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DoctorImpl implements _Doctor {
-  const _$DoctorImpl(
-      {@JsonKey(name: '_id') required this.id,
-      required this.fullName,
-      this.specialty,
-      this.otherSpecialties,
-      this.education,
-      this.email,
-      this.graduationYear,
-      this.licenseNumber,
-      this.experience,
-      this.currentWorkplace,
-      this.phone,
-      this.address,
-      this.verifiID,
-      this.status = 'pending',
-      this.isVerified = false,
-      this.avatar,
-      final Map<String, dynamic>? schedule})
-      : _schedule = schedule;
+  const _$DoctorImpl({
+    @JsonKey(name: '_id') required this.id,
+    required this.fullName,
+    this.specialty,
+    this.otherSpecialties,
+    this.education,
+    this.email,
+    this.graduationYear,
+    this.licenseNumber,
+    this.experience,
+    this.currentWorkplace,
+    this.phone,
+    this.address,
+    this.verifiID,
+    this.status = 'pending',
+    this.isVerified = false,
+    this.avatar,
+    final Map<String, dynamic>? schedule,
+    this.role = 'Doctor',
+  }) : _schedule = schedule;
 
   factory _$DoctorImpl.fromJson(Map<String, dynamic> json) =>
       _$$DoctorImplFromJson(json);
@@ -382,8 +442,12 @@ class _$DoctorImpl implements _Doctor {
   }
 
   @override
+  @JsonKey()
+  final String role;
+
+  @override
   String toString() {
-    return 'Doctor(id: $id, fullName: $fullName, specialty: $specialty, otherSpecialties: $otherSpecialties, education: $education, email: $email, graduationYear: $graduationYear, licenseNumber: $licenseNumber, experience: $experience, currentWorkplace: $currentWorkplace, phone: $phone, address: $address, verifiID: $verifiID, status: $status, isVerified: $isVerified, avatar: $avatar, schedule: $schedule)';
+    return 'Doctor(id: $id, fullName: $fullName, specialty: $specialty, otherSpecialties: $otherSpecialties, education: $education, email: $email, graduationYear: $graduationYear, licenseNumber: $licenseNumber, experience: $experience, currentWorkplace: $currentWorkplace, phone: $phone, address: $address, verifiID: $verifiID, status: $status, isVerified: $isVerified, avatar: $avatar, schedule: $schedule, role: $role)';
   }
 
   @override
@@ -417,30 +481,33 @@ class _$DoctorImpl implements _Doctor {
             (identical(other.isVerified, isVerified) ||
                 other.isVerified == isVerified) &&
             (identical(other.avatar, avatar) || other.avatar == avatar) &&
-            const DeepCollectionEquality().equals(other._schedule, _schedule));
+            const DeepCollectionEquality().equals(other._schedule, _schedule) &&
+            (identical(other.role, role) || other.role == role));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      fullName,
-      specialty,
-      otherSpecialties,
-      education,
-      email,
-      graduationYear,
-      licenseNumber,
-      experience,
-      currentWorkplace,
-      phone,
-      address,
-      verifiID,
-      status,
-      isVerified,
-      avatar,
-      const DeepCollectionEquality().hash(_schedule));
+    runtimeType,
+    id,
+    fullName,
+    specialty,
+    otherSpecialties,
+    education,
+    email,
+    graduationYear,
+    licenseNumber,
+    experience,
+    currentWorkplace,
+    phone,
+    address,
+    verifiID,
+    status,
+    isVerified,
+    avatar,
+    const DeepCollectionEquality().hash(_schedule),
+    role,
+  );
 
   /// Create a copy of Doctor
   /// with the given fields replaced by the non-null parameter values.
@@ -452,31 +519,31 @@ class _$DoctorImpl implements _Doctor {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DoctorImplToJson(
-      this,
-    );
+    return _$$DoctorImplToJson(this);
   }
 }
 
 abstract class _Doctor implements Doctor {
-  const factory _Doctor(
-      {@JsonKey(name: '_id') required final String id,
-      required final String fullName,
-      final String? specialty,
-      final String? otherSpecialties,
-      final String? education,
-      final String? email,
-      final int? graduationYear,
-      final String? licenseNumber,
-      final int? experience,
-      final String? currentWorkplace,
-      final String? phone,
-      final String? address,
-      final String? verifiID,
-      final String status,
-      final bool isVerified,
-      final String? avatar,
-      final Map<String, dynamic>? schedule}) = _$DoctorImpl;
+  const factory _Doctor({
+    @JsonKey(name: '_id') required final String id,
+    required final String fullName,
+    final String? specialty,
+    final String? otherSpecialties,
+    final String? education,
+    final String? email,
+    final int? graduationYear,
+    final String? licenseNumber,
+    final int? experience,
+    final String? currentWorkplace,
+    final String? phone,
+    final String? address,
+    final String? verifiID,
+    final String status,
+    final bool isVerified,
+    final String? avatar,
+    final Map<String, dynamic>? schedule,
+    final String role,
+  }) = _$DoctorImpl;
 
   factory _Doctor.fromJson(Map<String, dynamic> json) = _$DoctorImpl.fromJson;
 
@@ -515,6 +582,8 @@ abstract class _Doctor implements Doctor {
   String? get avatar;
   @override
   Map<String, dynamic>? get schedule;
+  @override
+  String get role;
 
   /// Create a copy of Doctor
   /// with the given fields replaced by the non-null parameter values.

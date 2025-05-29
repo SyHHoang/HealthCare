@@ -21,9 +21,10 @@ _$FeedbackImpl _$$FeedbackImplFromJson(Map<String, dynamic> json) =>
       images:
           (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
       userId: json['userId'] as String?,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
+      createdAt:
+          json['createdAt'] == null
+              ? null
+              : DateTime.parse(json['createdAt'] as String),
     );
 
 Map<String, dynamic> _$$FeedbackImplToJson(_$FeedbackImpl instance) =>

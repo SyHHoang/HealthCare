@@ -6,7 +6,7 @@ part of 'doctor_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$doctorServiceHash() => r'6924aa37213661f1b9b7afb520325c7c36cbb8e6';
+String _$doctorServiceHash() => r'a4830944411b6db8edc398648935e37c4385ad55';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -105,25 +105,26 @@ class DoctorServiceProvider
     int? page,
     int? limit,
   }) : this._internal(
-          () => DoctorService()
-            ..specialty = specialty
-            ..searchQuery = searchQuery
-            ..page = page
-            ..limit = limit,
-          from: doctorServiceProvider,
-          name: r'doctorServiceProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$doctorServiceHash,
-          dependencies: DoctorServiceFamily._dependencies,
-          allTransitiveDependencies:
-              DoctorServiceFamily._allTransitiveDependencies,
-          specialty: specialty,
-          searchQuery: searchQuery,
-          page: page,
-          limit: limit,
-        );
+         () =>
+             DoctorService()
+               ..specialty = specialty
+               ..searchQuery = searchQuery
+               ..page = page
+               ..limit = limit,
+         from: doctorServiceProvider,
+         name: r'doctorServiceProvider',
+         debugGetCreateSourceHash:
+             const bool.fromEnvironment('dart.vm.product')
+                 ? null
+                 : _$doctorServiceHash,
+         dependencies: DoctorServiceFamily._dependencies,
+         allTransitiveDependencies:
+             DoctorServiceFamily._allTransitiveDependencies,
+         specialty: specialty,
+         searchQuery: searchQuery,
+         page: page,
+         limit: limit,
+       );
 
   DoctorServiceProvider._internal(
     super._createNotifier, {
@@ -144,9 +145,7 @@ class DoctorServiceProvider
   final int? limit;
 
   @override
-  FutureOr<List<Doctor>> runNotifierBuild(
-    covariant DoctorService notifier,
-  ) {
+  FutureOr<List<Doctor>> runNotifierBuild(covariant DoctorService notifier) {
     return notifier.build(
       specialty: specialty,
       searchQuery: searchQuery,
@@ -160,11 +159,12 @@ class DoctorServiceProvider
     return ProviderOverride(
       origin: this,
       override: DoctorServiceProvider._internal(
-        () => create()
-          ..specialty = specialty
-          ..searchQuery = searchQuery
-          ..page = page
-          ..limit = limit,
+        () =>
+            create()
+              ..specialty = specialty
+              ..searchQuery = searchQuery
+              ..page = page
+              ..limit = limit,
         from: from,
         name: null,
         dependencies: null,
@@ -180,7 +180,7 @@ class DoctorServiceProvider
 
   @override
   AutoDisposeAsyncNotifierProviderElement<DoctorService, List<Doctor>>
-      createElement() {
+  createElement() {
     return _DoctorServiceProviderElement(this);
   }
 
@@ -235,5 +235,6 @@ class _DoctorServiceProviderElement
   @override
   int? get limit => (origin as DoctorServiceProvider).limit;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

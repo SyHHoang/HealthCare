@@ -44,13 +44,15 @@ String _$newsLoadedHash() => r'cdbbcdbb0486c7df18b7db920119345383a6203d';
 @ProviderFor(NewsLoaded)
 final newsLoadedProvider =
     AutoDisposeNotifierProvider<NewsLoaded, bool>.internal(
-  NewsLoaded.new,
-  name: r'newsLoadedProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$newsLoadedHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      NewsLoaded.new,
+      name: r'newsLoadedProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$newsLoadedHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$NewsLoaded = AutoDisposeNotifier<bool>;
 String _$newsNotifierHash() => r'b9fccca4e08baa8f88adfcb25a604821575956bd';
@@ -59,13 +61,15 @@ String _$newsNotifierHash() => r'b9fccca4e08baa8f88adfcb25a604821575956bd';
 @ProviderFor(NewsNotifier)
 final newsNotifierProvider =
     AsyncNotifierProvider<NewsNotifier, List<News>>.internal(
-  NewsNotifier.new,
-  name: r'newsNotifierProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$newsNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      NewsNotifier.new,
+      name: r'newsNotifierProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$newsNotifierHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$NewsNotifier = AsyncNotifier<List<News>>;
 // ignore_for_file: type=lint

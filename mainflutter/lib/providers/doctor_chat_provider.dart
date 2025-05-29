@@ -91,18 +91,33 @@ class DoctorChatMessagesNotifier extends StateNotifier<AsyncValue<List<dynamic>>
             ? Map<String, dynamic>.from(data) 
             : {};
             
+        debugPrint('===================================================================================');
         debugPrint('Nhận tin nhắn mới qua socket trong chat $_chatId');
+        debugPrint('Nội dung tin nhắn: ${messageData['content']}');
+        debugPrint('Người gửi: ${messageData['sender']}');
+        debugPrint('Model người gửi: ${messageData['sender']['role']}');
         
         state.whenData((messages) {
-          final messageExists = messages.any((msg) => 
-              msg['_id'] == messageData['_id'] || 
-              (msg['content'] == messageData['content'] && 
-               msg['sender'] == messageData['sender']));
+          final messageExists = messages.any((msg) {
+            final msgId = msg['_id'] ?? msg['id'];
+            final newMsgId = messageData['_id'] ?? messageData['id'];
+            return msgId == newMsgId;
+          });
           
           if (!messageExists) {
             final updatedMessages = List<dynamic>.from(messages);
             updatedMessages.add(messageData);
+            
+            updatedMessages.sort((a, b) {
+              final timeA = DateTime.parse(a['createdAt']);
+              final timeB = DateTime.parse(b['createdAt']);
+              return timeA.compareTo(timeB);
+            });
+            
             state = AsyncValue.data(updatedMessages);
+            debugPrint('Đã thêm tin nhắn mới, tổng số tin nhắn: ${updatedMessages.length}');
+          } else {
+            debugPrint('Tin nhắn đã tồn tại, bỏ qua');
           }
         });
       }

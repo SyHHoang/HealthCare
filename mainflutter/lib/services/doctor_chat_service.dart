@@ -55,7 +55,9 @@ class DoctorChatService {
           'Authorization': 'Bearer $token',
         },
       );
-
+      for (var i in json.decode(response.body)) {
+        debugPrint('tin nhắn lấy từ flutter: $i');
+      }
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
