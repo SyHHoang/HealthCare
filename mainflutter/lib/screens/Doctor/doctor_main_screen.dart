@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/doctor.dart';
 import '../../widgets/doctor_bottom_nav_bar.dart';
+import '../../services/socket_service.dart';
+import '../../services/token_service.dart';
 import 'doctor_home_screen.dart';
 import 'doctor_consultation_history_screen.dart';
 import 'doctor_patients_screen.dart';
@@ -23,6 +25,69 @@ class DoctorMainScreen extends ConsumerStatefulWidget {
 
 class _DoctorMainScreenState extends ConsumerState<DoctorMainScreen> {
   int _selectedIndex = 0;
+  final SocketService _socketService = SocketService.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectSocket();
+  }
+
+  Future<void> _connectSocket() async {
+    try {
+      // Lấy token trước khi kết nối
+      final token = await TokenService.getToken();
+      if (token == null) {
+        throw Exception('Không tìm thấy token');
+      }
+      
+      debugPrint('🔑 Token hiện tại: ${token.substring(0, 15)}...');
+      
+      // Kết nối socket
+      await _socketService.connect();
+      
+      // Thiết lập các listeners cơ bản
+      _setupSocketListeners();
+    } catch (e) {
+      debugPrint('❌ Lỗi kết nối socket: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi kết nối: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _setupSocketListeners() {
+    debugPrint('🔄 Đang thiết lập socket listeners...');
+    
+    // Thêm listener cho trạng thái online/offline của bệnh nhân
+    _socketService.addUserOnlineListener((userId) {
+      debugPrint('🟢 Bệnh nhân online: $userId');
+    });
+
+    _socketService.addUserOfflineListener((userId) {
+      debugPrint('🔴 Bệnh nhân offline: $userId');
+    });
+
+    // Thêm listener cho trạng thái đang nhập
+    _socketService.addTypingListener((userId) {
+      debugPrint('⌨️ Bệnh nhân đang nhập: $userId');
+    });
+
+    _socketService.addStopTypingListener((userId) {
+      debugPrint('⏹️ Bệnh nhân dừng nhập: $userId');
+    });
+  }
+
+  @override
+  void dispose() {
+    // Không disconnect socket ở đây vì chúng ta muốn duy trì kết nối
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     setState(() {

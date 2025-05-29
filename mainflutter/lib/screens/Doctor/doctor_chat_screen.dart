@@ -38,32 +38,25 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
   @override
   void initState() {
     super.initState();
-    _connectSocketAndLoadChat();
+    _setupChat();
   }
 
-  Future<void> _connectSocketAndLoadChat() async {
+  Future<void> _setupChat() async {
     try {
-      // Lấy token trước khi kết nối
-      final token = await TokenService.getToken();
-      if (token == null) {
-        throw Exception('Không tìm thấy token');
-      }
-      
-      debugPrint('🔑 Token hiện tại: ${token.substring(0, 15)}...');
-      
-      // Kết nối socket trước
-      await _socketService.connect();
-      
-      // Sau khi kết nối socket thành công, tham gia chat và tải lịch sử
+      // Tham gia vào phòng chat
       _socketService.joinChat(widget.chatId);
+      
+      // Tải lịch sử chat
       await _loadChatHistory();
-      _setupSocketListeners();
+      
+      // Thiết lập các listeners cho chat
+      _setupChatListeners();
     } catch (e) {
-      debugPrint('❌ Lỗi kết nối socket: $e');
+      debugPrint('❌ Lỗi thiết lập chat: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi kết nối: $e'),
+            content: Text('Lỗi thiết lập chat: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -71,8 +64,8 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     }
   }
 
-  void _setupSocketListeners() {
-    debugPrint('🔄 Đang thiết lập socket listeners...');
+  void _setupChatListeners() {
+    debugPrint('🔄 Đang thiết lập chat listeners...');
     debugPrint('  - Chat ID: ${widget.chatId}');
     debugPrint('  - Patient ID: ${widget.patientId}');
     
