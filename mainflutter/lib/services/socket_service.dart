@@ -43,7 +43,7 @@ class SocketService {
       debugPrint('  - Role: $role');
       debugPrint('  - URL: http://192.168.2.101:5000');
 
-      _socket = IO.io('http://10.0.54.158:5000', <String, dynamic>{
+      _socket = IO.io('http://10.0.54.26:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],
         'autoConnect': true,
         'auth': {

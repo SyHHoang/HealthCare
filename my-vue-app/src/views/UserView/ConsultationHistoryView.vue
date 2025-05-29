@@ -341,10 +341,19 @@ const initializeCall = async (consultationId) => {
     console.log('✅ Local tracks added');
 
     // Xử lý remote stream
-    peerConnection.ontrack = event => {
+    peerConnection.ontrack = (event) => {
       console.log('=== RECEIVED REMOTE TRACK ===');
-      remoteVideo.value.srcObject = event.streams[0];
-      console.log('✅ Remote stream set');
+      console.log('Event:', event);
+      console.log('Streams:', event.streams);
+      console.log('Track:', event.track);
+      
+      if (event.streams && event.streams[0]) {
+        console.log('Setting remote stream to video element');
+        remoteVideo.value.srcObject = event.streams[0];
+        console.log('✅ Remote stream set successfully');
+      } else {
+        console.error('❌ No streams found in track event');
+      }
     };
 
     // Xử lý ICE candidate
