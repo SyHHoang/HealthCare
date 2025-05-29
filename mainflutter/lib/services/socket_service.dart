@@ -43,7 +43,7 @@ class SocketService {
       debugPrint('  - Role: $role');
       debugPrint('  - URL: http://192.168.2.101:5000');
 
-      _socket = IO.io('http://localhost:5000', <String, dynamic>{
+      _socket = IO.io('http://10.0.54.158:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],
         'autoConnect': true,
         'auth': {
@@ -301,5 +301,21 @@ class SocketService {
     
     debugPrint('Gửi sự kiện $event qua socket: $data');
     _socket!.emit(event, data);
+  }
+
+  void on(String event, Function(dynamic) handler) {
+    if (_socket != null) {
+      _socket!.on(event, handler);
+    }
+  }
+
+  void off(String event, [Function(dynamic)? handler]) {
+    if (_socket != null) {
+      if (handler != null) {
+        _socket!.off(event, handler);
+      } else {
+        _socket!.off(event);
+      }
+    }
   }
 } 

@@ -38,6 +38,7 @@ import orderTypeRoutes from './routes/orderTypeRoutes.js';
 import videoCallRoutes from './routes/videoCallRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import Consultation from './models/Consultation.js';
 
 // Tạo __dirname cho ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -64,6 +65,49 @@ const io = new Server(server, {
 // Lưu trữ kết nối socket của người dùng và bác sĩ
 const userSockets = new Map();
 const doctorSockets = new Map();
+
+// Lưu trữ thông tin phòng video call
+const videoCallRooms = new Map();
+
+// Hàm kiểm tra thời gian tư vấn
+const isConsultationTime = (consultationDate) => {
+  const now = new Date();
+  const consultationTime = new Date(consultationDate);
+  const timeDiff = Math.abs(consultationTime - now);
+  return timeDiff <= 15 * 60 * 1000; // Cho phép vào phòng trước/sau 15 phút
+};
+
+// Hàm tạo phòng video call
+const createVideoCallRoom = (consultationId, consultationDate) => {
+  const roomId = `video_call_${consultationId}`;
+  videoCallRooms.set(roomId, {
+    consultationId,
+    consultationDate,
+    participants: new Set(),
+    createdAt: new Date()
+  });
+  console.log('=== VIDEO CALL ROOM CREATED ===');
+  console.log('Room ID:', roomId);
+  console.log('Consultation Date:', consultationDate);
+  return roomId;
+};
+
+// Hàm kiểm tra và dọn dẹp phòng cũ
+const cleanupOldRooms = () => {
+  const now = new Date();
+  for (const [roomId, room] of videoCallRooms.entries()) {
+    const consultationTime = new Date(room.consultationDate);
+    const timeDiff = Math.abs(consultationTime - now);
+    if (timeDiff > 30 * 60 * 1000) { // Xóa phòng sau 30 phút
+      console.log('=== CLEANING UP OLD ROOM ===');
+      console.log('Room ID:', roomId);
+      videoCallRooms.delete(roomId);
+    }
+  }
+};
+
+// Chạy cleanup mỗi 5 phút
+setInterval(cleanupOldRooms, 5 * 60 * 1000);
 
 // Middleware xác thực socket
 io.use(async (socket, next) => {
@@ -215,7 +259,7 @@ io.on('connection', (socket) => {
   });
 
   // Video call events
-  socket.on('join_video_call', (data, callback) => {
+  socket.on('join_video_call', async (data, callback) => {
     const { consultationId } = data;
     
     if (!consultationId) {
@@ -231,33 +275,63 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const roomId = `video_call_${consultationId}`;
-    
-    // Tham gia vào room video call
-    socket.join(roomId);
-    console.log('=== VIDEO CALL JOIN ===');
-    console.log(`Room ID: ${roomId}`);
-    console.log(`User ID: ${socket.userId}`);
-    console.log(`Role: ${socket.role}`);
-    console.log(`Socket ID: ${socket.id}`);
-    console.log('=====================');
+    try {
+      // Lấy thông tin cuộc tư vấn từ database
+      const consultation = await Consultation.findById(consultationId);
+      if (!consultation) {
+        throw new Error('Consultation not found');
+      }
 
-    // Thông báo cho người kia biết đã vào phòng
-    socket.to(roomId).emit('participant_joined', {
-      userId: socket.userId,
-      role: socket.role,
-      socketId: socket.id
-    });
+      // Kiểm tra thời gian
+      if (!isConsultationTime(consultation.consultationDate)) {
+        throw new Error('Not consultation time');
+      }
 
-    // Gọi callback để thông báo thành công
-    if (callback) {
-      callback({ 
-        success: true, 
-        roomId: roomId,
+      // Tạo hoặc lấy phòng
+      let roomId = `video_call_${consultationId}`;
+      if (!videoCallRooms.has(roomId)) {
+        roomId = createVideoCallRoom(consultationId, consultation.consultationDate);
+      }
+
+      const room = videoCallRooms.get(roomId);
+      
+      // Tham gia vào room video call
+      socket.join(roomId);
+      room.participants.add(socket.id);
+      
+      console.log('=== VIDEO CALL JOIN ===');
+      console.log(`Room ID: ${roomId}`);
+      console.log(`User ID: ${socket.userId}`);
+      console.log(`Role: ${socket.role}`);
+      console.log(`Socket ID: ${socket.id}`);
+      console.log(`Participants: ${room.participants.size}`);
+      console.log('=====================');
+
+      // Thông báo cho người kia biết đã vào phòng
+      socket.to(roomId).emit('participant_joined', {
         userId: socket.userId,
         role: socket.role,
         socketId: socket.id
       });
+
+      // Gọi callback để thông báo thành công
+      if (callback) {
+        callback({ 
+          success: true, 
+          roomId: roomId,
+          userId: socket.userId,
+          role: socket.role,
+          socketId: socket.id,
+          participants: Array.from(room.participants)
+        });
+      }
+    } catch (error) {
+      console.error('=== VIDEO CALL ERROR ===');
+      console.error(error.message);
+      if (callback) {
+        callback({ success: false, message: error.message });
+      }
+      socket.emit('error', { message: error.message });
     }
   });
 
@@ -267,19 +341,33 @@ io.on('connection', (socket) => {
     
     // Rời khỏi room video call
     socket.leave(roomId);
-    console.log('=== VIDEO CALL LEAVE ===');
-    console.log(`Room ID: ${roomId}`);
-    console.log(`User ID: ${socket.userId}`);
-    console.log(`Role: ${socket.role}`);
-    console.log(`Socket ID: ${socket.id}`);
-    console.log('======================');
+    
+    // Cập nhật danh sách người tham gia
+    const room = videoCallRooms.get(roomId);
+    if (room) {
+      room.participants.delete(socket.id);
+      console.log('=== VIDEO CALL LEAVE ===');
+      console.log(`Room ID: ${roomId}`);
+      console.log(`User ID: ${socket.userId}`);
+      console.log(`Role: ${socket.role}`);
+      console.log(`Socket ID: ${socket.id}`);
+      console.log(`Remaining participants: ${room.participants.size}`);
+      console.log('======================');
 
-    // Thông báo cho người kia biết đã rời phòng
-    socket.to(roomId).emit('participant_left', {
-      userId: socket.userId,
-      role: socket.role,
-      socketId: socket.id
-    });
+      // Thông báo cho người kia biết đã rời phòng
+      socket.to(roomId).emit('participant_left', {
+        userId: socket.userId,
+        role: socket.role,
+        socketId: socket.id
+      });
+
+      // Nếu không còn người tham gia, xóa phòng
+      if (room.participants.size === 0) {
+        videoCallRooms.delete(roomId);
+        console.log('=== ROOM DELETED ===');
+        console.log(`Room ID: ${roomId}`);
+      }
+    }
   });
 
   socket.on('video_call_offer', (data) => {

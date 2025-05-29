@@ -2,20 +2,23 @@
   <div class="consultation-history-container">
     <!-- Video Call Modal -->
     <div v-if="showVideoCall" class="video-call-modal">
-      <div class="video-grid">
-        <div class="video-box">
+      <div class="video-grid" :class="{ 'expanded': expandedVideo }">
+        <div class="video-box" :class="{ 'expanded': expandedVideo === 'local' }" @click="toggleExpand('local')">
           <video ref="localVideo" autoplay muted playsinline></video>
           <span class="video-label">Bạn</span>
+          <button class="expand-btn" @click.stop="toggleExpand('local')">
+            <i :class="expandedVideo === 'local' ? 'fas fa-compress' : 'fas fa-expand'"></i>
+          </button>
         </div>
-        <div class="video-box">
+        <div class="video-box" :class="{ 'expanded': expandedVideo === 'remote' }" @click="toggleExpand('remote')">
           <video ref="remoteVideo" autoplay playsinline></video>
           <span class="video-label">Bệnh nhân</span>
+          <button class="expand-btn" @click.stop="toggleExpand('remote')">
+            <i :class="expandedVideo === 'remote' ? 'fas fa-compress' : 'fas fa-expand'"></i>
+          </button>
         </div>
       </div>
       <div class="controls">
-        <div class="timer" :class="{ 'warning': remainingTime <= 300 }">
-          Thời gian còn lại: {{ formatTime(remainingTime) }}
-        </div>
         <button class="btn btn-danger" @click="endCall">
           <i class="fas fa-phone-slash"></i> Kết thúc
         </button>
@@ -102,11 +105,6 @@
                   <i class="fas fa-calendar-alt me-2"></i>
                   {{ formatDate(nextConsultation.consultationDate) }}
                 </p>
-                        <div class="countdown">
-                  <span class="badge bg-primary">
-                    Còn {{ formatCountdown(nextConsultation.consultationDate) }}
-                  </span>
-                </div>
               </div>
               <div class="col-md-2 text-end">
                 <button 
@@ -241,11 +239,10 @@ const localVideo = ref(null);
 const remoteVideo = ref(null);
 const cameraEnabled = ref(true);
 const micEnabled = ref(true);
-const remainingTime = ref(30 * 60);
 let localStream = null;
 let peerConnection = null;
-let timerInterval = null;
 let currentConsultationId = null;
+const expandedVideo = ref(null);
 
 const loadConsultationHistory = async () => {
   try {
@@ -283,46 +280,11 @@ const formatDate = (dateString) => {
   });
 };
 
-const formatCountdown = (dateString) => {
-  const now = new Date();
-  const target = new Date(dateString);
-  const diff = target - now;
-
-  if (diff <= 0) return 'Đã đến giờ';
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-  let result = '';
-  if (days > 0) result += `${days} ngày `;
-  if (hours > 0) result += `${hours} giờ `;
-  if (minutes > 0) result += `${minutes} phút`;
-
-  return result.trim();
-};
-
 const isConsultationTime = (consultationDate) => {
   const now = new Date();
   const consultationTime = new Date(consultationDate);
   const timeDiff = consultationTime - now;
   return Math.abs(timeDiff) <= 15 * 60 * 1000;
-};
-
-const formatTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
-
-const startTimer = () => {
-  timerInterval = setInterval(() => {
-    remainingTime.value--;
-    if (remainingTime.value <= 0) {
-      clearInterval(timerInterval);
-      endCall();
-    }
-  }, 1000);
 };
 
 const initializeCall = async (consultationId) => {
@@ -331,63 +293,79 @@ const initializeCall = async (consultationId) => {
     console.log('Consultation ID:', consultationId);
 
     // Lấy stream từ camera và mic
+    console.log('=== GETTING USER MEDIA ===');
     localStream = await navigator.mediaDevices.getUserMedia({ 
       video: true, 
       audio: true 
     });
     localVideo.value.srcObject = localStream;
+    console.log('✅ Got local media stream');
 
     // Tạo peer connection
+    console.log('=== CREATING PEER CONNECTION ===');
     peerConnection = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' }
       ]
     });
+    console.log('✅ Peer connection created');
 
     // Thêm stream local vào peer connection
+    console.log('=== ADDING LOCAL TRACKS ===');
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
+    console.log('✅ Local tracks added');
 
     // Xử lý remote stream
     peerConnection.ontrack = event => {
+      console.log('=== RECEIVED REMOTE TRACK ===');
       remoteVideo.value.srcObject = event.streams[0];
+      console.log('✅ Remote stream set');
     };
 
     // Xử lý ICE candidate
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
+        console.log('=== VIDEO CALL ICE CANDIDATE ===');
+        console.log('Consultation ID:', consultationId);
+        console.log('Candidate:', event.candidate);
         socketService.emit('video_call_ice_candidate', {
           consultationId: consultationId,
           candidate: event.candidate
         });
+        console.log('✅ ICE candidate sent');
       }
     };
 
     // Tham gia vào room video call
+    console.log('=== JOINING VIDEO CALL ROOM ===');
+    console.log('Consultation ID:', consultationId);
     socketService.emit('join_video_call', { 
       consultationId: consultationId 
     });
+    console.log('✅ Joined video call room');
 
     // Lắng nghe các sự kiện từ socket
+    console.log('=== SETTING UP SOCKET LISTENERS ===');
     socketService.on('participant_joined', handleParticipantJoined);
     socketService.on('participant_left', handleParticipantLeft);
     socketService.on('video_call_offer', handleOffer);
     socketService.on('video_call_answer', handleAnswer);
     socketService.on('video_call_ice_candidate', handleIceCandidate);
     socketService.on('video_call_ended', handleCallEnd);
+    console.log('✅ Socket listeners set up');
 
     // Đợi offer từ user
+    console.log('=== WAITING FOR PATIENT OFFER ===');
     toast.add({
       severity: 'info',
       summary: 'Đang chờ bệnh nhân',
       detail: 'Vui lòng đợi bệnh nhân tham gia cuộc gọi',
       life: 3000
     });
-
-    startTimer();
   } catch (error) {
-    console.error('Lỗi khởi tạo cuộc gọi:', error);
+    console.error('❌ Error initializing call:', error);
     toast.add({
       severity: 'error',
       summary: 'Lỗi',
@@ -419,15 +397,29 @@ const handleParticipantLeft = (data) => {
 
 const handleOffer = async (data) => {
   try {
+    console.log('=== RECEIVED OFFER ===');
+    console.log('Data:', data);
+    
+    console.log('=== SETTING REMOTE DESCRIPTION ===');
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+    console.log('✅ Remote description set');
+
+    console.log('=== CREATING ANSWER ===');
     const answer = await peerConnection.createAnswer();
+    console.log('✅ Answer created:', answer);
+
+    console.log('=== SETTING LOCAL DESCRIPTION ===');
     await peerConnection.setLocalDescription(answer);
+    console.log('✅ Local description set');
+
+    console.log('=== SENDING ANSWER ===');
     socketService.emit('video_call_answer', {
       consultationId: currentConsultationId,
       answer: answer
     });
+    console.log('✅ Answer sent');
   } catch (error) {
-    console.error('Lỗi xử lý offer:', error);
+    console.error('❌ Error handling offer:', error);
   }
 };
 
@@ -441,9 +433,12 @@ const handleAnswer = async (data) => {
 
 const handleIceCandidate = async (data) => {
   try {
+    console.log('=== RECEIVED ICE CANDIDATE ===');
+    console.log('Data:', data);
     await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    console.log('✅ Đã thêm ICE candidate');
   } catch (error) {
-    console.error('Lỗi xử lý ICE candidate:', error);
+    console.error('❌ Error handling ICE candidate:', error);
   }
 };
 
@@ -457,9 +452,6 @@ const endCall = () => {
   }
   if (peerConnection) {
     peerConnection.close();
-  }
-  if (timerInterval) {
-    clearInterval(timerInterval);
   }
   
   socketService.emit('leave_video_call', {
@@ -544,6 +536,14 @@ const startVideoCall = async (consultationId) => {
   }
 };
 
+const toggleExpand = (video) => {
+  if (expandedVideo.value === video) {
+    expandedVideo.value = null;
+  } else {
+    expandedVideo.value = video;
+  }
+};
+
 onMounted(() => {
   loadConsultationHistory();
 
@@ -584,9 +584,6 @@ onUnmounted(() => {
   }
   if (peerConnection) {
     peerConnection.close();
-  }
-  if (timerInterval) {
-    clearInterval(timerInterval);
   }
   if (currentConsultationId) {
     socketService.emit('leave_video_call', {
@@ -668,15 +665,6 @@ onUnmounted(() => {
   background-color: #e3f2fd;
 }
 
-.countdown {
-  margin-top: 10px;
-}
-
-.countdown .badge {
-  font-size: 1rem;
-  padding: 8px 16px;
-}
-
 .video-call-modal {
   position: fixed;
   top: 0;
@@ -697,6 +685,11 @@ onUnmounted(() => {
   padding: 20px;
   flex-grow: 1;
   height: calc(100vh - 100px);
+  transition: all 0.3s ease;
+}
+
+.video-grid.expanded {
+  grid-template-columns: 1fr;
 }
 
 .video-box {
@@ -705,6 +698,18 @@ onUnmounted(() => {
   border-radius: 10px;
   overflow: hidden;
   height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-box.expanded {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  border-radius: 0;
 }
 
 .video-box video {
@@ -753,27 +758,6 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-.timer {
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding: 12px 24px;
-  border-radius: 50px;
-  background-color: rgba(40, 167, 69, 0.9);
-  color: white;
-}
-
-.timer.warning {
-  background-color: rgba(255, 193, 7, 0.9);
-  color: black;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
 .btn-danger {
   background-color: #dc3545;
   color: white;
@@ -782,6 +766,36 @@ onUnmounted(() => {
 .btn-secondary {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+.expand-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.expand-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.video-box.expanded .expand-btn {
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {
@@ -818,11 +832,6 @@ onUnmounted(() => {
   .controls button {
     padding: 10px 20px;
     font-size: 0.9rem;
-  }
-
-  .timer {
-    font-size: 1rem;
-    padding: 10px 20px;
   }
 }
 </style> 

@@ -2,14 +2,20 @@
   <div class="consultation-history-container">
     <!-- Video Call Modal -->
     <div v-if="showVideoCall" class="video-call-modal">
-      <div class="video-grid">
-        <div class="video-box">
+      <div class="video-grid" :class="{ 'expanded': expandedVideo }">
+        <div class="video-box" :class="{ 'expanded': expandedVideo === 'local' }" @click="toggleExpand('local')">
           <video ref="localVideo" autoplay muted playsinline></video>
           <span class="video-label">Bạn</span>
+          <button class="expand-btn" @click.stop="toggleExpand('local')">
+            <i :class="expandedVideo === 'local' ? 'fas fa-compress' : 'fas fa-expand'"></i>
+          </button>
         </div>
-        <div class="video-box">
+        <div class="video-box" :class="{ 'expanded': expandedVideo === 'remote' }" @click="toggleExpand('remote')">
           <video ref="remoteVideo" autoplay playsinline></video>
           <span class="video-label">Bác sĩ</span>
+          <button class="expand-btn" @click.stop="toggleExpand('remote')">
+            <i :class="expandedVideo === 'remote' ? 'fas fa-compress' : 'fas fa-expand'"></i>
+          </button>
         </div>
       </div>
       <div class="controls">
@@ -228,11 +234,10 @@ const localVideo = ref(null);
 const remoteVideo = ref(null);
 const cameraEnabled = ref(true);
 const micEnabled = ref(true);
-const remainingTime = ref(30 * 60);
 let localStream = null;
 let peerConnection = null;
-let timerInterval = null;
 let currentConsultationId = null;
+const expandedVideo = ref(null);
 
 const loadConsultationHistory = async () => {
   try {
@@ -305,79 +310,92 @@ const formatTime = (seconds) => {
   return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-const startTimer = () => {
-  timerInterval = setInterval(() => {
-    remainingTime.value--;
-    if (remainingTime.value <= 0) {
-      clearInterval(timerInterval);
-      endCall();
-    }
-  }, 1000);
-};
-
 const initializeCall = async (consultationId) => {
   try {
     console.log('=== INITIALIZING VIDEO CALL ===');
     console.log('Consultation ID:', consultationId);
 
     // Lấy stream từ camera và mic
+    console.log('=== GETTING USER MEDIA ===');
     localStream = await navigator.mediaDevices.getUserMedia({ 
       video: true, 
       audio: true 
     });
     localVideo.value.srcObject = localStream;
+    console.log('✅ Got local media stream');
 
     // Tạo peer connection
+    console.log('=== CREATING PEER CONNECTION ===');
     peerConnection = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' }
       ]
     });
+    console.log('✅ Peer connection created');
 
     // Thêm stream local vào peer connection
+    console.log('=== ADDING LOCAL TRACKS ===');
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
+    console.log('✅ Local tracks added');
 
     // Xử lý remote stream
     peerConnection.ontrack = event => {
+      console.log('=== RECEIVED REMOTE TRACK ===');
       remoteVideo.value.srcObject = event.streams[0];
+      console.log('✅ Remote stream set');
     };
 
     // Xử lý ICE candidate
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
+        console.log('=== VIDEO CALL ICE CANDIDATE ===');
+        console.log('Consultation ID:', consultationId);
+        console.log('Candidate:', event.candidate);
         socketService.emit('video_call_ice_candidate', {
           consultationId: consultationId,
           candidate: event.candidate
         });
+        console.log('✅ ICE candidate sent');
       }
     };
 
     // Tham gia vào room video call
+    console.log('=== JOINING VIDEO CALL ROOM ===');
+    console.log('Consultation ID:', consultationId);
     socketService.emit('join_video_call', { 
       consultationId: consultationId 
     });
+    console.log('✅ Joined video call room');
 
     // Lắng nghe các sự kiện từ socket
+    console.log('=== SETTING UP SOCKET LISTENERS ===');
     socketService.on('participant_joined', handleParticipantJoined);
     socketService.on('participant_left', handleParticipantLeft);
     socketService.on('video_call_offer', handleOffer);
     socketService.on('video_call_answer', handleAnswer);
     socketService.on('video_call_ice_candidate', handleIceCandidate);
     socketService.on('video_call_ended', handleCallEnd);
+    console.log('✅ Socket listeners set up');
 
-    // User tạo offer
+    // Tạo và gửi offer
+    console.log('=== CREATING OFFER ===');
     const offer = await peerConnection.createOffer();
+    console.log('✅ Offer created:', offer);
+
+    console.log('=== SETTING LOCAL DESCRIPTION ===');
     await peerConnection.setLocalDescription(offer);
+    console.log('✅ Local description set');
+
+    console.log('=== SENDING OFFER ===');
     socketService.emit('video_call_offer', {
       consultationId: consultationId,
       offer: offer
     });
-
-    startTimer();
+    console.log('✅ Offer sent');
   } catch (error) {
-    console.error('Lỗi khởi tạo cuộc gọi:', error);
+    console.error('❌ Error initializing call:', error);
     toast.add({
       severity: 'error',
       summary: 'Lỗi',
@@ -431,9 +449,12 @@ const handleAnswer = async (data) => {
 
 const handleIceCandidate = async (data) => {
   try {
+    console.log('=== RECEIVED ICE CANDIDATE ===');
+    console.log('Data:', data);
     await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    console.log('✅ Đã thêm ICE candidate');
   } catch (error) {
-    console.error('Lỗi xử lý ICE candidate:', error);
+    console.error('❌ Error handling ICE candidate:', error);
   }
 };
 
@@ -447,9 +468,6 @@ const endCall = () => {
   }
   if (peerConnection) {
     peerConnection.close();
-  }
-  if (timerInterval) {
-    clearInterval(timerInterval);
   }
   
   socketService.emit('leave_video_call', {
@@ -534,6 +552,14 @@ const startVideoCall = async (consultationId) => {
   }
 };
 
+const toggleExpand = (video) => {
+  if (expandedVideo.value === video) {
+    expandedVideo.value = null;
+  } else {
+    expandedVideo.value = video;
+  }
+};
+
 onMounted(() => {
   loadConsultationHistory();
   // Không cần lắng nghe các sự kiện socket ở đây vì chúng sẽ được xử lý trong VideoCall component
@@ -545,9 +571,6 @@ onUnmounted(() => {
   }
   if (peerConnection) {
     peerConnection.close();
-  }
-  if (timerInterval) {
-    clearInterval(timerInterval);
   }
   if (currentConsultationId) {
     socketService.emit('leave_video_call', {
@@ -658,6 +681,11 @@ onUnmounted(() => {
   padding: 20px;
   flex-grow: 1;
   height: calc(100vh - 100px);
+  transition: all 0.3s ease;
+}
+
+.video-grid.expanded {
+  grid-template-columns: 1fr;
 }
 
 .video-box {
@@ -666,6 +694,18 @@ onUnmounted(() => {
   border-radius: 10px;
   overflow: hidden;
   height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-box.expanded {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  border-radius: 0;
 }
 
 .video-box video {
@@ -743,6 +783,36 @@ onUnmounted(() => {
 .btn-secondary {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+.expand-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.expand-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.video-box.expanded .expand-btn {
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {

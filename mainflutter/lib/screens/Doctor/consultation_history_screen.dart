@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/doctor.dart';
 import '../../services/token_service.dart';
+import '../../widgets/video_call_widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -18,6 +19,8 @@ class _ConsultationHistoryScreenState extends State<ConsultationHistoryScreen> {
   Map<String, dynamic>? nextConsultation;
   List<dynamic> upcomingConsultations = [];
   List<dynamic> pastConsultations = [];
+  bool showVideoCall = false;
+  String? currentConsultationId;
 
   @override
   void initState() {
@@ -90,8 +93,37 @@ class _ConsultationHistoryScreenState extends State<ConsultationHistoryScreen> {
     return result.trim();
   }
 
+  bool isConsultationTime(String dateString) {
+    final now = DateTime.now();
+    final consultationTime = DateTime.parse(dateString);
+    final timeDiff = consultationTime.difference(now).inMinutes.abs();
+    return timeDiff <= 15;
+  }
+
+  void startVideoCall(String consultationId) {
+    setState(() {
+      currentConsultationId = consultationId;
+      showVideoCall = true;
+    });
+  }
+
+  void endVideoCall() {
+    setState(() {
+      showVideoCall = false;
+      currentConsultationId = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (showVideoCall && currentConsultationId != null) {
+      return VideoCallWidget(
+        consultationId: currentConsultationId!,
+        isDoctor: true,
+        onCallEnd: endVideoCall,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Lịch sử tư vấn')),
       body: loading
@@ -150,6 +182,8 @@ class _ConsultationHistoryScreenState extends State<ConsultationHistoryScreen> {
     final age = user['age']?.toString() ?? '';
     final phone = user['phone'] ?? '';
     final date = consultation['consultationDate'] ?? '';
+    final consultationId = consultation['_id'] ?? '';
+
     return Card(
       color: isNext ? Colors.blue[50] : null,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -183,9 +217,12 @@ class _ConsultationHistoryScreenState extends State<ConsultationHistoryScreen> {
             if (isNext)
               IconButton(
                 icon: const Icon(Icons.video_call, color: Colors.blue),
-                onPressed: () {
-                  // TODO: Thực hiện chức năng gọi video
-                },
+                onPressed: isConsultationTime(date)
+                    ? () => startVideoCall(consultationId)
+                    : null,
+                tooltip: isConsultationTime(date)
+                    ? 'Bắt đầu cuộc gọi video'
+                    : 'Chưa đến thời gian tư vấn',
               ),
           ],
         ),

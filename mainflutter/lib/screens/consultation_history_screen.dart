@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/consultation.dart';
 import '../services/consultation_service.dart';
 import 'package:intl/intl.dart';
-import 'video_call_screen.dart';
+import '../widgets/video_call_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // Provider cho lịch sử cuộc hẹn
@@ -12,11 +12,19 @@ final consultationHistoryProvider = FutureProvider.autoDispose<Map<String, dynam
   return consultationService.getConsultationHistory();
 });
 
-class ConsultationHistoryScreen extends ConsumerWidget {
+class ConsultationHistoryScreen extends ConsumerStatefulWidget {
   const ConsultationHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsultationHistoryScreen> createState() => _ConsultationHistoryScreenState();
+}
+
+class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryScreen> {
+  bool showVideoCall = false;
+  String? currentConsultationId;
+
+  @override
+  Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -35,17 +43,28 @@ class ConsultationHistoryScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildUpcomingConsultationsTab(ref),
-            _buildPastConsultationsTab(ref),
-          ],
-        ),
+        body: showVideoCall && currentConsultationId != null
+            ? VideoCallWidget(
+                consultationId: currentConsultationId!,
+                isDoctor: false,
+                onCallEnd: () {
+                  setState(() {
+                    showVideoCall = false;
+                    currentConsultationId = null;
+                  });
+                },
+              )
+            : TabBarView(
+                children: [
+                  _buildUpcomingConsultationsTab(),
+                  _buildPastConsultationsTab(),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildUpcomingConsultationsTab(WidgetRef ref) {
+  Widget _buildUpcomingConsultationsTab() {
     final consultationHistoryAsyncValue = ref.watch(consultationHistoryProvider);
 
     return consultationHistoryAsyncValue.when(
@@ -69,7 +88,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
           child: ListView.builder(
             itemCount: consultations.length,
             itemBuilder: (context, index) {
-              return _buildConsultationCard(context, consultations[index], ref);
+              return _buildConsultationCard(context, consultations[index]);
             },
           ),
         );
@@ -103,7 +122,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPastConsultationsTab(WidgetRef ref) {
+  Widget _buildPastConsultationsTab() {
     final consultationHistoryAsyncValue = ref.watch(consultationHistoryProvider);
 
     return consultationHistoryAsyncValue.when(
@@ -127,7 +146,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
           child: ListView.builder(
             itemCount: consultations.length,
             itemBuilder: (context, index) {
-              return _buildConsultationCard(context, consultations[index], ref, isPast: true);
+              return _buildConsultationCard(context, consultations[index], isPast: true);
             },
           ),
         );
@@ -186,7 +205,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildConsultationCard(BuildContext context, Consultation consultation, WidgetRef ref, {bool isPast = false}) {
+  Widget _buildConsultationCard(BuildContext context, Consultation consultation, {bool isPast = false}) {
     final doctor = consultation.doctor;
     
     if (doctor == null) {
@@ -310,7 +329,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
                   OutlinedButton.icon(
                     icon: const Icon(Icons.videocam),
                     label: const Text('Vào phòng tư vấn'),
-                    onPressed: () => _joinVideoCall(context, consultation, ref),
+                    onPressed: () => _joinVideoCall(consultation),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue,
                       side: const BorderSide(color: Colors.blue),
@@ -394,7 +413,7 @@ class ConsultationHistoryScreen extends ConsumerWidget {
     return true;
   }
 
-  void _joinVideoCall(BuildContext context, Consultation consultation, WidgetRef ref) async {
+  void _joinVideoCall(Consultation consultation) async {
     try {
       debugPrint('=== FLUTTER STARTING VIDEO CALL ===');
       debugPrint('Consultation ID: ${consultation.id}');
@@ -428,18 +447,9 @@ class ConsultationHistoryScreen extends ConsumerWidget {
 
       debugPrint('Quyền truy cập đã được cấp, đang chuyển đến màn hình video call...');
       if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VideoCallScreen(
-              consultationId: consultation.id,
-              isDoctor: false,
-            ),
-          ),
-        ).then((_) {
-          debugPrint('Đã quay lại từ màn hình video call');
-          // Refresh lại danh sách khi quay lại màn hình
-          ref.refresh(consultationHistoryProvider);
+        setState(() {
+          currentConsultationId = consultation.id;
+          showVideoCall = true;
         });
       }
     } catch (e) {
