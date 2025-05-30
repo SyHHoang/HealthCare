@@ -260,14 +260,27 @@ export const getConsultationHistory = async (req, res) => {
       })
       .sort({ consultationDate: -1 });
 
+    console.log("danh sách tư vấn", consultations);
+
     // Tách thành 2 danh sách: đã qua và sắp tới
     const now = new Date();
-    const pastConsultations = consultations.filter(c => new Date(c.consultationDate) < now);
-    const upcomingConsultations = consultations.filter(c => new Date(c.consultationDate) >= now);
+    const pastConsultations = consultations.filter(c => {
+      // Cuộc hẹn đã qua nếu thời gian hiện tại sau thời gian kết thúc
+      return now > c.endTime;
+    });
+
+    const upcomingConsultations = consultations.filter(c => {
+      // Cuộc hẹn sắp tới nếu thời gian hiện tại trước thời gian bắt đầu
+      // hoặc đang trong khoảng thời gian diễn ra (từ consultationDate đến endTime)
+      return now <= c.endTime;
+    });
 
     // Lấy cuộc hẹn sớm nhất
     const nextConsultation = upcomingConsultations.length > 0 ? upcomingConsultations[0] : null;
-
+    console.log("pastConsultations", pastConsultations);
+    console.log("upcomingConsultations", upcomingConsultations);
+    console.log("nextConsultation", nextConsultation);
+  
     res.json({
       success: true,
       data: {
@@ -300,8 +313,16 @@ export const getDoctorConsultationHistory = async (req, res) => {
 
     // Tách thành 2 danh sách: đã qua và sắp tới
     const now = new Date();
-    const pastConsultations = consultations.filter(c => new Date(c.consultationDate) < now);
-    const upcomingConsultations = consultations.filter(c => new Date(c.consultationDate) >= now);
+    const pastConsultations = consultations.filter(c => {
+      // Cuộc hẹn đã qua nếu thời gian hiện tại sau thời gian kết thúc
+      return now > c.endTime;
+    });
+
+    const upcomingConsultations = consultations.filter(c => {
+      // Cuộc hẹn sắp tới nếu thời gian hiện tại trước thời gian bắt đầu
+      // hoặc đang trong khoảng thời gian diễn ra (từ consultationDate đến endTime)
+      return now <= c.endTime;
+    });
 
     // Lấy cuộc hẹn sớm nhất
     const nextConsultation = upcomingConsultations.length > 0 ? upcomingConsultations[0] : null;

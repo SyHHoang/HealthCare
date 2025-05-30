@@ -229,7 +229,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     SocketService.instance.on('participant_left', (data) {
       debugPrint('=== PARTICIPANT LEFT ===');
       debugPrint('Data: $data');
-      _endCall();
+      
+      // Chỉ hiển thị thông báo khi người kia thoát
+      if (data['remainingParticipants'] > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Người tham gia đã rời cuộc gọi'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     });
 
     // Lắng nghe sự kiện video call offer

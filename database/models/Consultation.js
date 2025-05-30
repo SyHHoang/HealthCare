@@ -14,6 +14,9 @@ const consultationSchema = new mongoose.Schema({
     consultationDate: {
         type: Date
     },
+    endTime: {
+        type: Date
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -24,9 +27,15 @@ const consultationSchema = new mongoose.Schema({
     }
 });
 
-// Cập nhật updatedAt trước khi lưu
+// Cập nhật updatedAt và tính endTime trước khi lưu
 consultationSchema.pre('save', function(next) {
     this.updatedAt = new Date();
+    
+    // Luôn tính lại endTime là consultationDate + 30 phút
+    if (this.consultationDate) {
+        this.endTime = new Date(this.consultationDate.getTime() + 30 * 60 * 1000);
+    }
+    
     next();
 });
 

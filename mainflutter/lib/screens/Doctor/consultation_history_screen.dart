@@ -99,8 +99,8 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
   bool isConsultationTime(String dateString) {
     final now = DateTime.now();
     final consultationTime = DateTime.parse(dateString);
-    final timeDiff = consultationTime.difference(now).inMinutes.abs();
-    return timeDiff <= 15;
+    final endTime = consultationTime.add(const Duration(minutes: 30));
+    return now.isAfter(consultationTime) && now.isBefore(endTime);
   }
 
   Future<bool> _checkAndRequestPermissions() async {

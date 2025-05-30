@@ -358,7 +358,8 @@ io.on('connection', (socket) => {
       socket.to(roomId).emit('participant_left', {
         userId: socket.userId,
         role: socket.role,
-        socketId: socket.id
+        socketId: socket.id,
+        remainingParticipants: room.participants.size
       });
 
       // Nếu không còn người tham gia, xóa phòng

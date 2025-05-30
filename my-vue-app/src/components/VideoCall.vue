@@ -229,13 +229,16 @@ const handleParticipantJoined = (data) => {
 const handleParticipantLeft = (data) => {
   console.log('=== PARTICIPANT LEFT ===');
   console.log('Data:', data);
-  toast.add({
-    severity: 'warn',
-    summary: 'Thông báo',
-    detail: 'Người tham gia đã rời cuộc gọi',
-    life: 3000
-  });
-  endCall();
+  
+  // Chỉ hiển thị thông báo khi người kia thoát
+  if (data.remainingParticipants > 0) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Thông báo',
+      detail: 'Người tham gia đã rời cuộc gọi',
+      life: 3000
+    });
+  }
 };
 
 const handleOffer = async (data) => {

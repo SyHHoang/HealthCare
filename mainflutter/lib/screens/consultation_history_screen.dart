@@ -384,11 +384,12 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
 
   bool _canJoinVideoCall(Consultation consultation) {
     final now = DateTime.now();
-    // Có thể vào phòng tư vấn trước 15 phút và sau 10 phút
-    final start = consultation.consultationDate.subtract(const Duration(minutes: 15));
-    final end = consultation.consultationDate.add(const Duration(minutes: 10));
+    final endTime = consultation.consultationDate.add(const Duration(minutes: 30));
     
-    return now.isAfter(start) && now.isBefore(end);
+    // Có thể vào phòng tư vấn trước 15 phút và trong khoảng thời gian tư vấn
+    final start = consultation.consultationDate.subtract(const Duration(minutes: 15));
+    
+    return now.isAfter(start) && now.isBefore(endTime);
   }
 
   Future<bool> _checkAndRequestPermissions() async {
