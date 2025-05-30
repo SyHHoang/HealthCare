@@ -307,9 +307,19 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     // Chuyển đổi dữ liệu thành Message objects
     final messages = messageData.map((data) {
       try {
+        // Xử lý trường hợp sender là object
+        if (data['sender'] is Map) {
+          data['senderModel'] = data['sender']['model'];
+          data['sender'] = data['sender']['id'];
+        }
+        if (data['receiver'] is Map) {
+          data['receiverModel'] = data['receiver']['model'];
+          data['receiver'] = data['receiver']['id'];
+        }
         return Message.fromJson(data as Map<String, dynamic>);
       } catch (e) {
         debugPrint('Lỗi chuyển đổi tin nhắn: $e');
+        debugPrint('Dữ liệu tin nhắn: $data');
         return null;
       }
     }).where((msg) => msg != null).toList();
@@ -343,7 +353,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
         
         messageWidgets.add(_buildDaySeparator(dayLabel));
       }
-      
+      debugPrint('vai trò: ${message.senderModel}');
       // Phân biệt tin nhắn của bệnh nhân và bác sĩ
       final isMe = message.senderModel == 'Doctor';
       debugPrint('tin nhắn của bác sĩ: $isMe');
@@ -450,6 +460,23 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Rời khỏi phòng chat khi thoát màn hình
+    _socketService.leaveChat(widget.chatId);
+    debugPrint('🟠 Đã rời khỏi phòng chat: ${widget.chatId}');
+    
+    // Hủy các timer nếu có
+    _typingTimer?.cancel();
+    _stopTypingTimer?.cancel();
+    
+    // Hủy các controller
+    _messageController.dispose();
+    _scrollController.dispose();
+    
+    super.dispose();
   }
 }
 

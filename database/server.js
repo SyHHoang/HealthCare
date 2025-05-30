@@ -235,7 +235,7 @@ io.on('connection', (socket) => {
         createdAt: newMessage.createdAt,
         isRead: false
       };
-
+      console.log('messageData', messageData);
       io.to(chatId).emit('new_message', messageData);
       
     } catch (error) {

@@ -72,12 +72,6 @@ class DoctorChatService {
   // Gửi tin nhắn qua socket thay vì HTTP
   Future<void> sendMessage(String chatId, String content) async {
     try {
-      // Đảm bảo socket đã kết nối
-      await ensureSocketConnected();
-      
-      // Tham gia vào phòng chat nếu chưa có
-      _socketService.joinChat(chatId);
-      
       // Gửi tin nhắn qua socket
       _socketService.emit('send_message', {
         'chatId': chatId,
