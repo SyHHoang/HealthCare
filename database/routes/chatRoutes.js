@@ -1,5 +1,5 @@
 import express from 'express';
-import { createChat, getUserChats, getDoctorChats, sendMessage, getChatMessages, searchMessages, getChatImages } from '../controllers/chatController.js';
+import { createChat, getUserChats, getDoctorChats, sendMessage, getChatMessages, searchMessages, getChatImages, getOlderMessages } from '../controllers/chatController.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
 import { authenticateDoctor } from '../middlewares/doctorAuthMiddleware.js';
 
@@ -10,6 +10,7 @@ router.post('/create', authenticateToken, createChat);
 router.get('/user', authenticateToken, getUserChats);
 router.post('/Sendmessage', authenticateToken, sendMessage);
 router.get('/messages/:chatId', authenticateToken, getChatMessages);
+router.get('/messages/:chatId/older', authenticateToken, getOlderMessages);
 router.get('/search/:chatId', authenticateToken, searchMessages);
 router.get('/images/:chatId', authenticateToken, getChatImages);
 
@@ -17,6 +18,7 @@ router.get('/images/:chatId', authenticateToken, getChatImages);
 router.get('/doctor', authenticateDoctor, getDoctorChats);
 router.post('/doctor/Sendmessage', authenticateDoctor, sendMessage);
 router.get('/doctor/messages/:chatId', authenticateDoctor, getChatMessages);
+router.get('/doctor/messages/:chatId/older', authenticateDoctor, getOlderMessages);
 router.get('/doctor/search/:chatId', authenticateDoctor, searchMessages);
 router.get('/doctor/images/:chatId', authenticateDoctor, getChatImages);
 

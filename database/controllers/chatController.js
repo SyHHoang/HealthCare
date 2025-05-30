@@ -257,4 +257,53 @@ export const getChatImages = async (req, res) => {
     console.error('Lỗi khi lấy danh sách ảnh:', error);
     res.status(500).json({ message: error.message });
   }
+};
+
+// Lấy tin nhắn cũ hơn của một chat
+export const getOlderMessages = async (req, res) => {
+  try {
+    console.log("hàm đang chạy")
+    const { chatId } = req.params;
+    const { beforeId } = req.query;
+    const userId = req.user ? req.user.userId : null;
+    const doctorId = req.doctor ? req.doctor.id : null;
+    const limit = parseInt(req.query.limit) || 10;
+    console.log("chatId", chatId,"beforeId",beforeId,"userId",userId,"doctorId",doctorId )
+    // Kiểm tra quyền truy cập
+    const chat = await Chat.findById(chatId);
+    console.log("chat=========", chat)
+    if (!chat) {
+      return res.status(404).json({ message: 'Chat không tồn tại' });
+    }
+    console.log("=============================================== tin nhắn cũ0")
+    if (userId && chat.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Bạn không có quyền xem tin nhắn của chat này' });
+    }
+
+    if (doctorId && chat.doctorId.toString() !== doctorId) {
+      return res.status(403).json({ message: 'Bạn không có quyền xem tin nhắn của chat này' });
+    }
+    console.log("=============================================== tin nhắn cũ11")
+    // Tìm vị trí của tin nhắn có ID beforeId trong mảng messages
+    const beforeIndex = chat.messages.findIndex(msg => msg.toString() === beforeId);
+    if (beforeIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy tin nhắn' });
+    }
+
+    // Lấy các tin nhắn cũ hơn từ mảng messages (ở trước vị trí beforeIndex)
+    const olderMessageIds = chat.messages.slice(
+      Math.max(0, beforeIndex - limit), // Lấy từ vị trí trước beforeIndex
+      beforeIndex // Đến vị trí beforeIndex
+    );
+    console.log("=============================================== tin nhắn cũ22")
+    // Lấy thông tin chi tiết của các tin nhắn
+    const messages = await Message.find({
+      _id: { $in: olderMessageIds }
+    }).sort({ createdAt: 1 }); // Sắp xếp từ cũ đến mới
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error('Lỗi khi lấy tin nhắn cũ:', error);
+    res.status(500).json({ message: error.message });
+  }
 }; 

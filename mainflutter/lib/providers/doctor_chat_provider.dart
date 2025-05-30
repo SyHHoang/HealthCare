@@ -139,4 +139,28 @@ class DoctorChatMessagesNotifier extends StateNotifier<AsyncValue<List<dynamic>>
     _socketService.removeMessageListener(_handleNewMessage);
     super.dispose();
   }
+
+  Future<void> loadMoreMessages(String oldestMessageId) async {
+    try {
+      final currentState = state;
+      if (currentState is AsyncData) {
+        final currentMessages = currentState.value;
+        if (currentMessages != null) {
+          // Tải thêm tin nhắn cũ hơn tin nhắn có ID oldestMessageId
+          final moreMessages = await _chatService.getOlderMessages(_chatId, oldestMessageId);
+          
+          if (moreMessages.isNotEmpty) {
+            // Thêm tin nhắn cũ vào đầu danh sách
+            final updatedMessages = [...moreMessages, ...currentMessages];
+            state = AsyncValue.data(updatedMessages);
+            debugPrint('📥 Đã tải thêm ${moreMessages.length} tin nhắn cũ');
+          } else {
+            debugPrint('ℹ️ Không còn tin nhắn cũ để tải');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Lỗi khi tải thêm tin nhắn cũ: $e');
+    }
+  }
 } 

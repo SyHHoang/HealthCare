@@ -273,6 +273,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     
     // Xây dựng danh sách tin nhắn có phân nhóm theo ngày
     List<Widget> messageWidgets = [];
+
+    // Thêm nút tải tin nhắn cũ
+    messageWidgets.add(
+      Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              if (messages.isNotEmpty) {
+                // Lấy ID của tin nhắn đầu tiên (cũ nhất) trong danh sách
+                final oldestMessageId = messages.first.id;
+                ref.read(chatMessagesProvider.notifier).loadMoreMessages(oldestMessageId);
+              }
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tải tin nhắn cũ'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
     
     for (int i = 0; i < messages.length; i++) {
       final message = messages[i];

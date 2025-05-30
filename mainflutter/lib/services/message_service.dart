@@ -426,4 +426,31 @@ class MessageService {
       throw Exception('Lỗi khi đánh dấu tin nhắn đã đọc: $e');
     }
   }
+
+  Future<List<Message>> getOlderMessages(String chatId, String oldestMessageId) async {
+    try {
+      final token = await TokenService.getToken();
+      if (token == null) {
+        throw Exception('Không có token! Vui lòng đăng nhập lại.');
+      }
+
+      final response = await http.get(
+        Uri.parse('$apiUrl/chat/messages/$chatId/older?beforeId=$oldestMessageId'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> messagesData = json.decode(response.body);
+        return messagesData.map((json) => Message.fromJson(json)).toList();
+      }
+      
+      return [];
+    } catch (e) {
+      debugPrint('Lỗi khi lấy tin nhắn cũ: $e');
+      return [];
+    }
+  }
 } 

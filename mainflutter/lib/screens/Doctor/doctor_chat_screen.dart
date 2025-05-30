@@ -41,7 +41,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     _setupChat();
   }
 
-  Future<void> _setupChat() async {
+  void _setupChat() async {
     try {
       // Tham gia vào phòng chat
       _socketService.joinChat(widget.chatId);
@@ -86,6 +86,55 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
       }
     });
   }
+
+  void _setupScrollListener() {
+    _scrollController.addListener(() {
+      // Kiểm tra khi cuộn lên đầu danh sách
+      if (_scrollController.position.pixels == _scrollController.position.minScrollExtent) {
+        _loadMoreMessages();
+      }
+    });
+  }
+
+  Future<void> _loadMoreMessages() async {
+    try {
+      final currentMessages = ref.read(doctorChatMessagesProvider(widget.chatId));
+      if (currentMessages is AsyncData) {
+        final messages = currentMessages.value;
+        if (messages != null && messages.isNotEmpty) {
+          // Lấy ID của tin nhắn cũ nhất
+          final oldestMessageId = messages.first!['_id'];
+          debugPrint('🔄 Đang tải thêm tin nhắn cũ hơn tin nhắn: $oldestMessageId');
+          
+          // Lưu vị trí cuộn hiện tại
+          final oldScrollHeight = _scrollController.position.maxScrollExtent;
+          
+          // Gọi provider để tải thêm tin nhắn
+          await ref.read(doctorChatMessagesProvider(widget.chatId).notifier).loadMoreMessages(oldestMessageId);
+          
+          // Đợi frame tiếp theo để đảm bảo UI đã được cập nhật
+          await Future.microtask(() {
+            if (mounted) {
+              // Giữ nguyên vị trí cuộn để người dùng không bị nhảy
+              final newScrollHeight = _scrollController.position.maxScrollExtent;
+              _scrollController.jumpTo(newScrollHeight - oldScrollHeight);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Lỗi khi tải thêm tin nhắn: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể tải thêm tin nhắn: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _loadChatHistory() async {
     if (!mounted) return; // Kiểm tra widget còn mounted không
     
@@ -328,9 +377,48 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     String? currentDay;
     List<Widget> messageWidgets = [];
     
+    // Thêm nút tải tin nhắn cũ ở đầu danh sách
+    messageWidgets.add(
+      Consumer(
+        builder: (context, ref, child) {
+          final isLoadingMore = ref.watch(doctorChatMessagesProvider(widget.chatId).select((value) => 
+            value is AsyncLoading && value.value != null
+          ));
+          
+          if (isLoadingMore) {
+            return const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: () => _loadMoreMessages(),
+                icon: const Icon(Icons.history),
+                label: const Text('Tải tin nhắn cũ'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    
     // Không cần sắp xếp lại vì đã sắp xếp trong provider
     for (int i = 0; i < messages.length; i++) {
-      final message = messages[i]!; // Thêm ! vì đã lọc null ở trên
+      final message = messages[i]!;
       final messageDay = '${message.createdAt.day}/${message.createdAt.month}/${message.createdAt.year}';
       
       // Thêm separator hiển thị ngày nếu khác ngày hiện tại hoặc tin nhắn đầu tiên
@@ -353,10 +441,8 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
         
         messageWidgets.add(_buildDaySeparator(dayLabel));
       }
-      debugPrint('vai trò: ${message.senderModel}');
-      // Phân biệt tin nhắn của bệnh nhân và bác sĩ
+      
       final isMe = message.senderModel == 'Doctor';
-      debugPrint('tin nhắn của bác sĩ: $isMe');
       
       // Kiểm tra nếu cần hiển thị thời gian giữa các tin nhắn
       bool showTime = true;
@@ -380,7 +466,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
     return ListView(
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
-      children: messageWidgets.toList(), 
+      children: messageWidgets,
     );
   }
 
@@ -414,7 +500,7 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withAlpha(128),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, -1),
@@ -439,7 +525,6 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
                   vertical: 8,
                 ),
               ),
-              
               maxLines: null,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),

@@ -108,15 +108,14 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
   bool _isInitialized = false;
   Timer? _mockMessageTimer;
   final bool _useMockMessages ;
+  bool _isLoadingMore = false;
 
   ChatMessagesNotifier(this._messageService, this._socketService, this._useMockMessages) : super([]) {
     // Khi khởi tạo, mở kết nối socket và đăng ký lắng nghe
   }
 
+  bool get isLoadingMore => _isLoadingMore;
 
-  
-  
-  
   void _processNewMessage(Map<String, dynamic> messageData) {
     try {
       // Xác định xem tin nhắn thuộc chat hiện tại không
@@ -398,6 +397,26 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
       // Nếu có lỗi, giữ nguyên tin nhắn tạm thời trong UI nhưng đánh dấu là đang gửi lại
       debugPrint('Lỗi khi gửi tin nhắn qua socket: $e');
       throw Exception('Không thể gửi tin nhắn: $e');
+    }
+  }
+
+  Future<void> loadMoreMessages(String oldestMessageId) async {
+    try {
+      final currentMessages = state;
+      if (currentMessages.isNotEmpty && _currentChatId != null) {
+        // Tải thêm tin nhắn cũ hơn tin nhắn có ID oldestMessageId
+        final moreMessages = await _messageService.getOlderMessages(_currentChatId!, oldestMessageId);
+        
+        if (moreMessages.isNotEmpty) {
+          // Thêm tin nhắn cũ vào đầu danh sách
+          state = [...moreMessages, ...currentMessages];
+          debugPrint('📥 Đã tải thêm ${moreMessages.length} tin nhắn cũ');
+        } else {
+          debugPrint('ℹ️ Không còn tin nhắn cũ để tải');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Lỗi khi tải thêm tin nhắn cũ: $e');
     }
   }
 

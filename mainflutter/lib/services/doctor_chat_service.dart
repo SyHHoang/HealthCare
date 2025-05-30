@@ -41,7 +41,7 @@ class DoctorChatService {
     }
   }
 
-  Future<List<dynamic>> getChatMessages(String chatId, {int limit = 10}) async {
+  Future<List<dynamic>> getChatMessages(String chatId) async {
     try {
       final token = await TokenService.getToken();
       if (token == null) {
@@ -49,15 +49,13 @@ class DoctorChatService {
       }
 
       final response = await http.get(
-        Uri.parse('$apiUrl/chat/doctor/messages/$chatId?limit=$limit'),
+        Uri.parse('$apiUrl/chat/doctor/messages/$chatId?limit=10&page=1&sort=desc'),
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
-      for (var i in json.decode(response.body)) {
-        debugPrint('tin nhắn lấy từ flutter: $i');
-      }
+
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -65,6 +63,34 @@ class DoctorChatService {
       }
     } catch (e) {
       debugPrint('Lỗi lấy tin nhắn: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> getOlderMessages(String chatId, String beforeId) async {
+    try {
+      final token = await TokenService.getToken();
+      if (token == null) {
+        throw Exception('Không có token! Vui lòng đăng nhập lại.');
+      }
+
+      debugPrint('chatId: $chatId');
+      debugPrint('beforeId: $beforeId');
+      final response = await http.get(
+        Uri.parse('$apiUrl/chat/doctor/messages/$chatId/older?beforeId=$beforeId&limit=10'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Lỗi lấy tin nhắn cũ');
+      }
+    } catch (e) {
+      debugPrint('Lỗi lấy tin nhắn cũ: $e');
       rethrow;
     }
   }
