@@ -78,12 +78,20 @@ const initializeCall = async () => {
     console.log('Consultation ID:', props.consultationId);
     console.log('Is Doctor:', isDoctor.value);
 
+    // Cập nhật trạng thái cuộc gọi trong database
+    await socketService.emit('update_consultation_status', {
+      consultationId: props.consultationId,
+      status: 'in_progress',
+      startTime: new Date().toISOString()
+    });
+
     // Lấy stream từ camera và mic
     localStream = await navigator.mediaDevices.getUserMedia({ 
       video: true, 
       audio: true 
     });
     localVideo.value.srcObject = localStream;
+    console.log('✅ Got local media stream');
 
     // Tạo peer connection
     peerConnection = new RTCPeerConnection({
@@ -91,30 +99,72 @@ const initializeCall = async () => {
         { urls: 'stun:stun.l.google.com:19302' }
       ]
     });
+    console.log('✅ Peer connection created');
 
     // Thêm stream local vào peer connection
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
+    console.log('✅ Local tracks added');
 
     // Xử lý remote stream
     peerConnection.ontrack = event => {
+      console.log('=== RECEIVED REMOTE TRACK ===');
+      console.log('Track kind:', event.track.kind);
+      console.log('Streams:', event.streams);
       remoteVideo.value.srcObject = event.streams[0];
+      console.log('✅ Remote stream set');
     };
 
     // Xử lý ICE candidate
     peerConnection.onicecandidate = event => {
       if (event.candidate) {
+        console.log('=== SENDING ICE CANDIDATE ===');
+        console.log('Candidate:', event.candidate);
         socketService.emit('video_call_ice_candidate', {
           consultationId: props.consultationId,
           candidate: event.candidate
         });
+        console.log('✅ ICE candidate sent');
       }
     };
 
+    // Log ICE connection state
+    peerConnection.oniceconnectionstatechange = () => {
+      console.log('ICE Connection State:', peerConnection.iceConnectionState);
+    };
+
+    // Log connection state
+    peerConnection.onconnectionstatechange = () => {
+      console.log('Connection State:', peerConnection.connectionState);
+    };
+
     // Tham gia vào room video call
+    console.log('=== JOINING VIDEO CALL ROOM ===');
     socketService.emit('join_video_call', { 
       consultationId: props.consultationId 
+    }, (response) => {
+      if (response.success) {
+        console.log('✅ Joined room:', response.roomId);
+        console.log('Participants:', response.participants);
+        
+        // Nếu là người đầu tiên tham gia, đợi người thứ hai
+        if (response.participants.length === 1) {
+          console.log('Waiting for other participant...');
+        } else {
+          // Nếu là người thứ hai tham gia, tạo offer
+          console.log('Other participant found, creating offer...');
+          createAndSendOffer();
+        }
+      } else {
+        console.error('Failed to join room:', response.message);
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: response.message,
+          life: 3000
+        });
+      }
     });
 
     // Lắng nghe các sự kiện từ socket
@@ -125,50 +175,64 @@ const initializeCall = async () => {
     socketService.on('video_call_ice_candidate', handleIceCandidate);
     socketService.on('video_call_ended', handleCallEnd);
 
-    // Nếu là bác sĩ, đợi offer từ user
-    if (isDoctor.value) {
-      toast.add({
-        severity: 'info',
-        summary: 'Đang chờ bệnh nhân',
-        detail: 'Vui lòng đợi bệnh nhân tham gia cuộc gọi',
-        life: 3000
-      });
-    } else {
-      // User tạo offer
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      socketService.emit('video_call_offer', {
-        consultationId: props.consultationId,
-        offer: offer
-      });
-    }
-
     startTimer();
   } catch (error) {
-    console.error('Lỗi khởi tạo cuộc gọi:', error);
+    console.error('Error initializing call:', error);
     toast.add({
       severity: 'error',
       summary: 'Lỗi',
       detail: 'Không thể khởi tạo cuộc gọi video: ' + error.message,
       life: 3000
     });
+    endCall();
+  }
+};
+
+const createAndSendOffer = async () => {
+  try {
+    console.log('=== CREATING OFFER ===');
+    const offer = await peerConnection.createOffer();
+    console.log('✅ Offer created:', offer);
+
+    console.log('=== SETTING LOCAL DESCRIPTION ===');
+    await peerConnection.setLocalDescription(offer);
+    console.log('✅ Local description set');
+
+    console.log('=== SENDING OFFER ===');
+    socketService.emit('video_call_offer', {
+      consultationId: props.consultationId,
+      offer: offer
+    });
+    console.log('✅ Offer sent');
+  } catch (error) {
+    console.error('Error creating offer:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tạo offer: ' + error.message,
+      life: 3000
+    });
   }
 };
 
 const handleParticipantJoined = (data) => {
+  console.log('=== PARTICIPANT JOINED ===');
+  console.log('Data:', data);
   toast.add({
     severity: 'success',
     summary: 'Thông báo',
-    detail: `${data.role === 'doctor' ? 'Bác sĩ' : 'Bệnh nhân'} đã tham gia cuộc gọi`,
+    detail: 'Người tham gia đã vào cuộc gọi',
     life: 3000
   });
 };
 
 const handleParticipantLeft = (data) => {
+  console.log('=== PARTICIPANT LEFT ===');
+  console.log('Data:', data);
   toast.add({
     severity: 'warn',
     summary: 'Thông báo',
-    detail: `${data.role === 'doctor' ? 'Bác sĩ' : 'Bệnh nhân'} đã rời cuộc gọi`,
+    detail: 'Người tham gia đã rời cuộc gọi',
     life: 3000
   });
   endCall();
@@ -209,24 +273,34 @@ const handleCallEnd = () => {
 };
 
 const endCall = () => {
+  // Dừng các track media
   if (localStream) {
     localStream.getTracks().forEach(track => track.stop());
   }
+  
+  // Đóng kết nối WebRTC
   if (peerConnection) {
     peerConnection.close();
   }
+  
+  // Dừng timer
   if (timerInterval) {
     clearInterval(timerInterval);
   }
   
+  // Cập nhật trạng thái cuộc gọi trong database
+  socketService.emit('update_consultation_status', {
+    consultationId: props.consultationId,
+    status: 'completed',
+    endTime: new Date().toISOString()
+  });
+  
+  // Thông báo cho server biết người dùng đã thoát cuộc gọi
   socketService.emit('leave_video_call', {
     consultationId: props.consultationId
   });
   
-  socketService.emit('video_call_end', {
-    consultationId: props.consultationId
-  });
-  
+  // Thoát màn hình video call
   router.back();
 };
 

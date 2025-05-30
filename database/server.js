@@ -447,6 +447,30 @@ io.on('connection', (socket) => {
     console.log('Role:', socket.role);
   });
 
+  // Xử lý cập nhật trạng thái cuộc gọi
+  socket.on('update_consultation_status', async (data) => {
+    try {
+      const { consultationId, status, startTime, endTime } = data;
+      
+      // Cập nhật trạng thái trong database
+      await Consultation.findByIdAndUpdate(consultationId, {
+        status,
+        startTime: startTime ? new Date(startTime) : undefined,
+        endTime: endTime ? new Date(endTime) : undefined,
+      });
+
+      // Thông báo cho tất cả người dùng trong phòng
+      io.to(`consultation_${consultationId}`).emit('consultation_status_updated', {
+        consultationId,
+        status,
+        startTime,
+        endTime
+      });
+    } catch (error) {
+      console.error('Error updating consultation status:', error);
+    }
+  });
+
   // socket.on('send_message', (data) => {
   //   console.log('Received message from client:', data);
   //   console.log('hàm này đang hoạt động');
