@@ -67,7 +67,15 @@ class DoctorChatMessagesNotifier extends StateNotifier<AsyncValue<List<dynamic>>
 
   Future<void> loadMessages() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _chatService.getChatMessages(_chatId));
+    try {
+      final messages = await _chatService.getChatMessages(_chatId);
+      final reversedMessages = messages.reversed.toList();
+      state = AsyncValue.data(reversedMessages);
+      debugPrint('📥 Đã tải ${reversedMessages.length} tin nhắn');
+    } catch (e) {
+      debugPrint('❌ Lỗi khi tải tin nhắn: $e');
+      state = AsyncValue.error(e, StackTrace.current);
+    }
   }
 
   Future<void> sendMessage(String content) async {
@@ -91,8 +99,7 @@ class DoctorChatMessagesNotifier extends StateNotifier<AsyncValue<List<dynamic>>
             ? Map<String, dynamic>.from(data) 
             : {};
             
-        debugPrint('===================================================================================');
-        debugPrint('Nhận tin nhắn mới qua socket trong chat $_chatId');
+        debugPrint('📩 Nhận tin nhắn mới qua socket trong chat $_chatId');
         debugPrint('Nội dung tin nhắn: ${messageData['content']}');
         debugPrint('Người gửi: ${messageData['sender']}');
         debugPrint('Model người gửi: ${messageData['sender']['role']}');
@@ -115,14 +122,14 @@ class DoctorChatMessagesNotifier extends StateNotifier<AsyncValue<List<dynamic>>
             });
             
             state = AsyncValue.data(updatedMessages);
-            debugPrint('Đã thêm tin nhắn mới, tổng số tin nhắn: ${updatedMessages.length}');
+            debugPrint('✅ Đã thêm tin nhắn mới, tổng số tin nhắn: ${updatedMessages.length}');
           } else {
-            debugPrint('Tin nhắn đã tồn tại, bỏ qua');
+            debugPrint('⚠️ Tin nhắn đã tồn tại, bỏ qua');
           }
         });
       }
     } catch (e) {
-      debugPrint('Lỗi khi xử lý tin nhắn mới: $e');
+      debugPrint('❌ Lỗi khi xử lý tin nhắn mới: $e');
     }
   }
 
