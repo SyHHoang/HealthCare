@@ -616,7 +616,7 @@ class _TreatmentScreenState extends ConsumerState<TreatmentScreen> {
                                           onPressed: () {
                                             ref
                                                 .read(treatmentNotifierProvider.notifier)
-                                                .deleteTreatment(treatment.id!);
+                                                .deleteTreatment(treatment.id);
                                             Navigator.pop(context);
                                                                                     },
                                           child: const Text('Xóa'),

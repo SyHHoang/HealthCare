@@ -262,6 +262,13 @@ io.on('connection', (socket) => {
   socket.on('join_video_call', async (data, callback) => {
     const { consultationId } = data;
     
+    console.log('=== VIDEO CALL JOIN REQUEST ===');
+    console.log('Data:', data);
+    console.log('Callback exists:', !!callback);
+    console.log('Socket ID:', socket.id);
+    console.log('User ID:', socket.userId);
+    console.log('Role:', socket.role);
+    
     if (!consultationId) {
       console.error('=== VIDEO CALL ERROR ===');
       console.error('Consultation ID is undefined');
@@ -299,7 +306,7 @@ io.on('connection', (socket) => {
       socket.join(roomId);
       room.participants.add(socket.id);
       
-      console.log('=== VIDEO CALL JOIN ===');
+      console.log('=== VIDEO CALL JOIN SUCCESS ===');
       console.log(`Room ID: ${roomId}`);
       console.log(`User ID: ${socket.userId}`);
       console.log(`Role: ${socket.role}`);
@@ -315,6 +322,7 @@ io.on('connection', (socket) => {
       });
 
       // Gọi callback để thông báo thành công
+      console.log("Calling callback with success response");
       if (callback) {
         callback({ 
           success: true, 
@@ -322,14 +330,19 @@ io.on('connection', (socket) => {
           userId: socket.userId,
           role: socket.role,
           socketId: socket.id,
-          participants: Array.from(room.participants)
+          participants: Array.from(room.participants),
+          isFirstParticipant: room.participants.size === 1
         });
+        console.log("Callback executed successfully");
+      } else {
+        console.log("No callback provided");
       }
     } catch (error) {
       console.error('=== VIDEO CALL ERROR ===');
       console.error(error.message);
       if (callback) {
         callback({ success: false, message: error.message });
+        console.log("Error callback executed");
       }
       socket.emit('error', { message: error.message });
     }

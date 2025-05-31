@@ -25,10 +25,11 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
   final _remoteRenderer = RTCVideoRenderer();
   bool _isCameraEnabled = true;
   bool _isMicEnabled = true;
-  bool _isExpanded = false;
+  final bool _isExpanded = false;
   String? _expandedVideo;
   RTCPeerConnection? _peerConnection;
   MediaStream? _localStream;
+  bool _isFirstParticipant = false;
 
   @override
   void initState() {
@@ -108,15 +109,13 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
 
         // Xử lý ICE candidate
         _peerConnection!.onIceCandidate = (RTCIceCandidate candidate) {
-          if (candidate != null) {
-            debugPrint('=== SENDING ICE CANDIDATE ===');
-            debugPrint('Consultation ID: ${widget.consultationId}');
-            debugPrint('Candidate: ${candidate.toMap()}');
-            SocketService.instance.emit('video_call_ice_candidate', {
-              'consultationId': widget.consultationId,
-              'candidate': candidate.toMap(),
-            });
-          }
+          debugPrint('=== SENDING ICE CANDIDATE ===');
+          debugPrint('Consultation ID: ${widget.consultationId}');
+          debugPrint('Candidate: ${candidate.toMap()}');
+          SocketService.instance.emit('video_call_ice_candidate', {
+            'consultationId': widget.consultationId,
+            'candidate': candidate.toMap(),
+          });
         };
 
         // Xử lý ICE connection state
@@ -146,25 +145,19 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
         // Join video call room
         debugPrint('=== JOINING VIDEO CALL ROOM ===');
         debugPrint('Consultation ID: ${widget.consultationId}');
-        SocketService.instance.emit('join_video_call', {
+        SocketService.instance.emitWithCallback('join_video_call', {
           'consultationId': widget.consultationId,
+        }, (response) {
+          if (response != null && response['success'] == true) {
+            _isFirstParticipant = response['isFirstParticipant'] ?? false;
+            debugPrint('✅ Joined video call room. Is first participant: $_isFirstParticipant');
+            
+            // Không gửi offer ngay lập tức, đợi người thứ 2 tham gia
+          }
         });
 
         // Lắng nghe các sự kiện từ socket
         _setupSocketListeners();
-
-        // Nếu là bệnh nhân, tạo offer
-        if (!widget.isDoctor) {
-          debugPrint('=== CREATING OFFER ===');
-          final offer = await _peerConnection!.createOffer();
-          await _peerConnection!.setLocalDescription(offer);
-          debugPrint('✅ Đã tạo và set local description');
-          SocketService.instance.emit('video_call_offer', {
-            'consultationId': widget.consultationId,
-            'offer': offer.toMap(),
-          });
-          debugPrint('✅ Đã gửi offer');
-        }
       }
     } catch (e) {
       debugPrint('❌ Error initializing call: $e');
@@ -192,14 +185,41 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     return await createPeerConnection(configuration, constraints);
   }
 
+  Future<void> _createAndSendOffer() async {
+    try {
+      debugPrint('=== CREATING AND SENDING OFFER ===');
+      debugPrint('Consultation ID: ${widget.consultationId}');
+
+      // Tạo offer
+      final offer = await _peerConnection!.createOffer();
+      debugPrint('✅ Offer created');
+
+      // Set local description
+      await _peerConnection!.setLocalDescription(offer);
+      debugPrint('✅ Local description set');
+
+      // Gửi offer
+      SocketService.instance.emit('video_call_offer', {
+        'consultationId': widget.consultationId,
+        'offer': offer.toMap(),
+      });
+      debugPrint('✅ Offer sent');
+    } catch (e) {
+      debugPrint('❌ Error creating and sending offer: $e');
+      _endCall();
+    }
+  }
+
   void _setupSocketListeners() {
     // Lắng nghe sự kiện participant joined
-    SocketService.instance.on('participant_joined', (data) {
+    SocketService.instance.on('participant_joined', (data) async {
       debugPrint('=== PARTICIPANT JOINED ===');
       debugPrint('Data: $data');
-      if (widget.isDoctor) {
-        // Nếu là bác sĩ và có người tham gia, kiểm tra lại kết nối
-        _checkConnection();
+      
+      // Nếu là người đầu tiên và có người thứ 2 tham gia, tạo và gửi offer
+      if (_isFirstParticipant) {
+        debugPrint('First participant detected, creating and sending offer...');
+        await _createAndSendOffer();
       }
     });
 
@@ -427,8 +447,8 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
           ),
           FloatingActionButton(
             backgroundColor: Colors.red,
-            child: const Icon(Icons.call_end),
             onPressed: _endCall,
+            child: const Icon(Icons.call_end),
           ),
         ],
       ),

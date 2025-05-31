@@ -35,9 +35,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final MessageService _messageService = MessageService();
   final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
-  bool _isTyping = false;
+  final bool _isTyping = false;
   bool _isDoctorOnline = false;
-  String _typingUserId = '';
+  final String _typingUserId = '';
   Timer? _typingTimer;
   Timer? _stopTypingTimer;
 

@@ -78,9 +78,9 @@ class DoctorHomeScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
+                            const Text(
                               'Bác sĩ',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 16,
                               ),
@@ -124,7 +124,7 @@ class DoctorHomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Thống kê nhanh
-                  Row(
+                  const Row(
                     children: [
                       _StatCard(
                         icon: Icons.calendar_today,
@@ -132,21 +132,21 @@ class DoctorHomeScreen extends StatelessWidget {
                         value: '0',
                         label: 'Lịch hẹn hôm nay',
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       _StatCard(
                         icon: Icons.person_add,
                         color: Colors.green,
                         value: '1',
                         label: 'Bệnh nhân mới',
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       _StatCard(
                         icon: Icons.star,
                         color: Colors.amber,
                         value: '4',
                         label: 'Đánh giá',
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       _StatCard(
                         icon: Icons.attach_money,
                         color: Colors.purple,
@@ -156,9 +156,9 @@ class DoctorHomeScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 28),
-                  Text(
+                  const Text(
                     'Chức năng chính',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),

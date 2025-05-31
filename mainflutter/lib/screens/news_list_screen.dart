@@ -97,10 +97,10 @@ class _NewsListScreenState extends ConsumerState<NewsListScreen> {
                   n.summary.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
 
           if (filteredList.isEmpty) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Icon(Icons.newspaper, size: 48, color: Colors.grey),
                   SizedBox(height: 16),
                   Text('Không tìm thấy bài viết phù hợp'),

@@ -105,10 +105,10 @@ class ChatMessagesNotifier extends StateNotifier<List<Message>> {
   final SocketService _socketService;
   String? _currentChatId;
   String? _currentDoctorId;
-  bool _isInitialized = false;
+  final bool _isInitialized = false;
   Timer? _mockMessageTimer;
   final bool _useMockMessages ;
-  bool _isLoadingMore = false;
+  final bool _isLoadingMore = false;
 
   ChatMessagesNotifier(this._messageService, this._socketService, this._useMockMessages) : super([]) {
     // Khi khởi tạo, mở kết nối socket và đăng ký lắng nghe

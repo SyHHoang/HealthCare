@@ -238,6 +238,7 @@ let localStream = null;
 let peerConnection = null;
 let currentConsultationId = null;
 const expandedVideo = ref(null);
+const isFirstParticipant = ref(false);
 
 const loadConsultationHistory = async () => {
   try {
@@ -341,19 +342,10 @@ const initializeCall = async (consultationId) => {
     console.log('✅ Local tracks added');
 
     // Xử lý remote stream
-    peerConnection.ontrack = (event) => {
+    peerConnection.ontrack = event => {
       console.log('=== RECEIVED REMOTE TRACK ===');
-      console.log('Event:', event);
-      console.log('Streams:', event.streams);
-      console.log('Track:', event.track);
-      
-      if (event.streams && event.streams[0]) {
-        console.log('Setting remote stream to video element');
-        remoteVideo.value.srcObject = event.streams[0];
-        console.log('✅ Remote stream set successfully');
-      } else {
-        console.error('❌ No streams found in track event');
-      }
+      remoteVideo.value.srcObject = event.streams[0];
+      console.log('✅ Remote stream set');
     };
 
     // Xử lý ICE candidate
@@ -362,7 +354,7 @@ const initializeCall = async (consultationId) => {
         console.log('=== VIDEO CALL ICE CANDIDATE ===');
         console.log('Consultation ID:', consultationId);
         console.log('Candidate:', event.candidate);
-        socketService.emit('video_call_ice_candidate', {
+        socketService.socket.emit('video_call_ice_candidate', {
           consultationId: consultationId,
           candidate: event.candidate
         });
@@ -373,36 +365,107 @@ const initializeCall = async (consultationId) => {
     // Tham gia vào room video call
     console.log('=== JOINING VIDEO CALL ROOM ===');
     console.log('Consultation ID:', consultationId);
-    socketService.emit('join_video_call', { 
-      consultationId: consultationId 
-    });
-    console.log('✅ Joined video call room');
+    console.log('Socket connected:', socketService.socket.connected);
+
+    try {
+      // Thêm timeout để kiểm tra callback
+      const timeout = setTimeout(() => {
+        console.log('❌ Callback timeout - not called within 5 seconds');
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không nhận được phản hồi từ server',
+          life: 3000
+        });
+        endCall();
+      }, 5000);
+
+      // Gửi sự kiện join_video_call với callback
+      console.log('Emitting join_video_call event...');
+      socketService.socket.emit('join_video_call', { 
+        consultationId: consultationId 
+      }, (response) => {
+        clearTimeout(timeout);
+        console.log('=== CALLBACK EXECUTED ===');
+        console.log('Response:', response);
+        
+        if (!response) {
+          console.error('❌ No response received from server');
+          toast.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: 'Không nhận được phản hồi từ server',
+            life: 3000
+          });
+          endCall();
+          return;
+        }
+
+        if (response.success) {
+          console.log('✅ Joined video call room successfully');
+          console.log('Room ID:', response.roomId);
+          console.log('Participants:', response.participants);
+          console.log("Response Data:", response.data);
+          
+          isFirstParticipant.value = response.isFirstParticipant;
+          console.log('Is first participant:', isFirstParticipant.value);
+          
+          if (isFirstParticipant.value) {
+            createAndSendOffer(consultationId);
+          }
+          
+          toast.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đã tham gia phòng video call',
+            life: 3000
+          });
+        } else {
+          console.error('❌ Failed to join video call room');
+          console.error('Error:', response.message);
+          
+          toast.add({
+            severity: 'error', 
+            summary: 'Lỗi',
+            detail: response.message || 'Không thể tham gia phòng video call',
+            life: 3000
+          });
+          
+          endCall();
+        }
+      });
+
+      // Thêm listener cho sự kiện error
+      socketService.socket.on('error', (error) => {
+        console.error('Socket error:', error);
+        clearTimeout(timeout);
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: error.message || 'Lỗi kết nối',
+          life: 3000
+        });
+        endCall();
+      });
+
+    } catch (error) {
+      console.error('❌ Error joining video call:', error);
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Không thể tham gia phòng video call: ' + error.message,
+        life: 3000
+      });
+      endCall();
+    }
 
     // Lắng nghe các sự kiện từ socket
-    console.log('=== SETTING UP SOCKET LISTENERS ===');
-    socketService.on('participant_joined', handleParticipantJoined);
-    socketService.on('participant_left', handleParticipantLeft);
-    socketService.on('video_call_offer', handleOffer);
-    socketService.on('video_call_answer', handleAnswer);
-    socketService.on('video_call_ice_candidate', handleIceCandidate);
-    socketService.on('video_call_ended', handleCallEnd);
-    console.log('✅ Socket listeners set up');
-
-    // Tạo và gửi offer
-    console.log('=== CREATING OFFER ===');
-    const offer = await peerConnection.createOffer();
-    console.log('✅ Offer created:', offer);
-
-    console.log('=== SETTING LOCAL DESCRIPTION ===');
-    await peerConnection.setLocalDescription(offer);
-    console.log('✅ Local description set');
-
-    console.log('=== SENDING OFFER ===');
-    socketService.emit('video_call_offer', {
-      consultationId: consultationId,
-      offer: offer
-    });
-    console.log('✅ Offer sent');
+    socketService.socket.on('participant_joined', handleParticipantJoined);
+    socketService.socket.on('participant_left', handleParticipantLeft);
+    socketService.socket.on('video_call_offer', handleOffer);
+    socketService.socket.on('video_call_answer', handleAnswer);
+    socketService.socket.on('video_call_ice_candidate', handleIceCandidate);
+    socketService.socket.on('video_call_ended', handleCallEnd);
   } catch (error) {
     console.error('❌ Error initializing call:', error);
     toast.add({
@@ -434,39 +497,6 @@ const handleParticipantLeft = (data) => {
   endCall();
 };
 
-const handleOffer = async (data) => {
-  try {
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socketService.emit('video_call_answer', {
-      consultationId: currentConsultationId,
-      answer: answer
-    });
-  } catch (error) {
-    console.error('Lỗi xử lý offer:', error);
-  }
-};
-
-const handleAnswer = async (data) => {
-  try {
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-  } catch (error) {
-    console.error('Lỗi xử lý answer:', error);
-  }
-};
-
-const handleIceCandidate = async (data) => {
-  try {
-    console.log('=== RECEIVED ICE CANDIDATE ===');
-    console.log('Data:', data);
-    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-    console.log('✅ Đã thêm ICE candidate');
-  } catch (error) {
-    console.error('❌ Error handling ICE candidate:', error);
-  }
-};
-
 const handleCallEnd = () => {
   endCall();
 };
@@ -479,11 +509,11 @@ const endCall = () => {
     peerConnection.close();
   }
   
-  socketService.emit('leave_video_call', {
+  socketService.socket.emit('leave_video_call', {
     consultationId: currentConsultationId
   });
   
-  socketService.emit('video_call_end', {
+  socketService.socket.emit('video_call_end', {
     consultationId: currentConsultationId
   });
   
@@ -582,7 +612,7 @@ onUnmounted(() => {
     peerConnection.close();
   }
   if (currentConsultationId) {
-    socketService.emit('leave_video_call', {
+    socketService.socket.emit('leave_video_call', {
       consultationId: currentConsultationId
     });
   }

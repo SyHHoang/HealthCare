@@ -243,6 +243,7 @@ let localStream = null;
 let peerConnection = null;
 let currentConsultationId = null;
 const expandedVideo = ref(null);
+const isFirstParticipant = ref(false);
 
 const loadConsultationHistory = async () => {
   try {
@@ -341,10 +342,95 @@ const initializeCall = async (consultationId) => {
     // Tham gia vào room video call
     console.log('=== JOINING VIDEO CALL ROOM ===');
     console.log('Consultation ID:', consultationId);
-    socketService.emit('join_video_call', { 
-      consultationId: consultationId 
-    });
-    console.log('✅ Joined video call room');
+    console.log('Socket connected:', socketService.socket.connected);
+
+    try {
+      // Thêm timeout để kiểm tra callback
+      const timeout = setTimeout(() => {
+        console.log('❌ Callback timeout - not called within 5 seconds');
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không nhận được phản hồi từ server',
+          life: 3000
+        });
+        endCall();
+      }, 5000);
+
+      // Gửi sự kiện join_video_call với callback
+      console.log('Emitting join_video_call event...');
+      socketService.socket.emit('join_video_call', { 
+        consultationId: consultationId 
+      }, (response) => {
+        clearTimeout(timeout);
+        console.log('=== CALLBACK EXECUTED ===');
+        console.log('Response:', response);
+        
+        if (!response) {
+          console.error('❌ No response received from server');
+          toast.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: 'Không nhận được phản hồi từ server',
+            life: 3000
+          });
+          endCall();
+          return;
+        }
+
+        if (response.success) {
+          console.log('✅ Joined video call room successfully');
+          console.log('Room ID:', response.roomId);
+          console.log('Participants:', response.participants);
+          console.log('Is first participant:', response.isFirstParticipant);
+          
+          isFirstParticipant.value = response.isFirstParticipant;
+          
+          // Không gửi offer ngay lập tức, đợi người thứ 2 tham gia
+          toast.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đã tham gia phòng video call',
+            life: 3000
+          });
+        } else {
+          console.error('❌ Failed to join video call room');
+          console.error('Error:', response.message);
+          
+          toast.add({
+            severity: 'error', 
+            summary: 'Lỗi',
+            detail: response.message || 'Không thể tham gia phòng video call',
+            life: 3000
+          });
+          
+          endCall();
+        }
+      });
+
+      // Thêm listener cho sự kiện error
+      socketService.socket.on('error', (error) => {
+        console.error('Socket error:', error);
+        clearTimeout(timeout);
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: error.message || 'Lỗi kết nối',
+          life: 3000
+        });
+        endCall();
+      });
+
+    } catch (error) {
+      console.error('❌ Error joining video call:', error);
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Không thể tham gia phòng video call: ' + error.message,
+        life: 3000
+      });
+      endCall();
+    }
 
     // Lắng nghe các sự kiện từ socket
     console.log('=== SETTING UP SOCKET LISTENERS ===');
@@ -355,15 +441,6 @@ const initializeCall = async (consultationId) => {
     socketService.on('video_call_ice_candidate', handleIceCandidate);
     socketService.on('video_call_ended', handleCallEnd);
     console.log('✅ Socket listeners set up');
-
-    // Đợi offer từ user
-    console.log('=== WAITING FOR PATIENT OFFER ===');
-    toast.add({
-      severity: 'info',
-      summary: 'Đang chờ bệnh nhân',
-      detail: 'Vui lòng đợi bệnh nhân tham gia cuộc gọi',
-      life: 3000
-    });
   } catch (error) {
     console.error('❌ Error initializing call:', error);
     toast.add({
@@ -376,7 +453,55 @@ const initializeCall = async (consultationId) => {
   }
 };
 
+// Thêm hàm mới để tạo và gửi offer
+const createAndSendOffer = async (consultationId) => {
+  try {
+    console.log('=== CREATING AND SENDING OFFER ===');
+    console.log('Consultation ID:', consultationId);
+
+    // Tạo offer
+    const offer = await peerConnection.createOffer();
+    console.log('✅ Offer created');
+
+    // Set local description
+    await peerConnection.setLocalDescription(offer);
+    console.log('✅ Local description set');
+
+    // Gửi offer
+    socketService.emit('video_call_offer', {
+      consultationId: consultationId,
+      offer: offer
+    });
+    console.log('✅ Offer sent');
+
+    toast.add({
+      severity: 'info',
+      summary: 'Đang chờ bệnh nhân',
+      detail: 'Vui lòng đợi bệnh nhân chấp nhận cuộc gọi',
+      life: 3000
+    });
+  } catch (error) {
+    console.error('❌ Error creating and sending offer:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tạo cuộc gọi: ' + error.message,
+      life: 3000
+    });
+    endCall();
+  }
+};
+
 const handleParticipantJoined = (data) => {
+  console.log('=== PARTICIPANT JOINED ===');
+  console.log('Data:', data);
+  
+  // Nếu là người đầu tiên và có người thứ 2 tham gia, tạo và gửi offer
+  if (isFirstParticipant.value) {
+    console.log('First participant detected, creating and sending offer...');
+    createAndSendOffer(currentConsultationId);
+  }
+  
   toast.add({
     severity: 'success',
     summary: 'Thông báo',

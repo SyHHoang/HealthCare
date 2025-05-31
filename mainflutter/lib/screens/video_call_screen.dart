@@ -124,17 +124,15 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
         // Xử lý ICE candidate
         _peerConnection!.onIceCandidate = (RTCIceCandidate candidate) {
-          if (candidate != null) {
-            debugPrint('=== SENDING ICE CANDIDATE ===');
-            debugPrint('Consultation ID: ${widget.consultationId}');
-            debugPrint('Candidate: ${candidate.toMap()}');
-            SocketService.instance.emit('video_call_ice_candidate', {
-              'consultationId': widget.consultationId,
-              'candidate': candidate.toMap(),
-            });
-            debugPrint('✅ ICE candidate sent');
-          }
-        };
+          debugPrint('=== SENDING ICE CANDIDATE ===');
+          debugPrint('Consultation ID: ${widget.consultationId}');
+          debugPrint('Candidate: ${candidate.toMap()}');
+          SocketService.instance.emit('video_call_ice_candidate', {
+            'consultationId': widget.consultationId,
+            'candidate': candidate.toMap(),
+          });
+          debugPrint('✅ ICE candidate sent');
+                };
 
         // Xử lý ICE connection state
         _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {

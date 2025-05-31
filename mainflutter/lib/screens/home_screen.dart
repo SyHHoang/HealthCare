@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Xin chào,',
                           style: TextStyle(
                             color: Colors.white70,
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Text(
                           fullName,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

@@ -59,7 +59,7 @@ class VaccinationScreen extends ConsumerWidget {
   }
 
   void _showAddVaccinationDialog(BuildContext context, WidgetRef ref) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     final vaccineNameController = TextEditingController();
     final vaccineTypeController = TextEditingController();
     DateTime? dateAdministered;
@@ -75,7 +75,7 @@ class VaccinationScreen extends ConsumerWidget {
           title: const Text('Thêm lịch sử tiêm chủng'),
           content: SingleChildScrollView(
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -160,7 +160,7 @@ class VaccinationScreen extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
+                if (formKey.currentState!.validate()) {
                   final vaccination = Vaccination(
                     id: '', // id sẽ được backend sinh ra
                     vaccineName: vaccineNameController.text,

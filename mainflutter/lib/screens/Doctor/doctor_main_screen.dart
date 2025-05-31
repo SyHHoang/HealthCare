@@ -5,7 +5,6 @@ import '../../widgets/doctor_bottom_nav_bar.dart';
 import '../../services/socket_service.dart';
 import '../../services/token_service.dart';
 import 'doctor_home_screen.dart';
-import 'doctor_consultation_history_screen.dart';
 import 'doctor_patients_screen.dart';
 import '../news_list_screen.dart';
 import 'doctor_chat_option_screen.dart';

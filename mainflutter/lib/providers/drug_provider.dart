@@ -4,8 +4,6 @@ import '../models/drug.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Phần này sẽ được tạo tự động bởi build_runner
 part 'drug_provider.g.dart';

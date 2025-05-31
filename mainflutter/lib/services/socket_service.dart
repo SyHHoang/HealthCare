@@ -43,7 +43,7 @@ class SocketService {
       debugPrint('  - Role: $role');
       debugPrint('  - URL: http://192.168.2.101:5000');
 
-      _socket = IO.io('http://10.0.54.26:5000', <String, dynamic>{
+      _socket = IO.io('http://192.168.2.101:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],
         'autoConnect': true,
         'auth': {
@@ -301,6 +301,19 @@ class SocketService {
     
     debugPrint('Gửi sự kiện $event qua socket: $data');
     _socket!.emit(event, data);
+  }
+
+  void emitWithCallback(String event, dynamic data, Function(dynamic) callback) {
+    if (!isConnected()) {
+      debugPrint('Không thể gửi tin nhắn: Socket chưa kết nối');
+      throw Exception('Socket chưa kết nối');
+    }
+    
+    debugPrint('Gửi sự kiện $event qua socket với callback: $data');
+    _socket!.emitWithAck(event, data, ack: (response) {
+      debugPrint('Nhận callback từ $event: $response');
+      callback(response);
+    });
   }
 
   void on(String event, Function(dynamic) handler) {

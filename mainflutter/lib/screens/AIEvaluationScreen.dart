@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/allergy.dart';
-import '../models/health_data.dart';
-import '../models/lifestyle.dart';
-import '../models/prescription.dart';
-import '../models/treatment.dart';
-import '../models/vaccination.dart';
 
 class AIEvaluationScreen extends ConsumerStatefulWidget {
   final dynamic user; // Có thể là User hoặc Doctor

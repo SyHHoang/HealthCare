@@ -29,9 +29,9 @@ class _DoctorChatScreenState extends ConsumerState<DoctorChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final SocketService _socketService = SocketService.instance;
   bool _isLoading = true;
-  bool _isTyping = false;
+  final bool _isTyping = false;
   bool _isPatientOnline = false;
-  String _typingUserId = '';
+  final String _typingUserId = '';
   Timer? _typingTimer;
   Timer? _stopTypingTimer;
 

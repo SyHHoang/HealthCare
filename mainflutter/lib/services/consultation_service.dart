@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../models/doctor.dart';
-import '../models/consultation_list.dart';
 import 'token_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Provider cho ConsultationService
