@@ -599,6 +599,22 @@ const createAndSendOffer = async (consultationId) => {
   }
 };
 
+const startHeartbeat = () => {
+  console.log('=== STARTING HEARTBEAT ===');
+  const heartbeatInterval = setInterval(() => {
+    console.log('Sending heartbeat...');
+    socketService.socket.emit('heartbeat', {
+      consultationId: currentConsultationId.value
+    });
+  }, 3000); // Gửi mỗi 3 giây
+
+  // Lưu interval để cleanup
+  onUnmounted(() => {
+    console.log('=== CLEANING UP HEARTBEAT ===');
+    clearInterval(heartbeatInterval);
+  });
+};
+
 const initializeCall = async (consultationId) => {
   try {
     console.log('=== INITIALIZING VIDEO CALL ===');
@@ -698,13 +714,8 @@ const initializeCall = async (consultationId) => {
           isFirstParticipant.value = response.isFirstParticipant;
           console.log('Is first participant:', isFirstParticipant.value);
           
-          // Không gửi offer ngay lập tức, đợi người nhận tham gia
-          toast.add({
-            severity: 'success',
-            summary: 'Thành công',
-            detail: 'Đã tham gia phòng video call',
-            life: 3000
-          });
+          // Bắt đầu gửi heartbeat sau khi join thành công
+          startHeartbeat();
         } else {
           console.error('❌ Failed to join video call room');
           console.error('Error:', response.message);

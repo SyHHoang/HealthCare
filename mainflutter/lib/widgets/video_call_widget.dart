@@ -30,6 +30,7 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
   RTCPeerConnection? _peerConnection;
   MediaStream? _localStream;
   bool _isFirstParticipant = false;
+  Timer? _heartbeatTimer;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     _localRenderer.dispose();
     _remoteRenderer.dispose();
     _cleanup();
+    _heartbeatTimer?.cancel();
     super.dispose();
   }
 
@@ -50,6 +52,17 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     _peerConnection?.close();
     _localStream = null;
     _peerConnection = null;
+  }
+
+  void _startHeartbeat() {
+    debugPrint('=== STARTING HEARTBEAT ===');
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      debugPrint('Sending heartbeat...');
+      SocketService.instance.emit('heartbeat', {
+        'consultationId': widget.consultationId,
+      });
+    });
   }
 
   Future<void> _initializeCall() async {
@@ -152,7 +165,8 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
             _isFirstParticipant = response['isFirstParticipant'] ?? false;
             debugPrint('✅ Joined video call room. Is first participant: $_isFirstParticipant');
             
-            // Không gửi offer ngay lập tức, đợi người thứ 2 tham gia
+            // Bắt đầu gửi heartbeat sau khi join thành công
+            _startHeartbeat();
           }
         });
 
@@ -333,6 +347,20 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
         debugPrint('Call ended by self, ignoring...');
       }
     });
+
+    // Lắng nghe sự kiện participant disconnected
+    SocketService.instance.on('participant_disconnected', (data) {
+      debugPrint('=== PARTICIPANT DISCONNECTED ===');
+      debugPrint('Data: $data');
+      
+      // Chỉ kết thúc cuộc gọi nếu người kia bị ngắt kết nối
+      if (data['socketId'] != SocketService.instance.socket?.id) {
+        debugPrint('Other participant disconnected, ending call...');
+        _endCall();
+      } else {
+        debugPrint('Self disconnected event, ignoring...');
+      }
+    });
   }
 
   void _toggleCamera() {
@@ -368,6 +396,10 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     debugPrint('Consultation ID: ${widget.consultationId}');
     debugPrint('Socket ID: ${SocketService.instance.socket?.id}');
     
+    // Hủy heartbeat timer
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    
     // Xóa tất cả listeners trước khi emit events
     SocketService.instance.off('participant_joined');
     SocketService.instance.off('participant_left');
@@ -375,6 +407,7 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     SocketService.instance.off('video_call_answer');
     SocketService.instance.off('video_call_ice_candidate');
     SocketService.instance.off('video_call_ended');
+    SocketService.instance.off('participant_disconnected');
 
     // Emit events
     SocketService.instance.emit('leave_video_call', {

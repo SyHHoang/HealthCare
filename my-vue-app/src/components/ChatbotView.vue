@@ -1,84 +1,102 @@
 <template>
   <div class="chat-container">
-    <div class="chat-header">Chatbot AI Tiếng Việt</div>
+    <div class="chat-header">
+      <span>Trợ lý Y tế AI</span>
+      <button class="close-btn" @click="$emit('close')">×</button>
+    </div>
     <div class="chat-messages" ref="chatMessages">
       <div
         v-for="(message, index) in messages"
         :key="index"
         :class="['message', message.sender]"
       >
-        {{ message.text }}
+        <div class="message-content">
+          {{ message.text }}
+        </div>
+        <div class="message-time">
+          {{ new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}
+        </div>
+      </div>
+      <div v-if="isLoading" class="message bot">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
     <div class="chat-input">
       <input
         type="text"
         v-model="userInput"
-        placeholder="Nhập tin nhắn..."
+        placeholder="Nhập câu hỏi của bạn..."
         @keyup.enter="sendMessage"
+        :disabled="isLoading"
       />
-      <button @click="sendMessage">Gửi</button>
+      <button @click="sendMessage" :disabled="isLoading">
+        <i class="fas fa-paper-plane"></i>
+      </button>
     </div>
-    <button class="close-btn" @click="$emit('close')">×</button>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
-
-// URL API của FastAPI
-const apiUrl = 'http://localhost:8000/generate';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import GeminiService from '@/services/geminiService';
 
 // State
 const userInput = ref('');
 const messages = ref([]);
+const isLoading = ref(false);
+const chatMessages = ref(null);
 
 // Khi mở chatbot, hiển thị tin nhắn chào
 onMounted(() => {
   messages.value = [
-    { sender: 'bot', text: 'Xin chào, tôi có thể giúp gì cho bạn?' }
+    { 
+      sender: 'bot', 
+      text: 'Xin chào! Tôi là trợ lý y tế AI. Tôi có thể giúp bạn tìm hiểu thông tin về sức khỏe, bệnh tật và các vấn đề y tế khác. Bạn cần tôi giúp gì không?' 
+    }
   ];
 });
 
-// Gửi tin nhắn đến API FastAPI
+// Xóa lịch sử chat khi đóng chatbot
+onUnmounted(() => {
+  GeminiService.clearChatHistory();
+});
+
+// Gửi tin nhắn đến Gemini API
 const sendMessage = async () => {
-  if (userInput.value.trim() === '') return;
+  if (userInput.value.trim() === '' || isLoading.value) return;
+
+  const userMessage = userInput.value;
+  userInput.value = ''; // Xóa input ngay lập tức
+  isLoading.value = true;
 
   // Thêm tin nhắn của người dùng vào danh sách
-  messages.value.push({ sender: 'user', text: userInput.value });
+  messages.value.push({ sender: 'user', text: userMessage });
 
   try {
-    // Gửi tin nhắn đến FastAPI với prompt trong query string
-    const response = await fetch(`${apiUrl}?prompt=${encodeURIComponent(userInput.value)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
+    // Gọi Gemini API
+    const response = await GeminiService.generateResponse(userMessage);
+    
     // Thêm phản hồi từ chatbot vào danh sách
-    messages.value.push({ sender: 'bot', text: data.generated_text });
+    messages.value.push({ sender: 'bot', text: response });
   } catch (error) {
     console.error('Lỗi khi gửi tin nhắn:', error);
     messages.value.push({
       sender: 'bot',
-      text: 'Xin lỗi, đã xảy ra lỗi khi kết nối với chatbot.',
+      text: 'Xin lỗi, đã xảy ra lỗi khi kết nối với trợ lý AI. Vui lòng thử lại sau.',
     });
+  } finally {
+    isLoading.value = false;
   }
 
   // Cuộn xuống cuối cùng
   await nextTick();
-  const chatMessages = document.querySelector('.chat-messages');
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-
-  // Xóa nội dung ô nhập
-  userInput.value = '';
+  if (chatMessages.value) {
+    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+  }
 };
 </script>
 
@@ -93,64 +111,81 @@ const sendMessage = async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative; /* Để nút close-btn định vị đúng */
+  position: relative;
 }
 
 /* Header */
 .chat-header {
-  background: #3498db;
+  background: #4CAF50;
   color: #ffffff;
-  padding: 12px;
-  text-align: center;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 1.1rem;
   font-weight: bold;
 }
 
 /* Nút đóng */
 .close-btn {
-  position: absolute;
-  top: 8px;
-  right: 12px;
   background: transparent;
   border: none;
   font-size: 24px;
-  color: #ffffff; /* Đổi màu để nổi trên header xanh */
+  color: #ffffff;
   cursor: pointer;
-  z-index: 10;
+  padding: 0;
+  line-height: 1;
 }
 
 /* Tin nhắn */
 .chat-messages {
   flex: 1;
-  padding: 12px;
+  padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   background-color: #f8f9fa;
 }
 
 .message {
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  border-radius: 15px;
-  max-width: 80%;
-  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
 }
 
 .message.user {
-  background: #3498db;
-  color: #ffffff;
   align-self: flex-end;
-  border-bottom-right-radius: 5px;
 }
 
 .message.bot {
+  align-self: flex-start;
+}
+
+.message-content {
+  padding: 10px 14px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+.message.user .message-content {
+  background: #4CAF50;
+  color: #ffffff;
+  border-bottom-right-radius: 5px;
+}
+
+.message.bot .message-content {
   background: #ffffff;
   color: #333333;
-  align-self: flex-start;
   border-bottom-left-radius: 5px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+  align-self: flex-end;
 }
 
 /* Input */
@@ -158,29 +193,84 @@ const sendMessage = async () => {
   display: flex;
   border-top: 1px solid #eee;
   background: #ffffff;
+  padding: 8px;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 12px;
-  border: none;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
   outline: none;
   font-size: 0.95rem;
-  background: transparent;
+  transition: border-color 0.2s;
+}
+
+.chat-input input:focus {
+  border-color: #4CAF50;
+}
+
+.chat-input input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .chat-input button {
-  background: #3498db;
+  background: #4CAF50;
   color: #ffffff;
   border: none;
-  padding: 8px 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-left: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
 
-.chat-input button:hover {
-  background: #2980b9;
+.chat-input button:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.chat-input button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 15px;
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: #4CAF50;
+  border-radius: 50%;
+  animation: typing 1s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 /* Scrollbar styling */

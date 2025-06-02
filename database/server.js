@@ -69,6 +69,10 @@ const doctorSockets = new Map();
 // Lưu trữ thông tin phòng video call
 const videoCallRooms = new Map();
 
+// Lưu trữ heartbeat timers và call duration timers
+const heartbeatTimers = new Map();
+const callDurationTimers = new Map();
+
 // Hàm kiểm tra thời gian tư vấn
 const isConsultationTime = (consultationDate) => {
   const now = new Date();
@@ -84,7 +88,10 @@ const createVideoCallRoom = (consultationId, consultationDate) => {
     consultationId,
     consultationDate,
     participants: new Set(),
-    createdAt: new Date()
+    createdAt: new Date(),
+    lastHeartbeat: new Date(),
+    callDuration: 0, // Thời gian gọi tính bằng giây
+    participantHeartbeats: new Map() // Lưu trữ thời gian heartbeat của từng người tham gia
   });
   console.log('=== VIDEO CALL ROOM CREATED ===');
   console.log('Room ID:', roomId);
@@ -102,8 +109,115 @@ const cleanupOldRooms = () => {
       console.log('=== CLEANING UP OLD ROOM ===');
       console.log('Room ID:', roomId);
       videoCallRooms.delete(roomId);
+      // Xóa timers
+      if (heartbeatTimers.has(roomId)) {
+        clearInterval(heartbeatTimers.get(roomId));
+        heartbeatTimers.delete(roomId);
+      }
+      if (callDurationTimers.has(roomId)) {
+        clearInterval(callDurationTimers.get(roomId));
+        callDurationTimers.delete(roomId);
+      }
     }
   }
+};
+
+// Hàm bắt đầu heartbeat cho phòng
+const startHeartbeat = (roomId) => {
+  // Xóa timer cũ nếu có
+  if (heartbeatTimers.has(roomId)) {
+    clearInterval(heartbeatTimers.get(roomId));
+  }
+
+  // Tạo timer mới để kiểm tra heartbeat
+  const timer = setInterval(() => {
+    const room = videoCallRooms.get(roomId);
+    if (!room) {
+      clearInterval(timer);
+      heartbeatTimers.delete(roomId);
+      return;
+    }
+
+    const now = new Date();
+    // Kiểm tra heartbeat của từng người tham gia
+    for (const [socketId, lastHeartbeat] of room.participantHeartbeats.entries()) {
+      const timeSinceLastHeartbeat = now - lastHeartbeat;
+      // Nếu không nhận được heartbeat trong 10 giây, coi như mất kết nối
+      if (timeSinceLastHeartbeat > 10000) {
+        console.log('=== PARTICIPANT DISCONNECTED ===');
+        console.log('Room ID:', roomId);
+        console.log('Socket ID:', socketId);
+        
+        // Thông báo cho tất cả người tham gia
+        io.to(roomId).emit('participant_disconnected', {
+          socketId: socketId,
+          reason: 'connection_lost'
+        });
+
+        // Xóa người tham gia khỏi phòng
+        room.participants.delete(socketId);
+        room.participantHeartbeats.delete(socketId);
+
+        // Nếu không còn người tham gia, xóa phòng
+        if (room.participants.size === 0) {
+          videoCallRooms.delete(roomId);
+          clearInterval(timer);
+          heartbeatTimers.delete(roomId);
+          if (callDurationTimers.has(roomId)) {
+            clearInterval(callDurationTimers.get(roomId));
+            callDurationTimers.delete(roomId);
+          }
+        }
+      }
+    }
+  }, 5000); // Kiểm tra mỗi 5 giây
+
+  heartbeatTimers.set(roomId, timer);
+};
+
+// Hàm bắt đầu đếm thời gian gọi
+const startCallDurationTimer = (roomId) => {
+  // Xóa timer cũ nếu có
+  if (callDurationTimers.has(roomId)) {
+    clearInterval(callDurationTimers.get(roomId));
+  }
+
+  // Tạo timer mới
+  const timer = setInterval(() => {
+    const room = videoCallRooms.get(roomId);
+    if (!room) {
+      clearInterval(timer);
+      callDurationTimers.delete(roomId);
+      return;
+    }
+
+    // Cập nhật thời gian gọi
+    room.callDuration += 1;
+
+    // Kiểm tra nếu đã quá 30 phút
+    if (room.callDuration >= 1800) { // 30 phút = 1800 giây
+      console.log('=== CALL TIME LIMIT REACHED ===');
+      console.log('Room ID:', roomId);
+      
+      // Thông báo cho tất cả người tham gia
+      io.to(roomId).emit('video_call_ended', {
+        by: 'system',
+        reason: 'time_limit',
+        message: 'Cuộc gọi đã kết thúc do hết thời gian cho phép'
+      });
+
+      // Xóa phòng và timers
+      videoCallRooms.delete(roomId);
+      clearInterval(timer);
+      callDurationTimers.delete(roomId);
+      if (heartbeatTimers.has(roomId)) {
+        clearInterval(heartbeatTimers.get(roomId));
+        heartbeatTimers.delete(roomId);
+      }
+    }
+  }, 1000); // Cập nhật mỗi giây
+
+  callDurationTimers.set(roomId, timer);
 };
 
 // Chạy cleanup mỗi 5 phút
@@ -298,6 +412,9 @@ io.on('connection', (socket) => {
       let roomId = `video_call_${consultationId}`;
       if (!videoCallRooms.has(roomId)) {
         roomId = createVideoCallRoom(consultationId, consultation.consultationDate);
+        // Bắt đầu heartbeat và timer thời gian gọi
+        startHeartbeat(roomId);
+        startCallDurationTimer(roomId);
       }
 
       const room = videoCallRooms.get(roomId);
@@ -305,6 +422,7 @@ io.on('connection', (socket) => {
       // Tham gia vào room video call
       socket.join(roomId);
       room.participants.add(socket.id);
+      room.participantHeartbeats.set(socket.id, new Date());
       
       console.log('=== VIDEO CALL JOIN SUCCESS ===');
       console.log(`Room ID: ${roomId}`);
@@ -331,7 +449,8 @@ io.on('connection', (socket) => {
           role: socket.role,
           socketId: socket.id,
           participants: Array.from(room.participants),
-          isFirstParticipant: room.participants.size === 1
+          isFirstParticipant: room.participants.size === 1,
+          remainingTime: 1800 - room.callDuration // Thời gian còn lại
         });
         console.log("Callback executed successfully");
       } else {
@@ -345,6 +464,17 @@ io.on('connection', (socket) => {
         console.log("Error callback executed");
       }
       socket.emit('error', { message: error.message });
+    }
+  });
+
+  // Thêm sự kiện heartbeat từ client
+  socket.on('heartbeat', (data) => {
+    const { consultationId } = data;
+    const roomId = `video_call_${consultationId}`;
+    const room = videoCallRooms.get(roomId);
+    
+    if (room) {
+      room.participantHeartbeats.set(socket.id, new Date());
     }
   });
 
@@ -366,6 +496,7 @@ io.on('connection', (socket) => {
     const room = videoCallRooms.get(roomId);
     if (room) {
       room.participants.delete(socket.id);
+      room.participantHeartbeats.delete(socket.id);
       console.log(`Remaining participants: ${room.participants.size}`);
       
       // Thông báo cho người kia biết đã rời phòng
@@ -376,9 +507,17 @@ io.on('connection', (socket) => {
         remainingParticipants: room.participants.size
       });
 
-      // Nếu không còn người tham gia, xóa phòng
+      // Nếu không còn người tham gia, xóa phòng và timers
       if (room.participants.size === 0) {
         videoCallRooms.delete(roomId);
+        if (heartbeatTimers.has(roomId)) {
+          clearInterval(heartbeatTimers.get(roomId));
+          heartbeatTimers.delete(roomId);
+        }
+        if (callDurationTimers.has(roomId)) {
+          clearInterval(callDurationTimers.get(roomId));
+          callDurationTimers.delete(roomId);
+        }
         console.log('=== ROOM DELETED ===');
         console.log(`Room ID: ${roomId}`);
       }

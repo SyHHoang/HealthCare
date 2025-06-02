@@ -453,7 +453,9 @@ const initializeCall = async (consultationId) => {
           
           isFirstParticipant.value = response.isFirstParticipant;
           
-          // Không gửi offer ngay lập tức, đợi người thứ 2 tham gia
+          // Bắt đầu gửi heartbeat sau khi join thành công
+          startHeartbeat();
+          
           toast.add({
             severity: 'success',
             summary: 'Thành công',
@@ -732,6 +734,7 @@ const endCall = () => {
     socketService.off('video_call_ice_candidate');
     socketService.off('video_call_ended');
     socketService.off('call_message');
+    socketService.off('participant_disconnected');
   }
   
   // Reset state
@@ -1058,6 +1061,22 @@ const logCallRecording = async (consultationId, recordingBlob) => {
   }
 };
 
+const startHeartbeat = () => {
+  console.log('=== STARTING HEARTBEAT ===');
+  const heartbeatInterval = setInterval(() => {
+    console.log('Sending heartbeat...');
+    socketService.socket.emit('heartbeat', {
+      consultationId: currentConsultationId
+    });
+  }, 3000); // Gửi mỗi 3 giây
+
+  // Lưu interval để cleanup
+  onUnmounted(() => {
+    console.log('=== CLEANING UP HEARTBEAT ===');
+    clearInterval(heartbeatInterval);
+  });
+};
+
 onMounted(() => {
   loadConsultationHistory();
 
@@ -1099,6 +1118,20 @@ onMounted(() => {
       timestamp: data.timestamp
     });
     scrollToBottom();
+  });
+
+  // Thêm listener cho sự kiện participant_disconnected
+  socketService.on('participant_disconnected', (data) => {
+    console.log('=== PARTICIPANT DISCONNECTED ===');
+    console.log('Data:', data);
+    
+    // Chỉ kết thúc cuộc gọi nếu người kia bị ngắt kết nối
+    if (data.socketId !== socketService.socket.id) {
+      console.log('Other participant disconnected, ending call...');
+      endCall();
+    } else {
+      console.log('Self disconnected event, ignoring...');
+    }
   });
 });
 
