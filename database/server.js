@@ -348,9 +348,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Xử lý rời khỏi video call
   socket.on('leave_video_call', (data) => {
     const { consultationId } = data;
     const roomId = `video_call_${consultationId}`;
+    
+    console.log('=== VIDEO CALL LEAVE ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`User ID: ${socket.userId}`);
+    console.log(`Role: ${socket.role}`);
+    console.log(`Socket ID: ${socket.id}`);
     
     // Rời khỏi room video call
     socket.leave(roomId);
@@ -359,14 +366,8 @@ io.on('connection', (socket) => {
     const room = videoCallRooms.get(roomId);
     if (room) {
       room.participants.delete(socket.id);
-      console.log('=== VIDEO CALL LEAVE ===');
-      console.log(`Room ID: ${roomId}`);
-      console.log(`User ID: ${socket.userId}`);
-      console.log(`Role: ${socket.role}`);
-      console.log(`Socket ID: ${socket.id}`);
       console.log(`Remaining participants: ${room.participants.size}`);
-      console.log('======================');
-
+      
       // Thông báo cho người kia biết đã rời phòng
       socket.to(roomId).emit('participant_left', {
         userId: socket.userId,
@@ -381,6 +382,40 @@ io.on('connection', (socket) => {
         console.log('=== ROOM DELETED ===');
         console.log(`Room ID: ${roomId}`);
       }
+    }
+  });
+
+  // Xử lý kết thúc video call
+  socket.on('video_call_end', (data) => {
+    const { consultationId } = data;
+    const roomId = `video_call_${consultationId}`;
+    
+    console.log('=== VIDEO CALL END ===');
+    console.log(`Room ID: ${roomId}`);
+    console.log(`User ID: ${socket.userId}`);
+    console.log(`Role: ${socket.role}`);
+    
+    // Thông báo kết thúc cuộc gọi cho tất cả trong room
+    io.to(roomId).emit('video_call_ended', {
+      by: socket.userId,
+      role: socket.role
+    });
+    
+    // Xóa phòng và dọn dẹp
+    const room = videoCallRooms.get(roomId);
+    if (room) {
+      // Thông báo cho tất cả người tham gia
+      io.to(roomId).emit('participant_left', {
+        userId: socket.userId,
+        role: socket.role,
+        socketId: socket.id,
+        remainingParticipants: 0
+      });
+      
+      // Xóa phòng
+      videoCallRooms.delete(roomId);
+      console.log('=== ROOM DELETED ===');
+      console.log(`Room ID: ${roomId}`);
     }
   });
 
@@ -441,17 +476,6 @@ io.on('connection', (socket) => {
       from: socket.userId,
       role: socket.role,
       socketId: socket.id
-    });
-  });
-
-  socket.on('video_call_end', (data) => {
-    const { consultationId } = data;
-    const roomId = `video_call_${consultationId}`;
-    
-    // Thông báo kết thúc cuộc gọi cho tất cả trong room
-    io.to(roomId).emit('video_call_ended', {
-      by: socket.userId,
-      role: socket.role
     });
   });
 

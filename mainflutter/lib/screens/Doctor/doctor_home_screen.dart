@@ -3,7 +3,7 @@ import '../../models/doctor.dart';
 import '../../services/auth_service.dart';
 import '../login_screen.dart';
 import 'schedule_screen.dart';
-import 'consultation_history_screen.dart';
+import 'docto_consultation_history_screen.dart';
 
 class DoctorHomeScreen extends StatelessWidget {
   final Doctor doctor;

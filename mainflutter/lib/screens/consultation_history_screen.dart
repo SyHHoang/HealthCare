@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/consultation.dart';
 import '../services/consultation_service.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../widgets/video_call_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 // Provider cho lịch sử cuộc hẹn
 final consultationHistoryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
@@ -22,6 +24,47 @@ class ConsultationHistoryScreen extends ConsumerStatefulWidget {
 class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryScreen> {
   bool showVideoCall = false;
   String? currentConsultationId;
+  RTCPeerConnection? peerConnection;
+  MediaStream? localStream;
+  bool isFirstParticipant = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo locale data cho DateFormat
+    initializeDateFormatting('vi_VN', null);
+  }
+
+  @override
+  void dispose() {
+    _cleanupVideoCall();
+    super.dispose();
+  }
+
+  void _cleanupVideoCall() {
+    debugPrint('=== CLEANING UP VIDEO CALL ===');
+    
+    // Stop local stream
+    if (localStream != null) {
+      localStream!.getTracks().forEach((track) => track.stop());
+      localStream = null;
+    }
+
+    // Close peer connection
+    if (peerConnection != null) {
+      peerConnection!.close();
+      peerConnection = null;
+    }
+
+    // Reset state
+    setState(() {
+      showVideoCall = false;
+      currentConsultationId = null;
+      isFirstParticipant = false;
+    });
+
+    debugPrint('=== VIDEO CALL CLEANUP COMPLETED ===');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +91,7 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
                 consultationId: currentConsultationId!,
                 isDoctor: false,
                 onCallEnd: () {
-                  setState(() {
-                    showVideoCall = false;
-                    currentConsultationId = null;
-                  });
+                  _cleanupVideoCall();
                 },
               )
             : TabBarView(
@@ -212,9 +252,9 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
       return const SizedBox(); // Không hiển thị card nếu không có thông tin bác sĩ
     }
     
-    final consultationDate = consultation.consultationDate;
-    final dateFormatter = DateFormat('dd/MM/yyyy');
-    final timeFormatter = DateFormat('HH:mm');
+    final consultationDate = consultation.consultationDate.toLocal(); // Chuyển về múi giờ local
+    final dateFormatter = DateFormat('dd/MM/yyyy', 'vi_VN');
+    final timeFormatter = DateFormat('HH:mm', 'vi_VN');
     
     final formattedDate = dateFormatter.format(consultationDate);
     final formattedTime = timeFormatter.format(consultationDate);
@@ -300,25 +340,25 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
             ),
             const Divider(height: 24),
             // Thông tin thời gian
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoItem(
-                    context,
-                    'Ngày',
-                    formattedDate,
-                    Icons.calendar_today,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: Colors.blue, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$formattedDate lúc $formattedTime',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _buildInfoItem(
-                    context,
-                    'Giờ',
-                    formattedTime,
-                    Icons.access_time,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             // Actions
@@ -352,33 +392,6 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoItem(BuildContext context, String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.blue),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -446,6 +459,9 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
         return;
       }
 
+      // Đảm bảo cleanup trước khi bắt đầu cuộc gọi mới
+      _cleanupVideoCall();
+
       debugPrint('Quyền truy cập đã được cấp, đang chuyển đến màn hình video call...');
       if (context.mounted) {
         setState(() {
@@ -463,6 +479,7 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
           ),
         );
       }
+      _cleanupVideoCall();
     }
   }
 

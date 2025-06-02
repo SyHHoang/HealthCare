@@ -18,6 +18,35 @@
           </button>
         </div>
       </div>
+
+      <!-- Chat Panel -->
+      <div class="chat-panel" :class="{ 'expanded': showChat }">
+        <div class="chat-header">
+          <h5>Chat</h5>
+          <button class="close-btn" @click="toggleChat">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="chat-messages" ref="chatMessages">
+          <div v-for="(message, index) in callMessages" :key="index" 
+               :class="['message', message.sender === 'me' ? 'sent' : 'received']">
+            <div class="message-content">
+              {{ message.text }}
+            </div>
+            <div class="message-time">
+              {{ formatMessageTime(message.timestamp) }}
+            </div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" v-model="newMessage" @keyup.enter="sendCallMessage" 
+                 placeholder="Nhập tin nhắn...">
+          <button @click="sendCallMessage">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+
       <div class="controls">
         <button class="btn btn-danger" @click="endCall">
           <i class="fas fa-phone-slash"></i> Kết thúc
@@ -29,6 +58,18 @@
         <button class="btn btn-secondary" @click="toggleMic">
           <i :class="micEnabled ? 'fas fa-microphone' : 'fas fa-microphone-slash'"></i>
           {{ micEnabled ? 'Tắt mic' : 'Bật mic' }}
+        </button>
+        <button class="btn btn-secondary" @click="toggleScreenShare">
+          <i :class="isScreenSharing ? 'fas fa-stop-circle' : 'fas fa-desktop'"></i>
+          {{ isScreenSharing ? 'Dừng chia sẻ' : 'Chia sẻ màn hình' }}
+        </button>
+        <button class="btn btn-secondary" @click="toggleRecording">
+          <i :class="isRecording ? 'fas fa-stop-circle' : 'fas fa-record-vinyl'"></i>
+          {{ isRecording ? 'Dừng ghi âm' : 'Ghi âm' }}
+        </button>
+        <button class="btn btn-secondary" @click="toggleChat">
+          <i class="fas fa-comments"></i>
+          Chat
         </button>
       </div>
     </div>
@@ -218,7 +259,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import axios from '@/services/axiosInstance.js';
 import { useRouter } from 'vue-router';
@@ -244,6 +285,29 @@ let peerConnection = null;
 let currentConsultationId = null;
 const expandedVideo = ref(null);
 const isFirstParticipant = ref(false);
+
+// New refs for additional features
+const isScreenSharing = ref(false);
+const isRecording = ref(false);
+const showChat = ref(false);
+const callMessages = ref([]);
+const newMessage = ref('');
+const chatMessages = ref(null);
+let mediaRecorder = null;
+let screenStream = null;
+
+// Video quality constraints
+const videoConstraints = {
+  video: {
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    frameRate: { ideal: 30 }
+  },
+  audio: {
+    echoCancellation: true,
+    noiseSuppression: true
+  }
+};
 
 const loadConsultationHistory = async () => {
   try {
@@ -285,7 +349,7 @@ const isConsultationTime = (consultationDate) => {
   const now = new Date();
   const consultationTime = new Date(consultationDate);
   const timeDiff = consultationTime - now;
-  return Math.abs(timeDiff) <= 15 * 60 * 1000;
+  return Math.abs(timeDiff) <= 30 * 60 * 1000;
 };
 
 const initializeCall = async (consultationId) => {
@@ -293,23 +357,26 @@ const initializeCall = async (consultationId) => {
     console.log('=== INITIALIZING VIDEO CALL ===');
     console.log('Consultation ID:', consultationId);
 
-    // Lấy stream từ camera và mic
-    console.log('=== GETTING USER MEDIA ===');
-    localStream = await navigator.mediaDevices.getUserMedia({ 
-      video: true, 
-      audio: true 
-    });
+    // Get media with improved quality
+    localStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
     localVideo.value.srcObject = localStream;
-    console.log('✅ Got local media stream');
 
-    // Tạo peer connection
-    console.log('=== CREATING PEER CONNECTION ===');
+    // Create peer connection with better configuration
     peerConnection = new RTCPeerConnection({
       iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' }
-      ]
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+      ],
+      iceCandidatePoolSize: 10
     });
-    console.log('✅ Peer connection created');
+
+    // Add connection state change handler
+    peerConnection.onconnectionstatechange = () => {
+      if (peerConnection.connectionState === 'disconnected') {
+        handleDisconnection();
+      }
+    };
 
     // Thêm stream local vào peer connection
     console.log('=== ADDING LOCAL TRACKS ===');
@@ -453,11 +520,72 @@ const initializeCall = async (consultationId) => {
   }
 };
 
-// Thêm hàm mới để tạo và gửi offer
+const handleParticipantJoined = (data) => {
+  console.log('=== PARTICIPANT JOINED ===');
+  console.log('Data:', data);
+  
+  // Nếu là người đầu tiên và có người thứ 2 tham gia, tạo và gửi offer
+  if (isFirstParticipant.value) {
+    console.log('First participant detected, creating and sending offer...');
+    // Đợi một chút để đảm bảo peer connection đã sẵn sàng
+    setTimeout(() => {
+      createAndSendOffer(currentConsultationId);
+    }, 1000);
+  }
+  
+  toast.add({
+    severity: 'success',
+    summary: 'Thông báo',
+    detail: 'Bệnh nhân đã tham gia cuộc gọi',
+    life: 3000
+  });
+};
+
 const createAndSendOffer = async (consultationId) => {
   try {
     console.log('=== CREATING AND SENDING OFFER ===');
     console.log('Consultation ID:', consultationId);
+
+    // Kiểm tra và tạo mới peer connection nếu cần
+    if (!peerConnection || peerConnection.connectionState === 'closed') {
+      console.log('Creating new peer connection...');
+      peerConnection = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 10
+      });
+
+      // Thêm các event handlers
+      peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          console.log('=== VIDEO CALL ICE CANDIDATE ===');
+          console.log('Consultation ID:', consultationId);
+          console.log('Candidate:', event.candidate);
+          socketService.emit('video_call_ice_candidate', {
+            consultationId: consultationId,
+            candidate: event.candidate
+          });
+          console.log('✅ ICE candidate sent');
+        }
+      };
+
+      peerConnection.ontrack = event => {
+        console.log('=== RECEIVED REMOTE TRACK ===');
+        remoteVideo.value.srcObject = event.streams[0];
+        console.log('✅ Remote stream set');
+      };
+
+      // Thêm local stream vào peer connection
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+        });
+        console.log('✅ Local tracks added to new peer connection');
+      }
+    }
 
     // Tạo offer
     const offer = await peerConnection.createOffer();
@@ -492,32 +620,19 @@ const createAndSendOffer = async (consultationId) => {
   }
 };
 
-const handleParticipantJoined = (data) => {
-  console.log('=== PARTICIPANT JOINED ===');
+const handleParticipantLeft = (data) => {
+  console.log('=== PARTICIPANT LEFT ===');
   console.log('Data:', data);
   
-  // Nếu là người đầu tiên và có người thứ 2 tham gia, tạo và gửi offer
-  if (isFirstParticipant.value) {
-    console.log('First participant detected, creating and sending offer...');
-    createAndSendOffer(currentConsultationId);
-  }
+  // Tự động thoát khi người kia rời đi
+  endCall();
   
-  toast.add({
-    severity: 'success',
-    summary: 'Thông báo',
-    detail: 'Bệnh nhân đã tham gia cuộc gọi',
-    life: 3000
-  });
-};
-
-const handleParticipantLeft = (data) => {
   toast.add({
     severity: 'warn',
     summary: 'Thông báo',
     detail: 'Bệnh nhân đã rời cuộc gọi',
     life: 3000
   });
-  endCall();
 };
 
 const handleOffer = async (data) => {
@@ -572,23 +687,65 @@ const handleCallEnd = () => {
 };
 
 const endCall = () => {
+  console.log('=== ENDING CALL ===');
+  console.log('Consultation ID:', currentConsultationId);
+  
+  // Stop recording if active
+  if (isRecording.value) {
+    stopRecording();
+  }
+  
+  // Stop screen sharing if active
+  if (isScreenSharing.value) {
+    stopScreenShare();
+  }
+  
+  // Stop local stream
   if (localStream) {
     localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
   }
+  
+  // Close peer connection
   if (peerConnection) {
+    // Đóng tất cả các kết nối
     peerConnection.close();
+    // Reset peer connection
+    peerConnection = null;
   }
   
-  socketService.emit('leave_video_call', {
-    consultationId: currentConsultationId
-  });
+  // Emit leave events
+  if (currentConsultationId) {
+    socketService.emit('leave_video_call', {
+      consultationId: currentConsultationId
+    });
+    
+    socketService.emit('video_call_end', {
+      consultationId: currentConsultationId
+    });
+    
+    // Xóa tất cả listeners liên quan đến video call
+    socketService.off('participant_joined');
+    socketService.off('participant_left');
+    socketService.off('video_call_offer');
+    socketService.off('video_call_answer');
+    socketService.off('video_call_ice_candidate');
+    socketService.off('video_call_ended');
+    socketService.off('call_message');
+  }
   
-  socketService.emit('video_call_end', {
-    consultationId: currentConsultationId
-  });
-  
+  // Reset state
   showVideoCall.value = false;
   currentConsultationId = null;
+  isScreenSharing.value = false;
+  isRecording.value = false;
+  showChat.value = false;
+  callMessages.value = [];
+  newMessage.value = '';
+  expandedVideo.value = null;
+  isFirstParticipant.value = false;
+  
+  console.log('=== CALL ENDED ===');
 };
 
 const toggleCamera = () => {
@@ -647,6 +804,18 @@ const startVideoCall = async (consultationId) => {
       return;
     }
 
+    // Đảm bảo peer connection đã được reset
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnection = null;
+    }
+
+    // Reset các trạng thái
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localStream = null;
+    }
+
     currentConsultationId = consultationId;
     showVideoCall.value = true;
     await initializeCall(consultationId);
@@ -658,6 +827,8 @@ const startVideoCall = async (consultationId) => {
       detail: 'Không thể bắt đầu cuộc gọi video',
       life: 3000
     });
+    // Đảm bảo reset state nếu có lỗi
+    endCall();
   }
 };
 
@@ -666,6 +837,224 @@ const toggleExpand = (video) => {
     expandedVideo.value = null;
   } else {
     expandedVideo.value = video;
+  }
+};
+
+// Screen sharing
+const toggleScreenShare = async () => {
+  try {
+    if (!isScreenSharing.value) {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true
+      });
+      const screenTrack = screenStream.getVideoTracks()[0];
+      
+      // Replace video track
+      const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+      if (sender) {
+        sender.replaceTrack(screenTrack);
+      } else {
+        peerConnection.addTrack(screenTrack, screenStream);
+      }
+      
+      isScreenSharing.value = true;
+      
+      // Handle when user stops sharing
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+    } else {
+      stopScreenShare();
+    }
+  } catch (error) {
+    console.error('Error toggling screen share:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể chia sẻ màn hình: ' + error.message,
+      life: 3000
+    });
+  }
+};
+
+const stopScreenShare = () => {
+  if (screenStream) {
+    screenStream.getTracks().forEach(track => track.stop());
+    screenStream = null;
+  }
+  isScreenSharing.value = false;
+  
+  // Restore camera video
+  if (localStream) {
+    const videoTrack = localStream.getVideoTracks()[0];
+    const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+    if (sender) {
+      sender.replaceTrack(videoTrack);
+    }
+  }
+};
+
+// Recording
+const toggleRecording = () => {
+  if (!isRecording.value) {
+    startRecording();
+  } else {
+    stopRecording();
+  }
+};
+
+const startRecording = () => {
+  try {
+    const stream = remoteVideo.value.srcObject;
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: 'video/webm;codecs=vp8,opus'
+    });
+    
+    const chunks = [];
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        chunks.push(e.data);
+      }
+    };
+    
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      
+      // Save recording
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `call-recording-${new Date().toISOString()}.webm`;
+      a.click();
+      
+      // Log recording
+      await logCallRecording(currentConsultationId, blob);
+    };
+    
+    mediaRecorder.start();
+    isRecording.value = true;
+    
+    toast.add({
+      severity: 'info',
+      summary: 'Thông báo',
+      detail: 'Đang ghi âm cuộc gọi',
+      life: 3000
+    });
+  } catch (error) {
+    console.error('Error starting recording:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể bắt đầu ghi âm: ' + error.message,
+      life: 3000
+    });
+  }
+};
+
+const stopRecording = () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    isRecording.value = false;
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Thông báo',
+      detail: 'Đã dừng ghi âm',
+      life: 3000
+    });
+  }
+};
+
+// Chat functionality
+const toggleChat = () => {
+  showChat.value = !showChat.value;
+};
+
+const sendCallMessage = () => {
+  if (!newMessage.value.trim()) return;
+  
+  const message = {
+    text: newMessage.value,
+    sender: 'me',
+    timestamp: new Date()
+  };
+  
+  callMessages.value.push(message);
+  socketService.emit('call_message', {
+    consultationId: currentConsultationId,
+    message: newMessage.value,
+    timestamp: message.timestamp
+  });
+  
+  newMessage.value = '';
+  scrollToBottom();
+};
+
+const scrollToBottom = async () => {
+  await nextTick();
+  if (chatMessages.value) {
+    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+  }
+};
+
+const formatMessageTime = (timestamp) => {
+  return new Date(timestamp).toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Handle disconnection
+const handleDisconnection = async () => {
+  toast.add({
+    severity: 'warn',
+    summary: 'Cảnh báo',
+    detail: 'Mất kết nối. Đang thử kết nối lại...',
+    life: 3000
+  });
+  
+  try {
+    // Try to reconnect
+    await reconnectCall();
+  } catch (error) {
+    console.error('Reconnection failed:', error);
+    endCall();
+  }
+};
+
+const reconnectCall = async () => {
+  if (!peerConnection || peerConnection.connectionState === 'connected') return;
+  
+  try {
+    // Create new offer
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    
+    // Send offer through signaling
+    socketService.emit('video_call_offer', {
+      consultationId: currentConsultationId,
+      offer: offer
+    });
+  } catch (error) {
+    console.error('Error during reconnection:', error);
+    throw error;
+  }
+};
+
+// Log call recording
+const logCallRecording = async (consultationId, recordingBlob) => {
+  try {
+    const formData = new FormData();
+    formData.append('recording', recordingBlob);
+    formData.append('consultationId', consultationId);
+    
+    await axios.post('/api/video-call/log-recording', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  } catch (error) {
+    console.error('Error logging recording:', error);
   }
 };
 
@@ -701,6 +1090,16 @@ onMounted(() => {
     console.log('=== RECEIVED ICE CANDIDATE ===');
     console.log('Data:', data);
   });
+
+  // New socket listeners
+  socketService.on('call_message', (data) => {
+    callMessages.value.push({
+      text: data.message,
+      sender: 'other',
+      timestamp: data.timestamp
+    });
+    scrollToBottom();
+  });
 });
 
 onUnmounted(() => {
@@ -714,6 +1113,12 @@ onUnmounted(() => {
     socketService.emit('leave_video_call', {
       consultationId: currentConsultationId
     });
+  }
+  if (screenStream) {
+    screenStream.getTracks().forEach(track => track.stop());
+  }
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
   }
 });
 </script>
@@ -957,6 +1362,122 @@ onUnmounted(() => {
   .controls button {
     padding: 10px 20px;
     font-size: 0.9rem;
+  }
+}
+
+/* New styles for additional features */
+.chat-panel {
+  position: fixed;
+  right: -300px;
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+.chat-panel.expanded {
+  right: 0;
+}
+
+.chat-header {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-messages {
+  height: calc(100vh - 130px);
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.message {
+  margin-bottom: 15px;
+  max-width: 80%;
+}
+
+.message.sent {
+  margin-left: auto;
+}
+
+.message.received {
+  margin-right: auto;
+}
+
+.message-content {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+
+.message.sent .message-content {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.message-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+.chat-input {
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.chat-input button {
+  padding: 8px 15px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background-color: #0b5ed7;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #0d6efd;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .chat-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .controls {
+    flex-wrap: wrap;
+  }
+  
+  .controls button {
+    flex: 1 1 calc(50% - 10px);
   }
 }
 </style> 

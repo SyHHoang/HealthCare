@@ -79,7 +79,7 @@ export const getConsultationList = async (req, res) => {
       EndDate: item.EndDate,
       call: item.call 
     }));
-    console.log("formattedList",formattedList);
+    
     res.json({
       success: true,
       data: formattedList
@@ -260,7 +260,7 @@ export const getConsultationHistory = async (req, res) => {
       })
       .sort({ consultationDate: -1 });
 
-    console.log("danh sách tư vấn", consultations);
+    
 
     // Tách thành 2 danh sách: đã qua và sắp tới
     const now = new Date();
