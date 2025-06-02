@@ -74,19 +74,28 @@ const sendMessage = async () => {
   isLoading.value = true;
 
   // Thêm tin nhắn của người dùng vào danh sách
-  messages.value.push({ sender: 'user', text: userMessage });
+  messages.value.push({ 
+    sender: 'user', 
+    text: userMessage,
+    time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  });
 
   try {
     // Gọi Gemini API
     const response = await GeminiService.generateResponse(userMessage);
     
     // Thêm phản hồi từ chatbot vào danh sách
-    messages.value.push({ sender: 'bot', text: response });
+    messages.value.push({ 
+      sender: 'bot', 
+      text: response,
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    });
   } catch (error) {
     console.error('Lỗi khi gửi tin nhắn:', error);
     messages.value.push({
       sender: 'bot',
       text: 'Xin lỗi, đã xảy ra lỗi khi kết nối với trợ lý AI. Vui lòng thử lại sau.',
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     });
   } finally {
     isLoading.value = false;
