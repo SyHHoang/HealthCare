@@ -6,6 +6,7 @@ import '../../widgets/video_call_widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class ConsultationHistoryScreen extends ConsumerStatefulWidget {
   final Doctor doctor;
@@ -24,11 +25,45 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
   bool showVideoCall = false;
   String? currentConsultationId;
   String activeTab = 'upcoming';
+  RTCPeerConnection? peerConnection;
+  MediaStream? localStream;
+  bool isFirstParticipant = false;
 
   @override
   void initState() {
     super.initState();
     loadConsultationHistory();
+  }
+
+  @override
+  void dispose() {
+    _cleanupVideoCall();
+    super.dispose();
+  }
+
+  void _cleanupVideoCall() {
+    debugPrint('=== CLEANING UP VIDEO CALL ===');
+    
+    // Stop local stream
+    if (localStream != null) {
+      localStream!.getTracks().forEach((track) => track.stop());
+      localStream = null;
+    }
+
+    // Close peer connection
+    if (peerConnection != null) {
+      peerConnection!.close();
+      peerConnection = null;
+    }
+
+    // Reset state
+    setState(() {
+      showVideoCall = false;
+      currentConsultationId = null;
+      isFirstParticipant = false;
+    });
+
+    debugPrint('=== VIDEO CALL CLEANUP COMPLETED ===');
   }
 
   Future<void> loadConsultationHistory() async {
@@ -176,6 +211,9 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
         return;
       }
 
+      // Đảm bảo cleanup trước khi bắt đầu cuộc gọi mới
+      _cleanupVideoCall();
+
       setState(() {
         currentConsultationId = consultationId;
         showVideoCall = true;
@@ -188,14 +226,12 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
           backgroundColor: Colors.red,
         ),
       );
+      _cleanupVideoCall();
     }
   }
 
   void endVideoCall() {
-    setState(() {
-      showVideoCall = false;
-      currentConsultationId = null;
-    });
+    _cleanupVideoCall();
   }
 
   @override

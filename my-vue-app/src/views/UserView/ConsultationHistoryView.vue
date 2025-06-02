@@ -212,6 +212,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
@@ -239,6 +240,7 @@ let peerConnection = null;
 let currentConsultationId = null;
 const expandedVideo = ref(null);
 const isFirstParticipant = ref(false);
+const remainingTime = ref(1800); // 30 minutes in seconds
 
 const loadConsultationHistory = async () => {
   try {
@@ -309,6 +311,292 @@ const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+const handleParticipantJoined = (data) => {
+  console.log('=== PARTICIPANT JOINED ===');
+  console.log('Data:', data);
+  
+  // Nếu là người gọi đầu tiên, đợi người nhận tham gia rồi mới gửi offer
+  if (isFirstParticipant.value) {
+    console.log('First participant, waiting for receiver to join...');
+    // Đợi 1 giây để đảm bảo người nhận đã sẵn sàng
+    setTimeout(() => {
+      createAndSendOffer(currentConsultationId);
+    }, 1000);
+  }
+  
+  toast.add({
+    severity: 'success',
+    summary: 'Thông báo',
+    detail: 'Bác sĩ đã tham gia cuộc gọi',
+    life: 3000
+  });
+};
+
+const handleParticipantLeft = (data) => {
+  console.log('=== PARTICIPANT LEFT ===');
+  console.log('Data:', data);
+  toast.add({
+    severity: 'warn',
+    summary: 'Thông báo',
+    detail: 'Bác sĩ đã rời cuộc gọi',
+    life: 3000
+  });
+  endCall();
+};
+
+const handleCallEnd = () => {
+  console.log('=== CALL ENDED ===');
+  endCall();
+};
+
+const endCall = () => {
+  console.log('=== ENDING CALL ===');
+  
+  // Stop local stream
+  if (localStream) {
+    console.log('Stopping local stream...');
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+
+  // Close peer connection
+  if (peerConnection) {
+    console.log('Closing peer connection...');
+    peerConnection.close();
+    peerConnection = null;
+  }
+
+  // Remove socket listeners
+  console.log('Removing socket listeners...');
+  socketService.socket.off('participant_joined', handleParticipantJoined);
+  socketService.socket.off('participant_left', handleParticipantLeft);
+  socketService.socket.off('video_call_offer', handleOffer);
+  socketService.socket.off('video_call_answer', handleAnswer);
+  socketService.socket.off('video_call_ice_candidate', handleIceCandidate);
+  socketService.socket.off('video_call_ended', handleCallEnd);
+
+  // Emit leave events
+  if (currentConsultationId) {
+    console.log('Emitting leave events...');
+    socketService.socket.emit('leave_video_call', {
+      consultationId: currentConsultationId
+    });
+    
+    socketService.socket.emit('video_call_end', {
+      consultationId: currentConsultationId
+    });
+  }
+
+  // Reset state
+  console.log('Resetting state...');
+  showVideoCall.value = false;
+  currentConsultationId = null;
+  isFirstParticipant.value = false;
+  expandedVideo.value = null;
+  cameraEnabled.value = true;
+  micEnabled.value = true;
+  remainingTime.value = 1800;
+
+  console.log('=== CALL ENDED SUCCESSFULLY ===');
+};
+
+const toggleCamera = () => {
+  if (localStream) {
+    const videoTrack = localStream.getVideoTracks()[0];
+    videoTrack.enabled = !videoTrack.enabled;
+    cameraEnabled.value = videoTrack.enabled;
+    console.log('Camera ' + (cameraEnabled.value ? 'enabled' : 'disabled'));
+  }
+};
+
+const toggleMic = () => {
+  if (localStream) {
+    const audioTrack = localStream.getAudioTracks()[0];
+    audioTrack.enabled = !audioTrack.enabled;
+    micEnabled.value = audioTrack.enabled;
+    console.log('Microphone ' + (micEnabled.value ? 'enabled' : 'disabled'));
+  }
+};
+
+const startVideoCall = async (consultationId) => {
+  try {
+    console.log('=== USER STARTING VIDEO CALL ===');
+    console.log('Consultation ID:', consultationId);
+    
+    if (!consultationId) {
+      console.error('Consultation ID is undefined');
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Không tìm thấy ID cuộc hẹn',
+        life: 3000
+      });
+      return;
+    }
+    
+    // Kiểm tra thời gian cuộc hẹn
+    const consultation = nextConsultation.value || upcomingConsultations.value.find(c => c._id === consultationId);
+    if (!consultation) {
+      console.error('Không tìm thấy thông tin cuộc hẹn');
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Không tìm thấy thông tin cuộc hẹn',
+        life: 3000
+      });
+      return;
+    }
+
+    if (!isConsultationTime(consultation.consultationDate)) {
+      console.error('Không đúng thời gian tư vấn');
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Chưa đến thời gian tư vấn hoặc đã quá thời gian cho phép',
+        life: 3000
+      });
+      return;
+    }
+
+    // Đảm bảo cleanup trước khi bắt đầu cuộc gọi mới
+    endCall();
+
+    currentConsultationId = consultationId;
+    showVideoCall.value = true;
+    await initializeCall(consultationId);
+  } catch (error) {
+    console.error('Lỗi khi bắt đầu cuộc gọi:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể bắt đầu cuộc gọi video',
+      life: 3000
+    });
+    endCall();
+  }
+};
+
+const toggleExpand = (video) => {
+  if (expandedVideo.value === video) {
+    expandedVideo.value = null;
+  } else {
+    expandedVideo.value = video;
+  }
+};
+
+const handleOffer = async (data) => {
+  try {
+    console.log('=== HANDLING OFFER ===');
+    console.log('From:', data.from);
+    console.log('Role:', data.role);
+    
+    if (!peerConnection) {
+      console.error('❌ No peer connection available');
+      return;
+    }
+
+    // Set remote description
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+    console.log('✅ Remote description set');
+
+    // Create and send answer
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    console.log('✅ Local description set');
+
+    // Send answer
+    socketService.socket.emit('video_call_answer', {
+      consultationId: currentConsultationId,
+      answer: answer
+    });
+    console.log('✅ Answer sent');
+  } catch (error) {
+    console.error('❌ Error handling offer:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể xử lý yêu cầu kết nối: ' + error.message,
+      life: 3000
+    });
+  }
+};
+
+const handleAnswer = async (data) => {
+  try {
+    console.log('=== HANDLING ANSWER ===');
+    console.log('From:', data.from);
+    console.log('Role:', data.role);
+    
+    if (!peerConnection) {
+      console.error('❌ No peer connection available');
+      return;
+    }
+
+    // Set remote description
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    console.log('✅ Remote description set');
+  } catch (error) {
+    console.error('❌ Error handling answer:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể xử lý phản hồi kết nối: ' + error.message,
+      life: 3000
+    });
+  }
+};
+
+const handleIceCandidate = async (data) => {
+  try {
+    console.log('=== HANDLING ICE CANDIDATE ===');
+    console.log('From:', data.from);
+    console.log('Role:', data.role);
+    
+    if (!peerConnection) {
+      console.error('❌ No peer connection available');
+      return;
+    }
+
+    // Add ICE candidate
+    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    console.log('✅ ICE candidate added');
+  } catch (error) {
+    console.error('❌ Error handling ICE candidate:', error);
+  }
+};
+
+const createAndSendOffer = async (consultationId) => {
+  try {
+    console.log('=== CREATING AND SENDING OFFER ===');
+    console.log('Consultation ID:', consultationId);
+    
+    if (!peerConnection) {
+      console.error('❌ No peer connection available');
+      return;
+    }
+
+    // Create offer
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    console.log('✅ Local description set');
+
+    // Send offer
+    socketService.socket.emit('video_call_offer', {
+      consultationId: consultationId,
+      offer: offer
+    });
+    console.log('✅ Offer sent');
+  } catch (error) {
+    console.error('❌ Error creating and sending offer:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tạo yêu cầu kết nối: ' + error.message,
+      life: 3000
+    });
+  }
 };
 
 const initializeCall = async (consultationId) => {
@@ -410,10 +698,7 @@ const initializeCall = async (consultationId) => {
           isFirstParticipant.value = response.isFirstParticipant;
           console.log('Is first participant:', isFirstParticipant.value);
           
-          if (isFirstParticipant.value) {
-            createAndSendOffer(consultationId);
-          }
-          
+          // Không gửi offer ngay lập tức, đợi người nhận tham gia
           toast.add({
             severity: 'success',
             summary: 'Thành công',
@@ -475,127 +760,6 @@ const initializeCall = async (consultationId) => {
       life: 3000
     });
     endCall();
-  }
-};
-
-const handleParticipantJoined = (data) => {
-  toast.add({
-    severity: 'success',
-    summary: 'Thông báo',
-    detail: 'Bác sĩ đã tham gia cuộc gọi',
-    life: 3000
-  });
-};
-
-const handleParticipantLeft = (data) => {
-  toast.add({
-    severity: 'warn',
-    summary: 'Thông báo',
-    detail: 'Bác sĩ đã rời cuộc gọi',
-    life: 3000
-  });
-  endCall();
-};
-
-const handleCallEnd = () => {
-  endCall();
-};
-
-const endCall = () => {
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-  }
-  if (peerConnection) {
-    peerConnection.close();
-  }
-  
-  socketService.socket.emit('leave_video_call', {
-    consultationId: currentConsultationId
-  });
-  
-  socketService.socket.emit('video_call_end', {
-    consultationId: currentConsultationId
-  });
-  
-  showVideoCall.value = false;
-  currentConsultationId = null;
-};
-
-const toggleCamera = () => {
-  if (localStream) {
-    const videoTrack = localStream.getVideoTracks()[0];
-    videoTrack.enabled = !videoTrack.enabled;
-    cameraEnabled.value = videoTrack.enabled;
-  }
-};
-
-const toggleMic = () => {
-  if (localStream) {
-    const audioTrack = localStream.getAudioTracks()[0];
-    audioTrack.enabled = !audioTrack.enabled;
-    micEnabled.value = audioTrack.enabled;
-  }
-};
-
-const startVideoCall = async (consultationId) => {
-  try {
-    console.log('=== USER STARTING VIDEO CALL ===');
-    console.log('Consultation ID:', consultationId);
-    
-    if (!consultationId) {
-      console.error('Consultation ID is undefined');
-      toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Không tìm thấy ID cuộc hẹn',
-        life: 3000
-      });
-      return;
-    }
-    
-    // Kiểm tra thời gian cuộc hẹn
-    const consultation = nextConsultation.value || upcomingConsultations.value.find(c => c._id === consultationId);
-    if (!consultation) {
-      console.error('Không tìm thấy thông tin cuộc hẹn');
-      toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Không tìm thấy thông tin cuộc hẹn',
-        life: 3000
-      });
-      return;
-    }
-
-    if (!isConsultationTime(consultation.consultationDate)) {
-      console.error('Không đúng thời gian tư vấn');
-      toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Chưa đến thời gian tư vấn hoặc đã quá thời gian cho phép',
-        life: 3000
-      });
-      return;
-    }
-
-    currentConsultationId = consultationId;
-    showVideoCall.value = true;
-    await initializeCall(consultationId);
-  } catch (error) {
-    console.error('Lỗi khi bắt đầu cuộc gọi:', error);
-    toast.add({
-      severity: 'error',
-      summary: 'Lỗi',
-      detail: 'Không thể bắt đầu cuộc gọi video',
-      life: 3000
-    });
-  }
-};
-
-const toggleExpand = (video) => {
-  if (expandedVideo.value === video) {
-    expandedVideo.value = null;
-  } else {
-    expandedVideo.value = video;
   }
 };
 

@@ -218,7 +218,9 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
       
       // Nếu là người đầu tiên và có người thứ 2 tham gia, tạo và gửi offer
       if (_isFirstParticipant) {
-        debugPrint('First participant detected, creating and sending offer...');
+        debugPrint('First participant detected, waiting for 1 second before sending offer...');
+        // Đợi 1 giây để đảm bảo người nhận đã sẵn sàng
+        await Future.delayed(const Duration(seconds: 1));
         await _createAndSendOffer();
       }
     });
@@ -227,7 +229,14 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     SocketService.instance.on('participant_left', (data) {
       debugPrint('=== PARTICIPANT LEFT ===');
       debugPrint('Data: $data');
-      _endCall();
+      
+      // Chỉ kết thúc cuộc gọi nếu người kia rời đi và không phải là socket của chính mình
+      if (data['socketId'] != SocketService.instance.socket?.id) {
+        debugPrint('Other participant left, ending call...');
+        _endCall();
+      } else {
+        debugPrint('Self left event, ignoring...');
+      }
     });
 
     // Lắng nghe sự kiện video call offer
@@ -235,21 +244,31 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
       debugPrint('=== RECEIVED VIDEO CALL OFFER ===');
       debugPrint('Data: $data');
       try {
+        if (_peerConnection == null) {
+          debugPrint('❌ No peer connection available');
+          return;
+        }
+
         await _peerConnection!.setRemoteDescription(
           RTCSessionDescription(
             data['offer']['sdp'],
             data['offer']['type'],
           ),
         );
+        debugPrint('✅ Remote description set');
+
         final answer = await _peerConnection!.createAnswer();
         await _peerConnection!.setLocalDescription(answer);
+        debugPrint('✅ Local description set');
+
         SocketService.instance.emit('video_call_answer', {
           'consultationId': widget.consultationId,
           'answer': answer.toMap(),
         });
-        debugPrint('✅ Đã gửi answer');
+        debugPrint('✅ Answer sent');
       } catch (e) {
         debugPrint('❌ Error handling offer: $e');
+        _endCall();
       }
     });
 
@@ -258,15 +277,21 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
       debugPrint('=== RECEIVED VIDEO CALL ANSWER ===');
       debugPrint('Data: $data');
       try {
+        if (_peerConnection == null) {
+          debugPrint('❌ No peer connection available');
+          return;
+        }
+
         await _peerConnection!.setRemoteDescription(
           RTCSessionDescription(
             data['answer']['sdp'],
             data['answer']['type'],
           ),
         );
-        debugPrint('✅ Đã set remote description từ answer');
+        debugPrint('✅ Remote description set from answer');
       } catch (e) {
         debugPrint('❌ Error handling answer: $e');
+        _endCall();
       }
     });
 
@@ -275,6 +300,11 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
       debugPrint('=== RECEIVED ICE CANDIDATE ===');
       debugPrint('Data: $data');
       try {
+        if (_peerConnection == null) {
+          debugPrint('❌ No peer connection available');
+          return;
+        }
+
         if (data['candidate'] != null) {
           await _peerConnection!.addCandidate(
             RTCIceCandidate(
@@ -283,7 +313,7 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
               data['candidate']['sdpMLineIndex'],
             ),
           );
-          debugPrint('✅ Đã thêm ICE candidate');
+          debugPrint('✅ ICE candidate added');
         }
       } catch (e) {
         debugPrint('❌ Error handling ICE candidate: $e');
@@ -294,7 +324,14 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     SocketService.instance.on('video_call_ended', (data) {
       debugPrint('=== CALL ENDED ===');
       debugPrint('Data: $data');
-      _endCall();
+      
+      // Chỉ kết thúc cuộc gọi nếu người kia kết thúc cuộc gọi
+      if (data['by'] != widget.consultationId) {
+        debugPrint('Call ended by other participant');
+        _endCall();
+      } else {
+        debugPrint('Call ended by self, ignoring...');
+      }
     });
   }
 
@@ -327,13 +364,31 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
   }
 
   void _endCall() {
-    _cleanup();
+    debugPrint('=== ENDING CALL ===');
+    debugPrint('Consultation ID: ${widget.consultationId}');
+    debugPrint('Socket ID: ${SocketService.instance.socket?.id}');
+    
+    // Xóa tất cả listeners trước khi emit events
+    SocketService.instance.off('participant_joined');
+    SocketService.instance.off('participant_left');
+    SocketService.instance.off('video_call_offer');
+    SocketService.instance.off('video_call_answer');
+    SocketService.instance.off('video_call_ice_candidate');
+    SocketService.instance.off('video_call_ended');
+
+    // Emit events
     SocketService.instance.emit('leave_video_call', {
       'consultationId': widget.consultationId,
     });
+    
     SocketService.instance.emit('video_call_end', {
       'consultationId': widget.consultationId,
     });
+
+    // Cleanup resources
+    _cleanup();
+    
+    // Call parent callback
     widget.onCallEnd();
   }
 

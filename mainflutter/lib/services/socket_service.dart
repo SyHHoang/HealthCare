@@ -20,6 +20,9 @@ class SocketService {
   final List<Function(String)> _typingListeners = [];
   final List<Function(String)> _stopTypingListeners = [];
 
+  // Thêm getter cho socket
+  IO.Socket? get socket => _socket;
+
   SocketService._internal();
 
   bool isConnected() => _isConnected && _socket != null && _socket!.connected;
