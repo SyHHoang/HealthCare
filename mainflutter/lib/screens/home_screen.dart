@@ -10,6 +10,7 @@ import 'drug_search_screen.dart';
 import 'consultation_list_screen.dart';
 import 'consultation_history_screen.dart';
 import 'feedback_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final dynamic user;
@@ -106,8 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.notifications_none),
                 onPressed: () {
-                  // Xử lý nhấn thông báo
-                  print('Nhấn chuông thông báo');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
+                  );
                 },
               ),
               Padding(

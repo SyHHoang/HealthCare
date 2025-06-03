@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../login_screen.dart';
 import 'schedule_screen.dart';
 import 'docto_consultation_history_screen.dart';
+import 'doctor_notifications_screen.dart';
 
 class DoctorHomeScreen extends StatelessWidget {
   final Doctor doctor;
@@ -107,8 +108,12 @@ class DoctorHomeScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.notifications_none),
                 onPressed: () {
-                  // Xử lý nhấn chuông thông báo
-                  print('Nhấn chuông thông báo');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DoctorNotificationsScreen(),
+                    ),
+                  );
                 },
               ),
               IconButton(
