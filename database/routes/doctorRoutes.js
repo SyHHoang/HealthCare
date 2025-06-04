@@ -28,7 +28,7 @@ import { authenticateDoctor } from '../middlewares/doctorAuthMiddleware.js';
 import { upload } from '../utils/upload.js';
 import { authenticateToken, isAdmin } from '../middlewares/authMiddleware.js';
 import { sendNotification } from '../config/firebase-config.js';
-
+import Doctor from '../models/Doctor.js';
 const router = express.Router();
 
 // Public routes
@@ -70,19 +70,68 @@ router.get('/full-info/:id', authenticateToken, isAdmin, getFullDoctorInfo);
 router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
   try {
     const { fcmToken } = req.body;
-    const doctor = req.doctor;
+    const doctorId = req.doctor.id;
+    const doctor = await Doctor.findById(doctorId);
+    if (!fcmToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'FCM token là bắt buộc' 
+      });
+    }
 
     // Kiểm tra nếu token đã tồn tại
     if (!doctor.fcmTokens.includes(fcmToken)) {
       // Thêm token mới vào mảng
       doctor.fcmTokens.push(fcmToken);
       await doctor.save();
+      console.log(`Đã thêm FCM token mới cho bác sĩ ${doctor._id}`);
     }
 
-    res.json({ message: 'Cập nhật FCM token thành công' });
+    res.json({ 
+      success: true, 
+      message: 'Cập nhật FCM token thành công',
+      tokens: doctor.fcmTokens 
+    });
   } catch (error) {
-    console.error('Error updating FCM token:', error);
-    res.status(500).json({ message: 'Lỗi khi cập nhật FCM token' });
+    console.error('Lỗi khi cập nhật FCM token:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi cập nhật FCM token',
+      error: error.message 
+    });
+  }
+});
+
+// Xóa FCM token của bác sĩ
+router.delete('/remove-fcm-token', authenticateDoctor, async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    const doctor = req.doctor;
+
+    if (!fcmToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'FCM token là bắt buộc' 
+      });
+    }
+
+    // Xóa token khỏi mảng
+    doctor.fcmTokens = doctor.fcmTokens.filter(token => token !== fcmToken);
+    await doctor.save();
+    console.log(`Đã xóa FCM token khỏi bác sĩ ${doctor._id}`);
+
+    res.json({ 
+      success: true, 
+      message: 'Xóa FCM token thành công',
+      tokens: doctor.fcmTokens 
+    });
+  } catch (error) {
+    console.error('Lỗi khi xóa FCM token:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi xóa FCM token',
+      error: error.message 
+    });
   }
 });
 
