@@ -882,4 +882,5 @@ export const getFullDoctorInfo = async (req, res) => {
       message: 'Đã xảy ra lỗi khi lấy thông tin bác sĩ'
     });
   }
-}; 
+};
+

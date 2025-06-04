@@ -33,14 +33,7 @@
             <span>Nhắn tin</span>
             <span v-if="unreadMessages > 0" class="message-badge">{{ unreadMessages }}</span>
           </router-link>
-                    <router-link to="/doctor/feedback" class="nav-item">
-            <i class="bi bi-star"></i>
-            <span>Đánh giá</span>
-          </router-link>
-          <router-link to="/doctor/contact" class="nav-item">
-            <i class="bi bi-envelope"></i>
-            <span>Liên hệ</span>
-          </router-link>
+                    
         </nav>
         
         <div class="header-right">
@@ -165,7 +158,10 @@ const requestNotificationPermission = async () => {
     if (permission === 'granted') {
       const token = await getFCMToken();
       if (token) {
-        await axiosInstance.post('/api/doctors/update-fcm-token', { fcmToken: token });
+        await axiosInstance.post('/api/doctors/update-fcm-token', { 
+          fcmToken: token,
+          platform: 'web'
+        });
         console.log('FCM token saved successfully for doctor');
         toast.add({
           severity: 'success',

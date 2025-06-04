@@ -7,10 +7,20 @@ const doctorSchema = new mongoose.Schema({
     required: [true, 'Vui lòng nhập họ và tên'],
     trim: true
   },
-  fcmTokens: [{
-    type: String,
-    default: []
-  }],
+  fcmTokens: {
+    web: {
+      type: String,
+      default: ''
+    },
+    mobile: {
+      type: String,
+      default: ''
+    }
+  },
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
+  },
   email: {
     type: String,
     required: [true, 'Vui lòng nhập email'],

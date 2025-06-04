@@ -66,6 +66,21 @@ export default [
         path: 'notifications',
         name: 'DoctorNotifications',
         component: () => import('@/views/DoctorViews/Notifications.vue') // Lazy load
+      },
+      {
+        path: 'settings',
+        name: 'DoctorSettings',
+        component: () => import('@/views/DoctorViews/Settings.vue') // Lazy load
+      },
+      {
+        path: 'feedback',
+        name: 'DoctorFeedback',
+        component: () => import('@/views/PublicView/Feedback.vue') // Lazy load
+      },
+      {
+        path: 'contact',
+        name: 'DoctorContact',
+        component: () => import('@/views/PublicView/Contact.vue') // Lazy load
       }
     ]
   },

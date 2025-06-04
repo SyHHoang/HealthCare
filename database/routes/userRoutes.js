@@ -26,21 +26,17 @@ router.put("/settings", authenticateToken, updateNotificationSettings);
 // Route cập nhật FCM token
 router.post('/update-fcm-token', authenticateToken, async (req, res) => {
   try {
-    const { fcmToken } = req.body;
+    const { fcmToken, platform = 'web' } = req.body;
     const userId = req.user.userId;
-
     // Tìm user và cập nhật FCM token
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Kiểm tra nếu token đã tồn tại
-    if (!user.fcmTokens.includes(fcmToken)) {
-      // Thêm token mới vào mảng
-      user.fcmTokens.push(fcmToken);
-      await user.save();
-    }
+    // Cập nhật token mới
+    user.fcmTokens[platform] = fcmToken;
+    await user.save();
 
     res.json({ success: true, message: 'FCM token updated successfully' });
   } catch (error) {

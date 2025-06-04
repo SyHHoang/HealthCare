@@ -6,7 +6,7 @@
 
     <div class="settings-content">
       <div class="settings-section">
-        <div class="settings-item" @click="navigateTo('/user/feedback')">
+        <div class="settings-item" @click="navigateTo('/doctor/feedback')">
           <div class="settings-item-info">
             <i class="pi pi-comment" style="font-size: 1.5rem; color: #4CAF50;"></i>
             <div class="settings-text">
@@ -17,7 +17,7 @@
           <i class="pi pi-chevron-right"></i>
         </div>
 
-        <div class="settings-item" @click="navigateTo('/user/contact')">
+        <div class="settings-item" @click="navigateTo('/doctor/contact')">
           <div class="settings-item-info">
             <i class="pi pi-envelope" style="font-size: 1.5rem; color: #2196F3;"></i>
             <div class="settings-text">
@@ -28,7 +28,7 @@
           <i class="pi pi-chevron-right"></i>
         </div>
 
-        <div class="settings-item" @click="navigateTo('/user/change-password')">
+        <div class="settings-item" @click="navigateTo('/doctor/change-password')">
           <div class="settings-item-info">
             <i class="pi pi-lock" style="font-size: 1.5rem; color: #FF9800;"></i>
             <div class="settings-text">
@@ -38,7 +38,6 @@
           </div>
           <i class="pi pi-chevron-right"></i>
         </div>
-
         <div class="settings-item" @click="showNotificationSettings">
           <div class="settings-item-info">
             <i class="pi pi-bell" style="font-size: 1.5rem; color: #9C27B0;"></i>
@@ -86,7 +85,7 @@ const settings = ref({
 
 const fetchSettings = async () => {
   try {
-    const response = await axiosInstance.get('/api/users/settings');
+    const response = await axiosInstance.get('/api/doctors/settings');
     if (response.data.success) {
       settings.value.enabled = response.data.settings.enabled;
     }
@@ -103,7 +102,7 @@ const fetchSettings = async () => {
 
 const updateSettings = async () => {
   try {
-    const response = await axiosInstance.put('/api/users/settings', {
+    const response = await axiosInstance.put('/api/doctors/settings', {
       enabled: settings.value.enabled
     });
     

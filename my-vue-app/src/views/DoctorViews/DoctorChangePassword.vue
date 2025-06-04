@@ -56,7 +56,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import axiosInstance from '../services/axios-config';
+import axiosInstance from '@/services/axiosInstance';
 
 const router = useRouter();
 const isSubmitting = ref(false);

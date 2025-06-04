@@ -84,6 +84,12 @@ export default [
         name: 'UserNotifications',
         component: () => import('@/views/UserView/Notifications.vue'),
         meta: { requiresAuth: true, requiresUser: true }
+      },
+      {
+        path: 'change-password',
+        name: 'UserChangePassword',
+        component: () => import('@/views/UserView/ChangePasswork.vue'),
+        meta: { requiresAuth: true, requiresUser: true }
       }
     ]
   },

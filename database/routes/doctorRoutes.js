@@ -69,7 +69,7 @@ router.get('/full-info/:id', authenticateToken, isAdmin, getFullDoctorInfo);
 // Cập nhật FCM token cho bác sĩ
 router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
   try {
-    const { fcmToken } = req.body;
+    const { fcmToken, platform = 'web' } = req.body;
     const doctorId = req.doctor.id;
     const doctor = await Doctor.findById(doctorId);
     if (!fcmToken) {
@@ -79,13 +79,10 @@ router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
       });
     }
 
-    // Kiểm tra nếu token đã tồn tại
-    if (!doctor.fcmTokens.includes(fcmToken)) {
-      // Thêm token mới vào mảng
-      doctor.fcmTokens.push(fcmToken);
-      await doctor.save();
-      console.log(`Đã thêm FCM token mới cho bác sĩ ${doctor._id}`);
-    }
+    // Cập nhật token mới
+    doctor.fcmTokens[platform] = fcmToken;
+    await doctor.save();
+    console.log(`Đã cập nhật FCM token mới cho bác sĩ ${doctor._id}`);
 
     res.json({ 
       success: true, 
@@ -105,18 +102,11 @@ router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
 // Xóa FCM token của bác sĩ
 router.delete('/remove-fcm-token', authenticateDoctor, async (req, res) => {
   try {
-    const { fcmToken } = req.body;
+    const { platform = 'web' } = req.body;
     const doctor = req.doctor;
 
-    if (!fcmToken) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'FCM token là bắt buộc' 
-      });
-    }
-
-    // Xóa token khỏi mảng
-    doctor.fcmTokens = doctor.fcmTokens.filter(token => token !== fcmToken);
+    // Xóa token bằng cách gán giá trị rỗng
+    doctor.fcmTokens[platform] = '';
     await doctor.save();
     console.log(`Đã xóa FCM token khỏi bác sĩ ${doctor._id}`);
 
@@ -150,6 +140,51 @@ router.post('/send-notification', authenticateDoctor, async (req, res) => {
   } catch (error) {
     console.error('Error sending notification:', error);
     res.status(500).json({ message: 'Lỗi khi gửi thông báo' });
+  }
+});
+
+// Routes cho cài đặt thông báo
+router.get('/settings', authenticateDoctor, async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.doctor.id);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Không tìm thấy bác sĩ' });
+    }
+    res.json({ 
+      success: true,
+      settings: { enabled: doctor.notificationsEnabled }
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy cài đặt:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+router.put('/settings', authenticateDoctor, async (req, res) => {
+  try {
+    const { enabled } = req.body;
+
+    const doctor = await Doctor.findById(req.doctor.id);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Không tìm thấy bác sĩ' });
+    }
+
+    // Cập nhật cài đặt thông báo
+    doctor.notificationsEnabled = enabled ?? doctor.notificationsEnabled;
+
+    await doctor.save();
+
+    res.json({
+      success: true,
+      message: 'Cập nhật cài đặt thông báo thành công',
+      settings: { enabled: doctor.notificationsEnabled }
+    });
+  } catch (error) {
+    console.error('Lỗi khi cập nhật cài đặt:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi cập nhật cài đặt thông báo' 
+    });
   }
 });
 

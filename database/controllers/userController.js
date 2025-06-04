@@ -241,7 +241,7 @@ export const getNotificationSettings = async (req, res) => {
 
     res.json({
       success: true,
-      settings: user.notificationSettings
+      settings: { enabled: user.notificationsEnabled }
     });
   } catch (error) {
     console.error('Lỗi khi lấy cài đặt thông báo:', error);
@@ -255,32 +255,22 @@ export const getNotificationSettings = async (req, res) => {
 // Cập nhật cài đặt thông báo
 export const updateNotificationSettings = async (req, res) => {
   try {
-    const { 
-      systemNotifications,
-      paymentNotifications,
-      messageNotifications,
-      appointmentNotifications
-    } = req.body;
+    const { enabled } = req.body;
 
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
     }
 
-    // Cập nhật cài đặt thông báo
-    user.notificationSettings = {
-      systemNotifications: systemNotifications ?? user.notificationSettings.systemNotifications,
-      paymentNotifications: paymentNotifications ?? user.notificationSettings.paymentNotifications,
-      messageNotifications: messageNotifications ?? user.notificationSettings.messageNotifications,
-      appointmentNotifications: appointmentNotifications ?? user.notificationSettings.appointmentNotifications
-    };
+    // Cập nhật trạng thái thông báo
+    user.notificationsEnabled = enabled ?? user.notificationsEnabled;
 
     await user.save();
 
     res.json({
       success: true,
       message: "Cập nhật cài đặt thông báo thành công",
-      settings: user.notificationSettings
+      settings: { enabled: user.notificationsEnabled }
     });
   } catch (error) {
     console.error('Lỗi khi cập nhật cài đặt thông báo:', error);

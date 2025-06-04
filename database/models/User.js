@@ -6,10 +6,16 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: ''
   },
-  fcmTokens: [{
-    type: String,
-    default: []
-  }],
+  fcmTokens: {
+    web: {
+      type: String,
+      default: ''
+    },
+    mobile: {
+      type: String,
+      default: ''
+    }
+  },
   email: {
     type: String,
     required: true,
@@ -53,23 +59,9 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  notificationSettings: {
-    systemNotifications: {
-      type: Boolean,
-      default: true
-    },
-    paymentNotifications: {
-      type: Boolean,
-      default: true
-    },
-    messageNotifications: {
-      type: Boolean,
-      default: true
-    },
-    appointmentNotifications: {
-      type: Boolean,
-      default: true
-    }
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
   },
   createdAt: {
     type: Date,

@@ -28,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
       String? token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         await _apiService.post('/users/update-fcm-token', {
-          'fcmToken': token
+          'fcmToken': token,
+          'platform': 'mobile'  
         });
         print('FCM token saved successfully for user');
       }
@@ -42,7 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
       String? token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         await _apiService.post('/doctors/update-fcm-token', {
-          'fcmToken': token
+          'fcmToken': token,
+          'platform': 'mobile'
         });
         print('FCM token saved successfully for doctor');
       }
