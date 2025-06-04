@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "278060018675",
+    "firebase_url": "https://appmusic-caa79-default-rtdb.firebaseio.com",
+    "project_id": "appmusic-caa79",
+    "storage_bucket": "appmusic-caa79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278060018675:android:e9291c733c383ca0308086",
+        "android_client_info": {
+          "package_name": "com.example.mainflutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFbvK1xAhreXbP_xbDWroi2OagSuTuQeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,8 @@ import '../models/user.dart';
 import 'register_screen.dart';
 import 'main_screen.dart';
 import 'Doctor/doctor_main_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,8 +19,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+  final _apiService = ApiService();
   bool _isLoading = false;
   String _selectedRole = 'user'; // 'user' or 'doctor'
+
+  Future<void> _saveFCMToken() async {
+    try {
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _apiService.post('/users/update-fcm-token', {
+          'fcmToken': token
+        });
+      }
+    } catch (e) {
+      print('Error saving FCM token: $e');
+    }
+  }
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -30,6 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
             _emailController.text,
             _passwordController.text,
           );
+          // Lưu FCM token sau khi đăng nhập thành công
+          await _saveFCMToken();
+          
           if (mounted) {
             Navigator.pushReplacement(
               context,
@@ -46,6 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
             _emailController.text,
             _passwordController.text,
           );
+          // Lưu FCM token sau khi đăng nhập thành công
+          await _saveFCMToken();
+          
           if (mounted) {
             Navigator.pushReplacement(
               context,
