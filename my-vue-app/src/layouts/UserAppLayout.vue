@@ -165,13 +165,14 @@ export default {
 
     const requestNotificationPermission = async () => {
       try {
-        console.log('Requesting notification permission',Notification.permission);
-        if (Notification.permission === 'default') {
+        console.log('Requesting notification permission', Notification.permission);
+        //if (Notification.permission === 'default') {
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
             const token = await getFCMToken();
             if (token) {
               await axiosInstance.post('/api/users/update-fcm-token', { fcmToken: token });
+              console.log('FCM token saved successfully for user');
               toast.add({
                 severity: 'success',
                 summary: 'Thành công',
@@ -187,14 +188,14 @@ export default {
               life: 5000
             });
           }
-        } else if (Notification.permission === 'denied') {
-          toast.add({
-            severity: 'warn',
-            summary: 'Cảnh báo',
-            detail: 'Bạn đã từ chối thông báo. Vui lòng cập nhật cài đặt trình duyệt để nhận thông báo.',
-            life: 5000
-          });
-        }
+        // } else if (Notification.permission === 'denied') {
+        //   toast.add({
+        //     severity: 'warn',
+        //     summary: 'Cảnh báo',
+        //     detail: 'Bạn đã từ chối thông báo. Vui lòng cập nhật cài đặt trình duyệt để nhận thông báo.',
+        //     life: 5000
+        //   });
+        // }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
         toast.add({

@@ -196,9 +196,10 @@ router.get('/vnpay_ipn', async (req, res) => {
                 // Gửi thông báo qua FCM nếu thanh toán thành công
                 if (rspCode === "00") {
                     try {
-                        // Lấy FCM token của user từ database
-                        const user = await User.findById(transaction.userId).select('fcmToken');
-                        if (user && user.fcmToken) {
+                        // Lấy FCM tokens của user từ database
+                        const user = await User.findById(transaction.userId).select('fcmTokens');
+                        console.log("user",user)
+                        if (user && user.fcmTokens && user.fcmTokens.length > 0) {
                           const data = {
                             orderId: orderId.toString(),
                             quantity: String(transaction.quantity || 1),
@@ -208,19 +209,32 @@ router.get('/vnpay_ipn', async (req, res) => {
                             type: 'payment_success'
                           };
                         
-                          await sendNotification(
-                            user.fcmToken,
-                            'Thanh toán thành công',
-                            `Giao dịch ${orderId} đã được thanh toán thành công`,
-                            data
-                          );
+                          // Gửi thông báo đến tất cả các token của user
+                          for (const token of user.fcmTokens) {
+                            try {
+                              await sendNotification(
+                                token,
+                                'Thanh toán thành công',
+                                `Giao dịch ${nameOrderType} đã được thanh toán thành công`,
+                                data
+                              );
+                              console.log(`Gửi thông báo thành công đến token: ${token}`);
+                            } catch (error) {
+                              console.error(`Lỗi khi gửi thông báo đến token ${token}:`, error);
+                              // Nếu token không hợp lệ, xóa khỏi mảng
+                              if (error.message.includes('Invalid registration token')) {
+                                user.fcmTokens = user.fcmTokens.filter(t => t !== token);
+                                await user.save();
+                                console.log(`Đã xóa token không hợp lệ: ${token}`);
+                              }
+                            }
+                          }
                         }
 
                         // Gửi thông báo cho bác sĩ nếu có
                         if (transaction.doctorId) {
-                            const doctor = await Doctor.findById(transaction.doctorId).select('fcmToken fullNName');
-                            console.log("=======================================doctor",doctor)
-                            if (doctor && doctor.fcmToken) {
+                            const doctor = await Doctor.findById(transaction.doctorId).select('fcmTokens fullName');
+                            if (doctor && doctor.fcmTokens && doctor.fcmTokens.length > 0) {
                                 const doctorData = {
                                     orderId: orderId.toString(),
                                     amount: amount.toString(),
@@ -231,12 +245,26 @@ router.get('/vnpay_ipn', async (req, res) => {
                                     userName: doctor.fullName || 'Người dùng'
                                 };
                                 
-                                await sendNotification(
-                                    doctor.fcmToken,
-                                    'Bạn có người đăng ký tư vấn mới',
-                                        `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã đăng ký tư vấn, số tiền sẽ được chuyển lại sau`,
-                                    doctorData
-                                );
+                                // Gửi thông báo đến tất cả các token của bác sĩ
+                                for (const token of doctor.fcmTokens) {
+                                  try {
+                                    await sendNotification(
+                                      token,
+                                      'Bạn có người đăng ký tư vấn mới',
+                                      `Bệnh nhân ${doctor.fullName || 'Người dùng'} đã đăng ký tư vấn, số tiền sẽ được chuyển lại sau`,
+                                      doctorData
+                                    );
+                                    console.log(`Gửi thông báo thành công đến token bác sĩ: ${token}`);
+                                  } catch (error) {
+                                    console.error(`Lỗi khi gửi thông báo đến token bác sĩ ${token}:`, error);
+                                    // Nếu token không hợp lệ, xóa khỏi mảng
+                                    if (error.message.includes('Invalid registration token')) {
+                                      doctor.fcmTokens = doctor.fcmTokens.filter(t => t !== token);
+                                      await doctor.save();
+                                      console.log(`Đã xóa token không hợp lệ của bác sĩ: ${token}`);
+                                    }
+                                  }
+                                }
 
                                 // Lưu thông báo vào database
                                 const notification = new Notification({

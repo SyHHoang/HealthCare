@@ -6,10 +6,10 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: ''
   },
-  fcmToken: {
+  fcmTokens: [{
     type: String,
-    default: null
-  },
+    default: []
+  }],
   email: {
     type: String,
     required: true,

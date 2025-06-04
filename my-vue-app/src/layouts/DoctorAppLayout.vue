@@ -166,6 +166,7 @@ const requestNotificationPermission = async () => {
       const token = await getFCMToken();
       if (token) {
         await axiosInstance.post('/api/doctors/update-fcm-token', { fcmToken: token });
+        console.log('FCM token saved successfully for doctor');
         toast.add({
           severity: 'success',
           summary: 'Thành công',

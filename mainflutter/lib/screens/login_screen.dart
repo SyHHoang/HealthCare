@@ -30,12 +30,26 @@ class _LoginScreenState extends State<LoginScreen> {
         await _apiService.post('/users/update-fcm-token', {
           'fcmToken': token
         });
+        print('FCM token saved successfully for user');
       }
     } catch (e) {
-      print('Error saving FCM token: $e');
+      print('Error saving FCM token for user: $e');
     }
   }
 
+  Future<void> _saveFCMTokenDoctor() async {
+    try {
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _apiService.post('/doctors/update-fcm-token', {
+          'fcmToken': token
+        });
+        print('FCM token saved successfully for doctor');
+      }
+    } catch (e) {
+      print('Error saving FCM token for doctor: $e');
+    }
+  }
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
@@ -66,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordController.text,
           );
           // Lưu FCM token sau khi đăng nhập thành công
-          await _saveFCMToken();
+          await _saveFCMTokenDoctor();
           
           if (mounted) {
             Navigator.pushReplacement(

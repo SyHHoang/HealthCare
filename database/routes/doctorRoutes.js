@@ -72,8 +72,12 @@ router.post('/update-fcm-token', authenticateDoctor, async (req, res) => {
     const { fcmToken } = req.body;
     const doctor = req.doctor;
 
-    doctor.fcmToken = fcmToken;
-    await doctor.save();
+    // Kiểm tra nếu token đã tồn tại
+    if (!doctor.fcmTokens.includes(fcmToken)) {
+      // Thêm token mới vào mảng
+      doctor.fcmTokens.push(fcmToken);
+      await doctor.save();
+    }
 
     res.json({ message: 'Cập nhật FCM token thành công' });
   } catch (error) {
