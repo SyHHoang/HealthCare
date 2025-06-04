@@ -51,6 +51,9 @@ class DoctorInfoScreen extends ConsumerWidget {
     DateTime selectedDate = DateTime.now();
     List<Map<String, String>> availableTimeSlots = [];
     
+    // Lưu trữ ScaffoldMessenger để sử dụng sau
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     try {
       debugPrint('=== BẮT ĐẦU XỬ LÝ ĐẶT LỊCH ===');
       debugPrint('Thông tin tư vấn: startDate=${doctor.consultationStartDate}, endDate=${doctor.consultationEndDate}, callRemaining=$callRemaining');
@@ -315,7 +318,7 @@ class DoctorInfoScreen extends ConsumerWidget {
                         icon: const Icon(Icons.arrow_drop_down),
                         onPressed: hasCallRemaining ? () async {
                           // Hiển thị thông báo trước khi chọn ngày
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          scaffoldMessenger.showSnackBar(
                             const SnackBar(
                               content: Text('Vui lòng chọn ngày trong thời hạn tư vấn để xem lịch làm việc'),
                               duration: Duration(seconds: 2),
@@ -509,7 +512,7 @@ class DoctorInfoScreen extends ConsumerWidget {
                             Navigator.pop(context);
                             
                             // Hiển thị thông báo đang xử lý
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessenger.showSnackBar(
                               const SnackBar(
                                 content: Text('Đang đặt lịch...'),
                                 duration: Duration(seconds: 2),
@@ -547,7 +550,7 @@ class DoctorInfoScreen extends ConsumerWidget {
                               consultationDateTime
                             ).then((_) {
                               // Hiển thị thông báo thành công
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              scaffoldMessenger.showSnackBar(
                                 const SnackBar(
                                   content: Text('Đặt lịch tư vấn thành công'),
                                   backgroundColor: Colors.green,
@@ -562,7 +565,7 @@ class DoctorInfoScreen extends ConsumerWidget {
                               _refreshConsultationData(ref);
                             }).catchError((error) {
                               debugPrint('Lỗi khi đặt lịch tư vấn: $error');
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              scaffoldMessenger.showSnackBar(
                                 SnackBar(
                                   content: Text('Lỗi: ${error.toString()}'),
                                   backgroundColor: Colors.red,
@@ -572,7 +575,7 @@ class DoctorInfoScreen extends ConsumerWidget {
                             });
                           } catch (e) {
                             debugPrint('Lỗi khi đặt lịch: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessenger.showSnackBar(
                               SnackBar(
                                 content: Text('Lỗi: ${e.toString()}'),
                                 backgroundColor: Colors.red,
@@ -685,6 +688,7 @@ class DoctorInfoScreen extends ConsumerWidget {
   // Hiển thị hộp thoại nhập số lượt tư vấn
   Future<void> _showAddSessionsDialog(BuildContext context, WidgetRef ref) async {
     int sessionCount = 1; // Mặc định là 1 lượt
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     
     showDialog(
       context: context,
@@ -780,17 +784,16 @@ class DoctorInfoScreen extends ConsumerWidget {
                   );
                   
                   // Mở URL trong trình duyệt
-                  if (await canLaunchUrl(Uri.parse(paymentUrl))) {
-                    await launchUrl(
-                      Uri.parse(paymentUrl),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  } else {
+                  final uri = Uri.parse(paymentUrl);
+                  if (!await launchUrl(
+                    uri,
+                    mode: LaunchMode.externalNonBrowserApplication,
+                  )) {
                     throw Exception('Không thể mở URL thanh toán');
                   }
                 } catch (e) {
                   debugPrint('Lỗi khi xử lý thanh toán: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('Lỗi: ${e.toString()}'),
                       backgroundColor: Colors.red,
@@ -821,6 +824,7 @@ class DoctorInfoScreen extends ConsumerWidget {
   // Hiển thị hộp thoại thêm ngày tư vấn
   Future<void> _showExtendDaysDialog(BuildContext context, WidgetRef ref) async {
     int days = 30; // Mặc định là 30 ngày
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     
     showDialog(
       context: context,
@@ -890,17 +894,16 @@ class DoctorInfoScreen extends ConsumerWidget {
                 );
                 
                 // Mở URL trong trình duyệt
-                if (await canLaunchUrl(Uri.parse(paymentUrl))) {
-                  await launchUrl(
-                    Uri.parse(paymentUrl),
-                    mode: LaunchMode.externalApplication,
-                  );
-                } else {
+                final uri = Uri.parse(paymentUrl);
+                if (!await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalNonBrowserApplication,
+                )) {
                   throw Exception('Không thể mở URL thanh toán');
                 }
               } catch (e) {
                 debugPrint('Lỗi khi xử lý thanh toán: $e');
-                ScaffoldMessenger.of(context).showSnackBar(
+                scaffoldMessenger.showSnackBar(
                   SnackBar(
                     content: Text('Lỗi: ${e.toString()}'),
                     backgroundColor: Colors.red,
