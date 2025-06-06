@@ -50,14 +50,19 @@ const messages = ref([]);
 const isLoading = ref(false);
 const chatMessages = ref(null);
 
-// Khi mở chatbot, hiển thị tin nhắn chào
-onMounted(() => {
-  messages.value = [
-    { 
-      sender: 'bot', 
-      text: 'Xin chào! Tôi là trợ lý y tế AI. Tôi có thể giúp bạn tìm hiểu thông tin về sức khỏe, bệnh tật và các vấn đề y tế khác. Bạn cần tôi giúp gì không?' 
-    }
-  ];
+// Khởi tạo chat khi component được mount
+onMounted(async () => {
+  try {
+    await GeminiService.initializeChat();
+    messages.value = [
+      { 
+        sender: 'bot', 
+        text: 'Xin chào! Tôi là trợ lý y tế AI. Tôi có thể giúp bạn tìm hiểu thông tin về sức khỏe, bệnh tật và các vấn đề y tế khác. Bạn cần tôi giúp gì không?' 
+      }
+    ];
+  } catch (error) {
+    console.error('Lỗi khi khởi tạo chat:', error);
+  }
 });
 
 // Xóa lịch sử chat khi đóng chatbot

@@ -3,9 +3,17 @@ import axiosInstance from '@/services/axiosInstance.js';
 class GeminiService {
   static async generateResponse(message, chatHistory) {
     try {
+      // Format chat history để phù hợp với yêu cầu của Gemini API
+      const formattedHistory = chatHistory.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }));
+
+      console.log('Sending formatted chat history:', formattedHistory);
+
       const response = await axiosInstance.post('/api/gemini/message', { 
         message,
-        chatHistory
+        chatHistory: formattedHistory
       });
       return response.data.response;
     } catch (error) {

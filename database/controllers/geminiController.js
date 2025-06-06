@@ -13,6 +13,42 @@ const model = genAI.getGenerativeModel({
 });
 
 const geminiController = {
+  // Khởi tạo chat session mới
+  initializeChat: async (req, res) => {
+    try {
+      if (!process.env.GEMINI_API_KEY) {
+        console.error('GEMINI_API_KEY is not set');
+        return res.status(500).json({ error: 'Server configuration error' });
+      }
+
+      // Tạo chat session mới
+      const chat = model.startChat();
+      console.log('New chat session initialized');
+
+      res.json({ success: true, message: 'Chat session initialized' });
+    } catch (error) {
+      console.error('Error initializing chat:', error);
+      res.status(500).json({ 
+        error: 'Failed to initialize chat',
+        details: error.message
+      });
+    }
+  },
+
+  // Xóa lịch sử chat
+  clearChat: async (req, res) => {
+    try {
+      // Không cần thực hiện gì đặc biệt vì mỗi lần gửi tin nhắn là một session mới
+      res.json({ success: true, message: 'Chat history cleared' });
+    } catch (error) {
+      console.error('Error clearing chat:', error);
+      res.status(500).json({ 
+        error: 'Failed to clear chat history',
+        details: error.message
+      });
+    }
+  },
+
   // Gửi tin nhắn và nhận phản hồi
   sendMessage: async (req, res) => {
     try {
@@ -30,12 +66,9 @@ const geminiController = {
       }
 
       try {
-        // Tạo chat session với lịch sử chat
+        // Tạo chat session với lịch sử chat đã được format
         const chat = model.startChat({
-          history: chatHistory.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-          }))
+          history: chatHistory
         });
 
         // Gửi tin nhắn và nhận phản hồi
