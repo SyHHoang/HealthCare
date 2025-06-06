@@ -1,182 +1,159 @@
 <template>
   <div class="specialty-doctor-container">
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 sidebar">
-          <div class="sidebar-content">
-            <div class="nav flex-column nav-pills" role="tablist">
-              <button
-                class="nav-link"
-                :class="{ active: activeTab === 'specialties' }"
-                @click="activeTab = 'specialties'"
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="container">
+        <h1 class="header-title">Đội ngũ bác sĩ chuyên môn</h1>
+        <p class="header-subtitle">Tìm kiếm và kết nối với bác sĩ phù hợp với nhu cầu của bạn</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Search and Filter Section -->
+      <div class="search-filter-section">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="search-box">
+              <i class="bi bi-search search-icon"></i>
+              <input
+                type="text"
+                class="form-control search-input"
+                v-model="searchQuery"
+                placeholder="Tìm kiếm bác sĩ theo tên, chuyên khoa..."
+                @keyup.enter="handleSearch"
+              />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <select 
+              class="form-select filter-select" 
+              v-model="currentFilter"
+              @change="filterDoctors(currentFilter)"
+            >
+              <option value="all">Tất cả chuyên khoa</option>
+              <option 
+                v-for="specialty in specialties" 
+                :key="specialty._id"
+                :value="specialty._id"
               >
-                <i class="bi bi-heart-pulse me-2"></i>
-                Danh sách chuyên khoa
-              </button>
-              <button
-                class="nav-link"
-                :class="{ active: activeTab === 'doctors' }"
-                @click="activeTab = 'doctors'"
+                {{ specialty.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Smart Search Section -->
+        <div class="smart-search-section mt-4">
+          <div class="smart-search-box">
+            <div class="smart-search-input-wrapper">
+              <input
+                type="text"
+                class="form-control smart-search-input"
+                v-model="smartSearchQuery"
+                placeholder="Tìm kiếm Chuyên khoa bác sĩ dựa vào mô tả"
+                @keyup.enter="handleSmartSearch"
+              />
+              <button 
+                class="btn btn-primary smart-search-btn"
+                @click="handleSmartSearch"
               >
-                <i class="bi bi-person-badge me-2"></i>
-                Danh sách bác sĩ
+                <i class="bi bi-magic"></i>
+                Tìm kiếm thông minh
               </button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div v-if="loading" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div v-if="error" class="alert alert-danger error-message" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        {{ error }}
+      </div>
+
+      <!-- Doctors List -->
+      <div v-if="!loading && !error" class="doctors-section">
+        <div class="section-header">
+          <h2 class="section-title">Danh sách bác sĩ</h2>
+          <p class="section-subtitle" v-if="currentSpecialty">
+            Chuyên ngành: {{ currentSpecialty.name }}
+          </p>
+        </div>
+
+        <div class="row g-4">
+          <div
+            v-for="doctor in filteredDoctors"
+            :key="doctor._id"
+            class="col-md-6 col-lg-4"
+          >
+            <div class="doctor-card">
+              <div class="doctor-image-container">
+                <img
+                  :src="doctor.avatar || '/images/default-doctor.jpg'"
+                  class="doctor-image"
+                  :alt="doctor.fullName || doctor.name"
+                />
+                <div class="doctor-badge" v-if="doctor.academicTitle">
+                  {{ doctor.academicTitle }}
+                </div>
+              </div>
+              <div class="doctor-info">
+                <h3 class="doctor-name">{{ doctor.fullName || doctor.name }}</h3>
+                <p class="doctor-specialty">
+                  <i class="bi bi-heart-pulse"></i>
+                  {{ doctor.specialty?.name || doctor.specialty || 'Chưa cập nhật' }}
+                </p>
+                <div class="doctor-stats">
+                  <div class="stat-item">
+                    <i class="bi bi-briefcase"></i>
+                    <span>{{ doctor.experience || 0 }} năm kinh nghiệm</span>
+                  </div>
+                  <div class="stat-item">
+                    <i class="bi bi-star-fill"></i>
+                    <span v-if="doctor.ratingStats">
+                      {{ doctor.ratingStats.averageRating.toFixed(1) }}
+                      <small>({{ doctor.ratingStats.totalReviews }})</small>
+                    </span>
+                    <span v-else>Chưa có đánh giá</span>
+                  </div>
+                </div>
+                <div class="doctor-actions">
+                  <button
+                    class="btn btn-outline-primary"
+                    @click="showDoctorDetail(doctor._id)"
+                  >
+                    <i class="bi bi-info-circle"></i>
+                    Xem chi tiết
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    @click="handleVNPayPayment"
+                  >
+                    <i class="bi bi-calendar-check"></i>
+                    Đăng ký tư vấn
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9 main-content">
-          <!-- Search Section -->
-          <div class="search-section mb-4">
-            <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                v-model="searchQuery"
-                :placeholder="activeTab === 'specialties' ? 'Tìm kiếm chuyên khoa...' : 'Tìm kiếm bác sĩ...'"
-                @keyup.enter="handleSearch"
-              />
-              <button class="btn btn-primary" @click="handleSearch">
-                <i class="bi bi-search"></i>
-              </button>
-            </div>
-            <!-- Filter Section for Doctors -->
-            <div v-if="activeTab === 'doctors'" class="filter-section mt-3">
-              <div class="d-flex align-items-center gap-3">
-                <select 
-                  class="form-select" 
-                  v-model="currentFilter"
-                  @change="filterDoctors(currentFilter)"
-                >
-                  <option value="all">Tất cả bác sĩ</option>
-                  <option 
-                    v-for="specialty in specialties" 
-                    :key="specialty._id"
-                    :value="specialty._id"
-                  >
-                    {{ specialty.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Loading Spinner -->
-          <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          </div>
-
-          <!-- Error Message -->
-          <div v-if="error" class="alert alert-danger" role="alert">
-            {{ error }}
-          </div>
-
-          <!-- Specialties Tab Content -->
-          <div v-if="!loading && !error && activeTab === 'specialties'" class="tab-content">
-            <h2 class="mb-4">Chuyên khoa y tế</h2>
-            <div class="row g-4">
-              <div
-                v-for="specialty in filteredSpecialties"
-                :key="specialty._id"
-                class="col-md-6 col-lg-4"
-              >
-                <div class="card h-100 specialty-card">
-                  <div class="card-body">
-                    <h5 class="card-title">{{ specialty.name }}</h5>
-                    <p class="card-text">{{ specialty.description }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <span class="badge bg-primary">
-                        {{ specialty.count || 0 }} bác sĩ
-                      </span>
-                      <button
-                        class="btn btn-outline-primary btn-sm"
-                        @click="viewDoctorsBySpecialty(specialty._id)"
-                      >
-                        <i class="bi bi-person-badge me-1"></i>
-                        Xem bác sĩ
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Doctors Tab Content -->
-          <div v-if="!loading && !error && activeTab === 'doctors'" class="tab-content">
-            <h2 class="mb-4">Danh sách bác sĩ</h2>
-            <h5 class="mb-3 specialty-title">Chuyên ngành: {{ currentSpecialty?.name || 'Tất cả' }}</h5>
-            <div class="row g-4">
-              <div
-                v-for="doctor in filteredDoctors"
-                :key="doctor._id"
-                class="col-md-6 col-lg-4"
-              >
-                <div class="card h-100 doctor-card">
-                  <img
-                    :src="doctor.avatar || '/images/default-doctor.jpg'"
-                    class="card-img-top doctor-image"
-                    :alt="doctor.fullName || doctor.name"
-                  />
-                  <div class="card-body">
-                    <h5 class="card-title">{{ doctor.fullName || doctor.name }}</h5>
-                    <p class="card-text text-muted">
-                      <i class="bi bi-person-badge me-2"></i>{{ doctor.academicTitle || 'Chưa cập nhật' }}
-                    </p>
-                    <p class="card-text text-muted">
-                      <i class="bi bi-heart-pulse me-2"></i>{{ doctor.specialty?.name || doctor.specialty || 'Chưa cập nhật' }}
-                    </p>
-                    <p class="card-text">
-  <i class="bi bi-briefcase me-2"></i>{{ doctor.experience || 0 }} năm kinh nghiệm
-</p>
-<p class="card-text">
-  <i class="bi bi-star-half me-2"></i>
-  Đánh giá: 
-  <span v-if="doctor.ratingStats">
-    {{ doctor.ratingStats.averageRating.toFixed(1) }} / 5
-    <small class="text-muted">({{ doctor.ratingStats.totalReviews }} đánh giá)</small>
-  </span>
-  <span v-else>
-    Chưa có đánh giá
-  </span>
-</p>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                      <button
-                        class="btn btn-outline-primary btn-sm"
-                        @click="showDoctorDetail(doctor._id)"
-                      >
-                        <i class="bi bi-info-circle me-1"></i>
-                        Xem chi tiết
-                      </button>
-                      <button
-                        class="btn btn-primary btn-sm"
-                        @click="handleVNPayPayment"
-                      >
-                        <i class="bi bi-currency-exchange me-1"></i>
-                        Đăng ký tư vấn
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- No Results Message -->
-          <div
-            v-if="!loading && !error && 
-              ((activeTab === 'specialties' && filteredSpecialties.length === 0) || 
-               (activeTab === 'doctors' && filteredDoctors.length === 0))"
-            class="text-center py-5"
-          >
-            <h3>Không tìm thấy kết quả</h3>
-            <p class="text-muted">Vui lòng thử tìm kiếm với từ khóa khác</p>
-          </div>
+        <!-- No Results Message -->
+        <div
+          v-if="!loading && !error && filteredDoctors.length === 0"
+          class="no-results"
+        >
+          <i class="bi bi-search no-results-icon"></i>
+          <h3>Không tìm thấy kết quả</h3>
+          <p>Vui lòng thử tìm kiếm với từ khóa khác</p>
         </div>
       </div>
     </div>
@@ -379,7 +356,7 @@ const toast = useToast();
 const loading = ref(false);
 const error = ref(null);
 const searchQuery = ref('');
-const activeTab = ref('specialties');
+const activeTab = ref('doctors');
 const specialties = ref([]);
 const doctors = ref([]);
 const selectedDoctorId = ref('');
@@ -396,6 +373,7 @@ const loadingDoctor = ref(false);
 const doctorError = ref(null);
 const selectedDoctor = ref(null);
 const showAllReviews = ref(false);
+const smartSearchQuery = ref('');
 
 const displayedReviews = computed(() => {
   if (!selectedDoctor.value?.ratingStats?.latestReviews) return [];
@@ -809,6 +787,38 @@ const filteredDoctors = computed(() => {
   return doctors.value;
 });
 
+const handleSmartSearch = async () => {
+  if (!smartSearchQuery.value.trim()) return;
+  
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    // Gọi API tìm kiếm thông minh
+    const response = await axios.post('/api/gemini/message', {
+      message: `Tìm kiếm bác sĩ phù hợp với các triệu chứng sau: ${smartSearchQuery.value}`,
+      chatHistory: []
+    });
+    
+    // Xử lý kết quả tìm kiếm
+    if (response.data.response) {
+      // Cập nhật danh sách bác sĩ dựa trên kết quả
+      // TODO: Implement logic to filter doctors based on AI response
+      console.log('Smart search response:', response.data.response);
+    }
+  } catch (err) {
+    error.value = 'Không thể thực hiện tìm kiếm thông minh. Vui lòng thử lại sau.';
+    console.error('Smart search error:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const useExample = (example) => {
+  smartSearchQuery.value = example;
+  handleSmartSearch();
+};
+
 onMounted(() => {
   loadSpecialties();
   loadDoctors();
@@ -820,434 +830,348 @@ onMounted(() => {
 .specialty-doctor-container {
   min-height: 100vh;
   background-color: #f8f9fa;
-  padding-top: 80px;
 }
 
-.sidebar {
-  background-color: white;
-  min-height: calc(100vh - 80px);
-  border-right: 1px solid #dee2e6;
+/* Header Styles */
+.header-section {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  color: white;
+  padding: 60px 0;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Search and Filter Section */
+.search-filter-section {
+  background: white;
   padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
 }
 
-.sidebar-content {
-  position: sticky;
-  top: 100px;
+.search-box {
+  position: relative;
 }
 
-.nav-pills .nav-link {
-  color: #495057;
-  padding: 12px 20px;
-  margin-bottom: 8px;
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.search-input {
+  padding-left: 45px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.filter-select {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  font-size: 1rem;
+}
+
+/* Smart Search Styles */
+.smart-search-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.smart-search-box {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.smart-search-input-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.smart-search-input {
+  flex: 1;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0 15px;
+  font-size: 1rem;
+  background: #f8f9fa;
+}
+
+.smart-search-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+  background: white;
+}
+
+.smart-search-btn {
+  height: 48px;
+  padding: 0 20px;
   border-radius: 8px;
   display: flex;
   align-items: center;
-}
-
-.nav-pills .nav-link:hover {
-  background-color: #f8f9fa;
-}
-
-.nav-pills .nav-link.active {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.main-content {
-  padding: 20px;
-}
-
-.specialty-card, .doctor-card {
-  transition: transform 0.3s ease;
+  gap: 8px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
   border: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
 }
 
-.specialty-card:hover, .doctor-card:hover {
-  transform: translateY(-5px);
+.smart-search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
 }
 
-.doctor-image {
-  height: 200px;
-  object-fit: cover;
+.smart-search-btn i {
+  font-size: 1.1rem;
 }
 
-.search-section {
-  margin-bottom: 20px;
-}
-
-.search-section .input-group {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.search-section .form-control {
-  border-right: none;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.search-section .btn {
-  border-left: none;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.filter-section {
+.smart-search-examples {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
-.filter-section .form-select {
-  max-width: 300px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  padding: 8px 12px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.example-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #e9ecef;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.filter-section .form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+.example-tag:hover {
+  background: #dee2e6;
+  transform: translateY(-1px);
+}
+
+.example-tag i {
+  color: #0d6efd;
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid #dee2e6;
+  .smart-search-input-wrapper {
+    flex-direction: column;
   }
   
-  .doctor-image {
-    height: 150px;
+  .smart-search-btn {
+    width: 100%;
+    justify-content: center;
   }
-
-  .filter-section .form-select {
-    max-width: 100%;
+  
+  .smart-search-examples {
+    justify-content: center;
   }
 }
 
-.specialty-title {
-  font-size: 0.9rem;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  position: relative;
+/* Doctor Card Styles */
+.doctor-card {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  margin: auto;
-  animation: modalFadeIn 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.modal-body {
-  margin-bottom: 20px;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 15px;
-  border-top: 1px solid #dee2e6;
-}
-
-.doctor-profile {
-  display: flex;
-  align-items: center;
-}
-
-.doctor-avatar {
+.doctor-image-container {
   position: relative;
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
+  height: 250px;
+  overflow: hidden;
 }
 
-.doctor-avatar img {
+.doctor-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.doctor-card:hover .doctor-image {
+  transform: scale(1.05);
 }
 
 .doctor-badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #28a745;
+  top: 15px;
+  right: 15px;
+  background: rgba(13, 110, 253, 0.9);
   color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.doctor-info {
+  padding: 20px;
 }
 
 .doctor-name {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin: 0;
-}
-
-.doctor-title {
-  font-size: 1rem;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.section-title {
-  color: #2c3e50;
-  font-size: 1.2rem;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 0.5rem;
-}
-
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.detail-item {
-  display: flex;
-  align-items: flex-start;
-  padding: 0.5rem;
-  background: #f8f9fa;
-  border-radius: 0.5rem;
-}
-
-.detail-item i {
-  margin-top: 3px;
-}
-
-.detail-item div {
-  display: flex;
-  flex-direction: column;
-}
-
-.label {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
-}
-
-.value {
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-.rating-distribution {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-
-.rating-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.rating-label {
-  width: 80px;
-  font-weight: 500;
-}
-
-.progress {
-  flex: 1;
-  height: 8px;
-  margin: 0 1rem;
-  background-color: #e9ecef;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.rating-count {
-  width: 40px;
-  text-align: right;
-  color: #6c757d;
-  font-size: 0.875rem;
-}
-
-.reviews-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.review-item {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.reviewer-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.reviewer-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.reviewer-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.reviewer-name {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.review-date {
-  font-size: 0.875rem;
-  color: #6c757d;
-}
-
-.review-rating {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.review-content {
-  color: #2c3e50;
-  line-height: 1.5;
-  margin-top: 0.5rem;
-}
-
-.schedule-table {
-  background: #fff;
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.table {
-  margin-bottom: 0;
-}
-
-.table th {
-  background: #f8f9fa;
+  font-size: 1.25rem;
   font-weight: 600;
+  margin-bottom: 8px;
+  color: #2c3e50;
 }
 
-.table td {
-  vertical-align: middle;
+.doctor-specialty {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
 }
 
-.time-slot {
-  background: #e3f2fd;
-  padding: 6px 12px;
-  border-radius: 4px;
-  margin-bottom: 4px;
+.doctor-specialty i {
+  color: #0d6efd;
+  margin-right: 8px;
+}
+
+.doctor-stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #495057;
   font-size: 0.9rem;
 }
 
-.time-slot:last-child {
-  margin-bottom: 0;
+.stat-item i {
+  color: #0d6efd;
 }
 
-.btn-outline-primary {
-  border-color: #3498db;
-  color: #3498db;
-  transition: all 0.3s ease;
+.doctor-actions {
+  display: flex;
+  gap: 10px;
 }
 
-.btn-outline-primary:hover {
-  background-color: #3498db;
-  color: white;
+.doctor-actions .btn {
+  flex: 1;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+/* Section Styles */
+.section-header {
+  margin-bottom: 30px;
+  text-align: center;
 }
 
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.section-subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Loading and Error States */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-message {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* No Results State */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.no-results h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.no-results p {
+  color: #6c757d;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    margin: 10px auto;
-    max-height: calc(100vh - 20px);
+  .header-section {
+    padding: 40px 0;
   }
-  
-  .doctor-profile {
+
+  .header-title {
+    font-size: 2rem;
+  }
+
+  .doctor-image-container {
+    height: 200px;
+  }
+
+  .doctor-actions {
     flex-direction: column;
-    text-align: center;
   }
-  
-  .doctor-info {
-    margin-left: 0;
-    margin-top: 1rem;
-  }
-  
-  .details-grid {
-    grid-template-columns: 1fr;
+
+  .doctor-actions .btn {
+    width: 100%;
   }
 }
 </style> 

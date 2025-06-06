@@ -61,8 +61,12 @@ onMounted(() => {
 });
 
 // Xóa lịch sử chat khi đóng chatbot
-onUnmounted(() => {
-  GeminiService.clearChatHistory();
+onUnmounted(async () => {
+  try {
+    await GeminiService.clearChatHistory();
+  } catch (error) {
+    console.error('Lỗi khi xóa lịch sử chat:', error);
+  }
 });
 
 // Gửi tin nhắn đến Gemini API
@@ -81,8 +85,8 @@ const sendMessage = async () => {
   });
 
   try {
-    // Gọi Gemini API
-    const response = await GeminiService.generateResponse(userMessage);
+    // Gửi toàn bộ lịch sử chat
+    const response = await GeminiService.generateResponse(userMessage, messages.value);
     
     // Thêm phản hồi từ chatbot vào danh sách
     messages.value.push({ 

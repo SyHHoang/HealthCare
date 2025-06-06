@@ -1,54 +1,35 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Khởi tạo Gemini API với API key
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-
-// Tạo model chat
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash-001",
-  generationConfig: {
-    maxOutputTokens: 1000,
-    temperature: 0.7,
-  }
-});
-
-// Lưu trữ lịch sử chat
-let chatHistory = [];
-
-// Khởi tạo chat session
-const chat = model.startChat({
-  history: [],
-});
+import axiosInstance from '@/services/axiosInstance.js';
 
 class GeminiService {
-  static async generateResponse(message) {
+  static async generateResponse(message, chatHistory) {
     try {
-      // Thêm tin nhắn vào lịch sử
-      chatHistory.push({ role: 'user', parts: message });
-      
-      // Gửi tin nhắn và nhận phản hồi
-      const result = await chat.sendMessage(message);
-      const response = await result.response;
-      const text = response.text();
-      
-      // Thêm phản hồi vào lịch sử
-      chatHistory.push({ role: 'model', parts: text });
-      
-      return text;
+      const response = await axiosInstance.post('/api/gemini/message', { 
+        message,
+        chatHistory
+      });
+      return response.data.response;
     } catch (error) {
       console.error('Lỗi khi gọi Gemini API:', error);
       throw error;
     }
   }
 
-  static getChatHistory() {
-    return chatHistory;
+  static async initializeChat() {
+    try {
+      await axiosInstance.post('/api/gemini/initialize');
+    } catch (error) {
+      console.error('Lỗi khi khởi tạo chat:', error);
+      throw error;
+    }
   }
 
-  static clearChatHistory() {
-    chatHistory = [];
-    // Reset chat session
-    chat.reset();
+  static async clearChatHistory() {
+    try {
+      await axiosInstance.delete('/api/gemini/clear');
+    } catch (error) {
+      console.error('Lỗi khi xóa lịch sử chat:', error);
+      throw error;
+    }
   }
 }
 
