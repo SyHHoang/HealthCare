@@ -6,9 +6,9 @@ import 'token_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 class VnpayService {
   final apiUrl = dotenv.env['BASE_URL'] ?? 'Không có URL';
-  static const String _baseUrl = 'http://10.0.54.25:5000/api/vnpay';
-  static const String _returnUrl = 'http://10.0.54.25:5000/api/vnpay/vnpay_return';
-  static const String _ipnUrl = 'http://10.0.54.25:5000/api/vnpay/vnpay_ipn';
+  static const String _baseUrl = 'http://192.168.22.80:5000/api/vnpay';
+  static const String _returnUrl = 'http://192.168.22.80:5000/api/vnpay/vnpay_return';
+  static const String _ipnUrl = 'http://192.168.22.80:5000/api/vnpay/vnpay_ipn';
 
   static Future<String> createPaymentUrl({
     required String bankCode,

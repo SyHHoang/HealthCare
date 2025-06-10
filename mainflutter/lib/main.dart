@@ -20,7 +20,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Khởi tạo Firebase
+  // Khởi tạo FirebasePP
   await Firebase.initializeApp();
   
   // Đăng ký background handler

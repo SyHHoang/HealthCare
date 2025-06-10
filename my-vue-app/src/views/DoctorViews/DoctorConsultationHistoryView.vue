@@ -118,94 +118,60 @@
 
             <!-- Upcoming Tab Content -->
             <div v-if="!loading && !error && activeTab === 'upcoming'">
-      <!-- Next Consultation -->
-              <div v-if="nextConsultation" class="next-consultation mb-5">
-        <h3 class="mb-4">Cuộc tư vấn sắp tới</h3>
-        <div class="card">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-md-2">
-                <img 
-                  :src="nextConsultation.userId.avatar || '/images/default-avatar.jpg'" 
-                  class="patient-avatar rounded-circle"
-                  :alt="nextConsultation.userId.fullname"
-                >
-              </div>
-              <div class="col-md-8">
-                <h5 class="card-title">{{ nextConsultation.userId.fullname }}</h5>
-                <p class="card-text text-muted">
-                  <i class="fas fa-user me-2"></i>
-                  {{ nextConsultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                  {{ nextConsultation.userId.age }} tuổi
-                </p>
-                <p class="card-text">
-                  <i class="fas fa-phone me-2"></i>
-                  {{ nextConsultation.userId.phone }}
-                </p>
-                <p class="card-text">
-                  <i class="fas fa-calendar-alt me-2"></i>
-                  {{ formatDate(nextConsultation.consultationDate) }}
-                </p>
-              </div>
-              <div class="col-md-2 text-end">
-                <button 
-                  class="btn btn-primary" 
-                  @click="startVideoCall(nextConsultation._id)"
-                  :disabled="!isConsultationTime(nextConsultation.consultationDate)"
-                >
-                  <i class="fas fa-video"></i> Gọi video
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
               <!-- Upcoming Consultations List -->
-              <div v-if="upcomingConsultations.length > 0" class="upcoming-list">
-                <h3 class="mb-4">Danh sách tư vấn sắp tới</h3>
-        <div class="row g-4">
-          <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col-md-3">
-                    <img 
-                      :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
-                      class="patient-avatar rounded-circle"
-                      :alt="consultation.userId.fullname"
-                    >
-                  </div>
-                  <div class="col-md-9">
-                    <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
-                    <p class="card-text text-muted">
-                      <i class="fas fa-user me-2"></i>
-                      {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
-                      {{ consultation.userId.age }} tuổi
-                    </p>
-                    <p class="card-text">
-                      <i class="fas fa-phone me-2"></i>
-                      {{ consultation.userId.phone }}
-                    </p>
-                    <p class="card-text">
-                      <i class="fas fa-calendar-alt me-2"></i>
-                      {{ formatDate(consultation.consultationDate) }}
-                    </p>
+              <div class="upcoming-list">
+                <h3 class="mb-4">Danh sách cuộc hẹn sắp tới</h3>
+                <div class="row g-4">
+                  <div v-for="consultation in upcomingConsultations" :key="consultation._id" class="col-md-6">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="row align-items-center">
+                          <div class="col-md-3">
+                            <img 
+                              :src="consultation.userId.avatar || '/images/default-avatar.jpg'" 
+                              class="patient-avatar rounded-circle"
+                              :alt="consultation.userId.fullname"
+                            >
+                          </div>
+                          <div class="col-md-7">
+                            <h5 class="card-title">{{ consultation.userId.fullname }}</h5>
+                            <p class="card-text text-muted">
+                              <i class="fas fa-user me-2"></i>
+                              {{ consultation.userId.gender === 'male' ? 'Nam' : 'Nữ' }}, 
+                              {{ consultation.userId.age }} tuổi
+                            </p>
+                            <p class="card-text">
+                              <i class="fas fa-phone me-2"></i>
+                              {{ consultation.userId.phone }}
+                            </p>
+                            <p class="card-text">
+                              <i class="fas fa-calendar-alt me-2"></i>
+                              {{ formatDate(consultation.consultationDate) }}
+                            </p>
+                          </div>
+                          <div class="col-md-2 text-end">
+                            <button 
+                              class="btn btn-primary" 
+                              @click="startVideoCall(consultation._id)"
+                              :disabled="!isConsultationTime(consultation.consultationDate)"
+                            >
+                              <i class="fas fa-video"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Empty State -->
-              <div v-if="!nextConsultation && upcomingConsultations.length === 0" 
-           class="text-center py-5">
-                <h3>Bạn chưa có cuộc tư vấn nào sắp tới</h3>
-        <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
-      </div>
-    </div>
+              <!-- Empty State -->
+              <div v-if="upcomingConsultations.length === 0" 
+                   class="text-center py-5">
+                <h3>Bạn chưa có cuộc hẹn nào sắp tới</h3>
+                <p class="text-muted">Chưa có bệnh nhân nào đặt lịch tư vấn với bạn</p>
+              </div>
+            </div>
 
             <!-- History Tab Content -->
             <div v-if="!loading && !error && activeTab === 'history'">
@@ -349,7 +315,24 @@ const isConsultationTime = (consultationDate) => {
   const now = new Date();
   const consultationTime = new Date(consultationDate);
   const timeDiff = consultationTime - now;
-  return Math.abs(timeDiff) <= 30 * 60 * 1000;
+  const endTime = new Date(consultationTime.getTime() + 30 * 60 * 1000); // Thêm 30 phút cho cuộc hẹn
+
+  console.log('=== CHECKING CONSULTATION TIME ===');
+  console.log('Current time:', now.toLocaleString());
+  console.log('Consultation time:', consultationTime.toLocaleString());
+  console.log('End time:', endTime.toLocaleString());
+  console.log('Time difference (minutes):', timeDiff / (1000 * 60));
+  
+  // Kiểm tra xem lịch hẹn đã hết hạn chưa
+  if (now > endTime) {
+    console.log('Consultation has expired');
+    return false;
+  }
+  
+  // Kiểm tra xem có trong khoảng thời gian cho phép không (30 phút trước và sau)
+  const isWithinTime = Math.abs(timeDiff) <= 30 * 60 * 1000;
+  console.log('Is within allowed time:', isWithinTime);
+  return isWithinTime;
 };
 
 const initializeCall = async (consultationId) => {
@@ -771,6 +754,8 @@ const startVideoCall = async (consultationId) => {
   try {
     console.log('=== DOCTOR STARTING VIDEO CALL ===');
     console.log('Consultation ID:', consultationId);
+    console.log('Next Consultation:', JSON.stringify(nextConsultation.value, null, 2));
+    console.log('Upcoming Consultations:', JSON.stringify(upcomingConsultations.value, null, 2));
     
     if (!consultationId) {
       console.error('Consultation ID is undefined');
@@ -784,7 +769,9 @@ const startVideoCall = async (consultationId) => {
     }
     
     // Kiểm tra thời gian cuộc hẹn
-    const consultation = nextConsultation.value || upcomingConsultations.value.find(c => c._id === consultationId);
+    const consultation = upcomingConsultations.value.find(c => c._id === consultationId);
+    console.log('Found Consultation:', JSON.stringify(consultation, null, 2));
+    
     if (!consultation) {
       console.error('Không tìm thấy thông tin cuộc hẹn');
       toast.add({
@@ -796,12 +783,36 @@ const startVideoCall = async (consultationId) => {
       return;
     }
 
-    if (!isConsultationTime(consultation.consultationDate)) {
+    console.log('Consultation Date:', consultation.consultationDate);
+    console.log('Is Consultation Time:', isConsultationTime(consultation.consultationDate));
+    console.log('Current Time:', new Date().toLocaleString());
+    console.log('Consultation Time:', new Date(consultation.consultationDate).toLocaleString());
+    console.log('Time Difference (minutes):', Math.abs(new Date(consultation.consultationDate) - new Date()) / (1000 * 60));
+
+    // Kiểm tra thời gian
+    const now = new Date();
+    const consultationTime = new Date(consultation.consultationDate);
+    const timeDiff = consultationTime - now;
+    const minutesDiff = Math.abs(timeDiff) / (1000 * 60);
+    const endTime = new Date(consultationTime.getTime() + 30 * 60 * 1000);
+
+    if (now > endTime) {
+      console.error('Lịch hẹn đã hết hạn');
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Lịch hẹn đã hết hạn',
+        life: 3000
+      });
+      return;
+    }
+
+    if (minutesDiff > 30) {
       console.error('Không đúng thời gian tư vấn');
       toast.add({
         severity: 'error',
         summary: 'Lỗi',
-        detail: 'Chưa đến thời gian tư vấn hoặc đã quá thời gian cho phép',
+        detail: `Chưa đến thời gian tư vấn hoặc đã quá thời gian cho phép. Thời gian chênh lệch: ${Math.round(minutesDiff)} phút`,
         life: 3000
       });
       return;

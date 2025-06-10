@@ -630,13 +630,27 @@ const checkBookedTimes = async (doctorId, date) => {
   }
 };
 
+// Hàm chuyển đổi ngày dạng 'YYYY-MM-DD' về local Date object
+function parseLocalDate(dateString) {
+  if (!dateString) return null;
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 const loadAvailableTimeSlots = async () => {
   if (!selectedDate.value || !selectedDoctor.value) return;
-  
+  // Thêm log để debug
+  console.log('Ngày chọn:', selectedDate.value, typeof selectedDate.value);
   try {
-    // Lấy thứ trong tuần của ngày được chọn
-    const date = new Date(selectedDate.value);
-    if (isNaN(date.getTime())) {
+    // Sử dụng parseLocalDate để tránh lệch múi giờ
+    const selectedDateObj = parseLocalDate(selectedDate.value);
+    const startDate = new Date(selectedDoctor.value.StartDate);
+    const endDate = new Date(selectedDoctor.value.EndDate);
+    // Lùi startDate 1 ngày
+    const startDateMinus1 = new Date(startDate);
+    startDateMinus1.setDate(startDateMinus1.getDate() - 1);
+    console.log('So sánh:', selectedDateObj, startDateMinus1, endDate);
+    if (!selectedDateObj || isNaN(selectedDateObj.getTime()) || isNaN(startDateMinus1.getTime()) || isNaN(endDate.getTime())) {
       toast.add({
         severity: 'error',
         summary: 'Lỗi',
@@ -645,28 +659,7 @@ const loadAvailableTimeSlots = async () => {
       });
       return;
     }
-    
-    // Chuyển đổi thứ từ số sang tên tiếng Việt
-    const dayOfWeek = date.getDay();
-    const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const dayName = dayNames[dayOfWeek];
-    
-    // Kiểm tra xem ngày được chọn có nằm trong khoảng thời gian tư vấn không
-    const selectedDateObj = new Date(selectedDate.value);
-    const startDate = new Date(selectedDoctor.value.StartDate);
-    const endDate = new Date(selectedDoctor.value.EndDate);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Thời gian tư vấn của bác sĩ không hợp lệ',
-        life: 3000
-      });
-      return;
-    }
-    
-    if (selectedDateObj < startDate || selectedDateObj > endDate) {
+    if (selectedDateObj < startDateMinus1 || selectedDateObj > endDate) {
       toast.add({
         severity: 'error',
         summary: 'Lỗi',
@@ -677,13 +670,16 @@ const loadAvailableTimeSlots = async () => {
       availableTimeSlots.value = [];
       return;
     }
-    
+    // Lấy thứ trong tuần của ngày được chọn
+    const dayOfWeek = selectedDateObj.getDay();
+    const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const dayName = dayNames[dayOfWeek];
+    // Kiểm tra xem ngày được chọn có nằm trong khoảng thời gian tư vấn không
     // Lấy danh sách thời gian làm việc của ngày đó
     const daySchedule = selectedDoctor.value.schedule[dayName] || [];
-    
     // Lấy danh sách thời gian đã được đặt
     const bookedTimes = await checkBookedTimes(selectedDoctor.value._id, selectedDate.value);
-    
+    console.log('Các slot đã đặt:', bookedTimes);
     // Lọc ra các thời gian còn trống
     availableTimeSlots.value = daySchedule
       .filter(slot => !bookedTimes.includes(slot.startTime))
@@ -691,7 +687,6 @@ const loadAvailableTimeSlots = async () => {
         startTime: slot.startTime,
         day: selectedDate.value
       }));
-
     // Nếu không có lịch trong ngày đó
     if (availableTimeSlots.value.length === 0) {
       toast.add({
@@ -732,6 +727,11 @@ const showBookingModal = (doctor) => {
   selectedDate.value = null;
   availableTimeSlots.value = [];
   showBooking.value = true;
+  // Thêm log để debug
+  console.log('== Đặt lịch cho bác sĩ ==');
+  console.log('StartDate:', doctor.StartDate);
+  console.log('EndDate:', doctor.EndDate);
+  console.log('Schedule:', doctor.schedule);
 };
 
 const startChat = async (doctorId) => {

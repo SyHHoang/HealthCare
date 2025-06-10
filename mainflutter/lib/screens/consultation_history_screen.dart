@@ -111,14 +111,19 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
       data: (data) {
         final upcomingConsultations = data['upcomingConsultations'] as List<dynamic>;
         
-        if (upcomingConsultations.isEmpty) {
-          return _buildEmptyState('Không có cuộc hẹn sắp tới', 'Bạn chưa có lịch hẹn sắp tới nào');
-        }
-        
-        // Chuyển đổi từ List<dynamic> sang List<Consultation>
-        final consultations = upcomingConsultations
+        // Lọc các cuộc hẹn còn trong thời gian cho phép
+        final validConsultations = upcomingConsultations
             .map((json) => Consultation.fromJson(json))
+            .where((consultation) {
+              final now = DateTime.now();
+              final endTime = consultation.consultationDate.add(const Duration(minutes: 30));
+              return now.isBefore(endTime);
+            })
             .toList();
+        
+        if (validConsultations.isEmpty) {
+          return _buildEmptyState('Không có cuộc hẹn còn hiệu lực', 'Bạn chưa có cuộc hẹn nào đang còn hiệu lực');
+        }
         
         return RefreshIndicator(
           onRefresh: () async {
@@ -126,9 +131,9 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
             ref.refresh(consultationHistoryProvider);
           },
           child: ListView.builder(
-            itemCount: consultations.length,
+            itemCount: validConsultations.length,
             itemBuilder: (context, index) {
-              return _buildConsultationCard(context, consultations[index]);
+              return _buildConsultationCard(context, validConsultations[index]);
             },
           ),
         );
@@ -260,8 +265,8 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
     final formattedTime = timeFormatter.format(consultationDate);
     
     // Trạng thái và màu sắc
-    final status = consultation.getStatus();
-    final statusColor = consultation.getStatusColor();
+    final status = _getConsultationStatus(consultation);
+    final statusColor = _getStatusColor(status);
     
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -490,5 +495,32 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
         content: Text('Tính năng đặt lại lịch đang được phát triển'),
       ),
     );
+  }
+
+  String _getConsultationStatus(Consultation consultation) {
+    final now = DateTime.now();
+    final endTime = consultation.consultationDate.add(const Duration(minutes: 30));
+    final start = consultation.consultationDate.subtract(const Duration(minutes: 15));
+    
+    if (now.isBefore(start)) {
+      return 'Sắp tới';
+    } else if (now.isAfter(endTime)) {
+      return 'Đã quá hạn';
+    } else {
+      return 'Đang diễn ra';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Sắp tới':
+        return Colors.blue;
+      case 'Đang diễn ra':
+        return Colors.green;
+      case 'Đã quá hạn':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 } 
