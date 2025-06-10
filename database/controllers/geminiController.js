@@ -12,6 +12,9 @@ const model = genAI.getGenerativeModel({
   }
 });
 
+// Lưu session Gemini theo user (ở đây dùng IP, nếu có userId thì nên dùng userId)
+const userSessions = new Map();
+
 const geminiController = {
   // Khởi tạo chat session mới
   initializeChat: async (req, res) => {
@@ -20,11 +23,10 @@ const geminiController = {
         console.error('GEMINI_API_KEY is not set');
         return res.status(500).json({ error: 'Server configuration error' });
       }
-
-      // Tạo chat session mới
       const chat = model.startChat();
-      console.log('New chat session initialized');
-
+      const userKey = req.ip;
+      userSessions.set(userKey, chat);
+      console.log('New chat session initialized for', userKey);
       res.json({ success: true, message: 'Chat session initialized' });
     } catch (error) {
       console.error('Error initializing chat:', error);
@@ -38,7 +40,9 @@ const geminiController = {
   // Xóa lịch sử chat
   clearChat: async (req, res) => {
     try {
-      // Không cần thực hiện gì đặc biệt vì mỗi lần gửi tin nhắn là một session mới
+      const userKey = req.ip;
+      userSessions.delete(userKey);
+      console.log('Chat session cleared for', userKey);
       res.json({ success: true, message: 'Chat history cleared' });
     } catch (error) {
       console.error('Error clearing chat:', error);
@@ -52,9 +56,9 @@ const geminiController = {
   // Gửi tin nhắn và nhận phản hồi
   sendMessage: async (req, res) => {
     try {
-      const { message, chatHistory } = req.body;
-      console.log('Received message:', message);
-      console.log('Chat history:', JSON.stringify(chatHistory, null, 2));
+      const { message } = req.body;
+      const userKey = req.ip;
+      let chat = userSessions.get(userKey);
 
       if (!message) {
         return res.status(400).json({ error: 'Message is required' });
@@ -65,44 +69,25 @@ const geminiController = {
         return res.status(500).json({ error: 'Server configuration error' });
       }
 
-      try {
-        // Tạo chat session với lịch sử chat đã được format
-        const chat = model.startChat({
-          history: chatHistory
-        });
-
-        // Gửi tin nhắn và nhận phản hồi
-        const result = await chat.sendMessage(message);
-        console.log('Gemini response:', result);
-        
-        const response = await result.response;
-        const text = response.text();
-        console.log('Response text:', text);
-
-        res.json({ response: text });
-      } catch (geminiError) {
-        console.error('Gemini API error:', {
-          message: geminiError.message,
-          stack: geminiError.stack,
-          name: geminiError.name
-        });
-        
-        // Thử lại với generateContent nếu startChat thất bại
-        console.log('Trying with generateContent...');
-        const result = await model.generateContent(message);
-        const response = await result.response;
-        const text = response.text();
-        
-        res.json({ response: text });
+      // Nếu chưa có session thì tạo mới
+      if (!chat) {
+        chat = model.startChat();
+        userSessions.set(userKey, chat);
+        console.log('Auto create new chat session for', userKey);
       }
+
+      // Gửi tin nhắn và nhận phản hồi
+      const result = await chat.sendMessage(message);
+      const response = await result.response;
+      const text = response.text();
+      console.log('Gemini response for', userKey, ':', text);
+      res.json({ response: text });
     } catch (error) {
       console.error('Detailed error in sendMessage:', {
         message: error.message,
         stack: error.stack,
         name: error.name
       });
-      
-      // Trả về lỗi cụ thể hơn cho client
       res.status(500).json({ 
         error: 'Failed to get response from Gemini',
         details: error.message
