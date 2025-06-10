@@ -2,7 +2,14 @@ import Doctor from '../models/Doctor.js';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import VerificationRequest from '../models/VerificationRequest.js';
+import bcrypt from 'bcryptjs';
 
+// lấy danh sách bác sĩ theo chuhyeen khoa
+export const getDoctorBySpecialty= async (req, res) =>{
+  // try{
+  //   const 
+  // }
+}
 // Đăng ký bác sĩ mới
 export const register = async (req, res) => {
   try {
@@ -11,7 +18,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { fullName, email, phone, password } = req.body;
+    const { email, password } = req.body;
 
     // Kiểm tra email đã tồn tại
     const existingDoctor = await Doctor.findOne({ email });
@@ -20,12 +27,15 @@ export const register = async (req, res) => {
         message: 'Email đã được sử dụng. Vui lòng sử dụng email khác.'
       });
     }
-    // Tạo bác sĩ mới
+     const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    console.log("1:",password);
+    console.log("2:",hashedPassword);
+    // Tạo bác sĩ mới (password sẽ được hash tự động trong pre-save middleware)
     const doctor = await Doctor.create({
-      fullName,
       email,
-      phone,
-      password
+      password: hashedPassword, // Không hash ở đây, để pre-save middleware xử lý
+      role: 'doctor'
     });
 
     // Tạo token
@@ -53,29 +63,45 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('=== DOCTOR LOGIN DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('Email:', email);
+    console.log('Password length:', password ? password.length : 'undefined');
+    console.log('Password type:', typeof password);
+    console.log('Password value:', password); // Tạm thời log password để debug
 
     // Kiểm tra email và password có được cung cấp
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({
         message: 'Vui lòng cung cấp email và mật khẩu'
       });
     }
-
+console.log("1:",password);
     // Tìm bác sĩ theo email và lấy cả password
     const doctor = await Doctor.findOne({ email }).select('+password');
+    console.log('Doctor found:', doctor);
     if (!doctor) {
+      console.log('❌ Doctor not found');
       return res.status(401).json({
         message: 'Email hoặc mật khẩu không chính xác'
       });
     }
 
     // Kiểm tra mật khẩu
-    const isPasswordCorrect = await doctor.comparePassword(password);
-    if (!isPasswordCorrect) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    console.log("2:",hashedPassword);
+    const isMatch = await bcrypt.compare(password, doctor.password);
+    console.log('bcrypt.compare result:', isMatch);
+ 
+    if (!isMatch) {
+      console.log('❌ Password incorrect');
       return res.status(401).json({
         message: 'Email hoặc mật khẩu không chính xác'
       });
     }
+    console.log('✅ Login successful');
     // Tạo token
     const token = jwt.sign({ id: doctor._id, role: doctor.role }, process.env.JWT_SECRET, {
       expiresIn: '30d'
@@ -120,6 +146,94 @@ export const forgotPassword = async (req, res) => {
     console.error('Lỗi quên mật khẩu:', error);
     res.status(500).json({
       message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.'
+    });
+  }
+};
+
+// Reset mật khẩu bác sĩ (để fix lỗi double hash)
+export const resetDoctorPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        message: 'Vui lòng cung cấp email và mật khẩu mới'
+      });
+    }
+
+    // Tìm bác sĩ theo email
+    const doctor = await Doctor.findOne({ email });
+    if (!doctor) {
+      return res.status(404).json({
+        message: 'Không tìm thấy bác sĩ với email này'
+      });
+    }
+
+    // Reset mật khẩu - sẽ được hash tự động bởi pre-save middleware
+    doctor.password = newPassword;
+    await doctor.save();
+
+    console.log(`✅ Đã reset mật khẩu cho bác sĩ: ${email}`);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Reset mật khẩu thành công'
+    });
+  } catch (error) {
+    console.error('Lỗi reset mật khẩu:', error);
+    res.status(500).json({
+      message: 'Đã xảy ra lỗi khi reset mật khẩu. Vui lòng thử lại sau.'
+    });
+  }
+};
+
+// Test tạo bác sĩ mới (để debug)
+export const testCreateDoctor = async (req, res) => {
+  try {
+    const testEmail = 'test-doctor@gmail.com';
+    const testPassword = '123456';
+
+    console.log('=== TEST CREATE DOCTOR ===');
+
+    // Xóa bác sĩ cũ nếu có
+    await Doctor.deleteOne({ email: testEmail });
+    console.log('Đã xóa bác sĩ cũ (nếu có)');
+
+    // Tạo bác sĩ mới
+    const newDoctor = await Doctor.create({
+      email: testEmail,
+      password: testPassword,
+      role: 'doctor',
+      fullName: 'Test Doctor'
+    });
+
+    console.log('Đã tạo bác sĩ test:', newDoctor.email);
+
+    // Test đăng nhập ngay
+    const doctorWithPassword = await Doctor.findById(newDoctor._id).select('+password');
+    const isPasswordCorrect = await doctorWithPassword.comparePassword(testPassword);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Tạo và test bác sĩ thành công',
+      data: {
+        doctor: {
+          id: newDoctor._id,
+          email: newDoctor.email,
+          role: newDoctor.role
+        },
+        passwordTest: isPasswordCorrect,
+        testCredentials: {
+          email: testEmail,
+          password: testPassword
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Lỗi test tạo bác sĩ:', error);
+    res.status(500).json({
+      message: 'Đã xảy ra lỗi khi test tạo bác sĩ',
+      error: error.message
     });
   }
 };

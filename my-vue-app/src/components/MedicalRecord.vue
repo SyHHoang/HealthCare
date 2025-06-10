@@ -35,18 +35,9 @@
           <!-- Symptoms Component -->
           <Symptoms v-if="activeMenu === 'symptoms'" />
 
-          <!-- Prescriptions Component -->
-          <Prescription v-if="activeMenu === 'prescriptions'" />
           
           <!-- Allergy Component -->
           <Allergy v-if="activeMenu === 'allergy'" />
-
-          <!-- Vaccination Component -->
-          <Vaccination v-if="activeMenu === 'vaccination'" />
-
-          <!-- Treatments Component -->
-          <Treatment v-if="activeMenu === 'treatments'" />
-
           <!-- Lifestyle Component -->
           <Lifestyle v-if="activeMenu === 'lifestyle'" />
 
@@ -80,10 +71,7 @@ export default {
   name: 'MedicalRecord',
   components: {
     Symptoms,
-    Prescription,
     Allergy,
-    Vaccination,
-    Treatment,
     Lifestyle,
     HealthData,
     AIEvaluationView
@@ -93,10 +81,7 @@ export default {
     const showChatbot = ref(false);
     const menuItems = [
       { id: 'symptoms', title: 'Triệu chứng', icon: 'bi bi-thermometer-half' },
-      { id: 'prescriptions', title: 'Đơn thuốc', icon: 'bi bi-capsule' },
       { id: 'allergy', title: 'Dị ứng', icon: 'bi bi-exclamation-triangle' },
-      { id: 'vaccination', title: 'Tiêm chủng', icon: 'bi bi-suit-heart' },
-      { id: 'treatments', title: 'Điều trị', icon: 'bi bi-hospital' },
       { id: 'lifestyle', title: 'Lối sống', icon: 'bi bi-heart' },
       { id: 'healthData', title: 'Dữ liệu sức khỏe', icon: 'bi bi-graph-up' }
     ];

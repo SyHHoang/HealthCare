@@ -18,7 +18,7 @@
             </div>
             <div class="stat-info">
               <h3>Lịch hẹn hôm nay</h3>
-              <p class="stat-number">{{ todayAppointments }}</p>
+              <p class="stat-number">0</p>
 
             </div>
           </div>
@@ -29,7 +29,7 @@
             </div>
             <div class="stat-info">
               <h3>Tổng số bệnh nhân</h3>
-              <p class="stat-number">{{ totalPatients }}</p>
+              <p class="stat-number">10</p>
 
             </div>
           </div>
@@ -56,7 +56,7 @@
             </div>
             <div class="stat-info">
               <h3>Tổng doanh thu</h3>
-              <p class="stat-number">{{ formatCurrency(totalRevenue) }}</p>
+              <p class="stat-number">2.500.000 VNĐ</p>
         
             </div>
           </div>

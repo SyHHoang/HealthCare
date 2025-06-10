@@ -9,7 +9,7 @@ typedef MessageListener = Function(Map<String, dynamic> data);
 class SocketService {
   static final SocketService _instance = SocketService._internal();
   static SocketService get instance => _instance;
-  
+
   IO.Socket? _socket;
   bool _isConnected = false;
   final List<MessageListener> _messageListeners = [];
@@ -39,20 +39,17 @@ class SocketService {
         debugPrint('❌ Không thể kết nối socket: Token không tồn tại');
         return;
       }
-      
+
       final role = await TokenService.getRole() ?? 'user';
       debugPrint('🔄 Đang kết nối socket với:');
       debugPrint('  - Token: ${token.substring(0, 15)}...');
       debugPrint('  - Role: $role');
       debugPrint('  - URL: http://192.168.2.101:5000');
 
-      _socket = IO.io('http://10.0.54.25:5000', <String, dynamic>{
+      _socket = IO.io('http://192.168.2.101:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],
         'autoConnect': true,
-        'auth': {
-          'token': token,
-          'role': role
-        },
+        'auth': {'token': token, 'role': role},
         'reconnection': true,
         'reconnectionAttempts': 5,
         'reconnectionDelay': 1000,
@@ -84,11 +81,11 @@ class SocketService {
         debugPrint('📩 Nhận tin nhắn mới từ socket:');
         debugPrint('  - Kiểu dữ liệu: ${data.runtimeType}');
         debugPrint('  - Dữ liệu gốc: $data');
-        
+
         try {
           // Chuyển đổi dữ liệu thành Map để xử lý
           Map<String, dynamic> messageData;
-          
+
           if (data is Map) {
             messageData = Map<String, dynamic>.from(data);
             debugPrint('  - Đã chuyển đổi thành Map: $messageData');
@@ -100,13 +97,14 @@ class SocketService {
             messageData = {};
             debugPrint('  - Không thể chuyển đổi dữ liệu');
           }
-          
+
           // Đảm bảo có các trường cần thiết
-          if (!messageData.containsKey('chatId') && messageData.containsKey('_id')) {
+          if (!messageData.containsKey('chatId') &&
+              messageData.containsKey('_id')) {
             messageData['chatId'] = messageData['_id'];
             debugPrint('  - Đã thêm chatId từ _id: ${messageData['_id']}');
           }
-          
+
           // Thông báo cho tất cả các listeners
           debugPrint('  - Số lượng listeners: ${_messageListeners.length}');
           for (var listener in _messageListeners) {
@@ -117,12 +115,12 @@ class SocketService {
           debugPrint('  - Dữ liệu gốc: $data');
         }
       });
-      
+
       // Theo dõi sự kiện mới: tin nhắn đã đọc
       _socket!.on('messageRead', (data) {
         debugPrint('👁️ Tin nhắn đã được đánh dấu đã đọc: $data');
       });
-      
+
       // Sự kiện user online
       _socket!.on('user_online', (data) {
         debugPrint('🟢 User online: $data');
@@ -162,7 +160,7 @@ class SocketService {
           }
         }
       });
-      
+
       // Debug tất cả sự kiện socket
       _socket!.onAny((event, data) {
         debugPrint('🔄 Socket event: $event');
@@ -185,17 +183,17 @@ class SocketService {
       _emitJoinChat(chatId);
     }
   }
-  
+
   void _emitJoinChat(String chatId) {
-  if (!isConnected()) {
-    debugPrint('❌ Không thể tham gia phòng: Socket chưa kết nối');
-    return;
-  }
-  
-  debugPrint('🔵 Đang tham gia phòng chat: $chatId');
-  _socket!.emit('join_chat', chatId);
-  
-  // Kiểm tra xem đã join thành công chư
+    if (!isConnected()) {
+      debugPrint('❌ Không thể tham gia phòng: Socket chưa kết nối');
+      return;
+    }
+
+    debugPrint('🔵 Đang tham gia phòng chat: $chatId');
+    _socket!.emit('join_chat', chatId);
+
+    // Kiểm tra xem đã join thành công chư
   }
 
   void leaveChat(String chatId) {
@@ -208,13 +206,17 @@ class SocketService {
   void addMessageListener(MessageListener listener) {
     if (!_messageListeners.contains(listener)) {
       _messageListeners.add(listener);
-      debugPrint('🎧 Đã thêm message listener (total: ${_messageListeners.length})');
+      debugPrint(
+        '🎧 Đã thêm message listener (total: ${_messageListeners.length})',
+      );
     }
   }
 
   void removeMessageListener(MessageListener listener) {
     _messageListeners.remove(listener);
-    debugPrint('🛑 Đã xóa message listener (remaining: ${_messageListeners.length})');
+    debugPrint(
+      '🛑 Đã xóa message listener (remaining: ${_messageListeners.length})',
+    );
   }
 
   void addDoctorOnlineListener(Function(String) listener) {
@@ -301,22 +303,30 @@ class SocketService {
       debugPrint('Không thể gửi tin nhắn: Socket chưa kết nối');
       throw Exception('Socket chưa kết nối');
     }
-    
+
     debugPrint('Gửi sự kiện $event qua socket: $data');
     _socket!.emit(event, data);
   }
 
-  void emitWithCallback(String event, dynamic data, Function(dynamic) callback) {
+  void emitWithCallback(
+    String event,
+    dynamic data,
+    Function(dynamic) callback,
+  ) {
     if (!isConnected()) {
       debugPrint('Không thể gửi tin nhắn: Socket chưa kết nối');
       throw Exception('Socket chưa kết nối');
     }
-    
+
     debugPrint('Gửi sự kiện $event qua socket với callback: $data');
-    _socket!.emitWithAck(event, data, ack: (response) {
-      debugPrint('Nhận callback từ $event: $response');
-      callback(response);
-    });
+    _socket!.emitWithAck(
+      event,
+      data,
+      ack: (response) {
+        debugPrint('Nhận callback từ $event: $response');
+        callback(response);
+      },
+    );
   }
 
   void on(String event, Function(dynamic) handler) {
@@ -334,4 +344,4 @@ class SocketService {
       }
     }
   }
-} 
+}

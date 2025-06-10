@@ -1,6 +1,14 @@
 <template>
   <div class="login">
     <h1>Đăng nhập</h1>
+    <div class="role-select">
+      <button :class="{ active: role === 'user' }" @click="role = 'user'">
+        <span class="icon">👤</span> Bệnh nhân
+      </button>
+      <button :class="{ active: role === 'doctor' }" @click="role = 'doctor'">
+        <span class="icon">🩺</span> Bác sĩ
+      </button>
+    </div>
     <form @submit.prevent="login" class="login-form">
       <div class="form-group">
         <label for="email">Email</label>
@@ -31,12 +39,8 @@
       </button>
     </form>
     <p class="register-link">
-      Chưa có tài khoản? <router-link to="/auth/register">Đăng ký</router-link>
+      Chưa có tài khoản? <router-link to="/auth/register" class="register-link-highlight">Đăng ký</router-link>
     </p>
-    <p class="doctor-link">
-      Bạn có phải là bác sĩ? <router-link to="/auth/doctor/login">Đăng nhập ngay</router-link>
-    </p>
-
     <!-- Modal quên mật khẩu -->
     <div class="modal" v-if="showForgotPassword">
       <div class="modal-content">
@@ -70,11 +74,11 @@ import { jwtDecode } from 'jwt-decode';
 const router = useRouter();
 const route = useRoute();
 
+const role = ref('user'); // 'user' hoặc 'doctor'
 const form = reactive({
   email: '',
   password: '',
 });
-
 const showForgotPassword = ref(false);
 const resetEmail = ref('');
 const errorMessage = ref('');
@@ -83,57 +87,53 @@ const isLoading = ref(false);
 const login = async () => {
   errorMessage.value = '';
   isLoading.value = true;
-  
   try {
-    console.log('Đang gửi request đăng nhập với:', {
-      email: form.email,
-      password: '***'
-    });
-
-    const response = await axiosInstance.post('/api/auth/login', {
-      email: form.email,
-      password: form.password,
-    });
-
-    console.log('Response từ server:', response.data);
-
+    let response;
+    if (role.value === 'doctor') {
+      console.log('Đang đăng nhập bác sĩ với:', {
+        email: form.email,
+        password: form.password
+      });
+      response = await axiosInstance.post('/api/doctors/login', {
+        email: form.email,
+        password: form.password
+      });
+    } else {
+      response = await axiosInstance.post('/api/auth/login', {
+        email: form.email,
+        password: form.password
+      });
+    }
     if (response.data && response.data.token) {
       const decodedToken = jwtDecode(response.data.token);
-      console.log('Token đã được giải mã:', decodedToken);
-      
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', decodedToken.role || 'user');
-      
-      console.log('Đã lưu token vào localStorage');
-      console.log('Token hiện tại:', localStorage.getItem('token'));
-      
-      // Kiểm tra role và chuyển hướng
-      const payload = JSON.parse(atob(response.data.token.split('.')[1]));
-      if (payload.role === 'admin') {
-        // Nếu có redirect query, sử dụng nó
-        const redirect = route.query.redirect || '/admin/feedbacks';
-        router.push(redirect);
-      } else if (payload.role === 'doctor') {
+      localStorage.setItem('role', decodedToken.role || role.value);
+      if (role.value === 'doctor') {
+        localStorage.setItem('user', JSON.stringify(response.data.doctor));
         router.push('/doctor/dashboard');
       } else {
-        // Người dùng thông thường
-        router.push('/user/dashboard');
+        // Kiểm tra role và chuyển hướng
+        const payload = JSON.parse(atob(response.data.token.split('.')[1]));
+        if (payload.role === 'admin') {
+          router.push('/admin');
+        } else if (payload.role === 'doctor') {
+          router.push('/doctor/dashboard');
+        } else {
+          router.push('/user/dashboard');
+        }
       }
     } else {
       throw new Error('Không nhận được token');
     }
   } catch (error) {
-    console.error('Chi tiết lỗi đăng nhập:', error);
     if (error.response) {
-      // Lỗi từ server
       errorMessage.value = `Đăng nhập thất bại: ${error.response.data.message || 'Vui lòng kiểm tra lại thông tin'}`;
     } else if (error.request) {
-      // Lỗi không thể kết nối đến server
       errorMessage.value = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
     } else {
-      // Lỗi khác
       errorMessage.value = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
     }
+    // Không điều hướng khi đăng nhập thất bại
   } finally {
     isLoading.value = false;
   }
@@ -141,14 +141,19 @@ const login = async () => {
 
 const sendResetLink = async () => {
   try {
-    await axiosInstance.post('/api/users/forgot-password', {
-      email: resetEmail.value
-    });
+    if (role.value === 'doctor') {
+      await axiosInstance.post('/api/auth/forgot-password', {
+        email: resetEmail.value
+      });
+    } else {
+      await axiosInstance.post('/api/users/forgot-password', {
+        email: resetEmail.value
+      });
+    }
     alert('Link đặt lại mật khẩu đã được gửi đến email của bạn!');
     showForgotPassword.value = false;
     resetEmail.value = '';
   } catch (error) {
-    console.error('Lỗi gửi link:', error);
     alert('Không thể gửi link: ' + (error.response?.data.message || error.message));
   }
 };
@@ -156,19 +161,49 @@ const sendResetLink = async () => {
 
 <style scoped>
 .login {
-  max-width: 500px;
+  max-width: 400px;
   margin: 40px auto;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 h1 {
   text-align: center;
   font-size: 28px;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+}
+
+.role-select {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.role-select button {
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid #ddd;
+  background: #f7f7f7;
+  color: #333;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.role-select button.active {
+  background: gold;
+  color: #fff;
+  border-color: gold;
+}
+.role-select .icon {
+  font-size: 18px;
 }
 
 .login-form {
@@ -182,13 +217,11 @@ h1 {
   flex-direction: column;
   position: relative;
 }
-
 .form-group label {
   font-size: 14px;
   color: #555;
   margin-bottom: 5px;
 }
-
 .form-group input {
   padding: 10px;
   font-size: 16px;
@@ -196,11 +229,9 @@ h1 {
   border-radius: 5px;
   outline: none;
 }
-
 .form-group input:focus {
   border-color: gold;
 }
-
 .forgot-password {
   position: absolute;
   right: 0;
@@ -211,12 +242,10 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .forgot-password:hover {
   color: #ffd700;
   text-decoration: underline;
 }
-
 .submit-btn {
   padding: 12px;
   background: gold;
@@ -227,50 +256,32 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .submit-btn:hover {
   background: #ffd700;
   transform: translateY(-1px);
 }
-
+.submit-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
 .register-link {
   text-align: center;
   margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
   font-size: 14px;
   color: #666;
 }
-
-.register-link a {
+.register-link-highlight {
   color: gold;
   text-decoration: none;
   font-weight: bold;
   margin-left: 5px;
   transition: all 0.3s ease;
 }
-
-.register-link a:hover {
+.register-link-highlight:hover {
   color: #ffd700;
   text-decoration: underline;
 }
-
-.doctor-link {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.doctor-link a {
-  color: gold;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.doctor-link a:hover {
-  text-decoration: underline;
-}
-
 /* Modal styles */
 .modal {
   position: fixed;
@@ -284,7 +295,6 @@ h1 {
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: white;
   padding: 30px;
@@ -292,30 +302,25 @@ h1 {
   max-width: 400px;
   width: 90%;
 }
-
 .modal-content h2 {
   margin-bottom: 15px;
   color: #333;
   font-size: 24px;
 }
-
 .modal-content p {
   color: #666;
   margin-bottom: 20px;
 }
-
 .forgot-password-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-
 .modal-buttons {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
-
 .cancel-btn {
   padding: 12px;
   background: #f4f4f4;
@@ -327,15 +332,12 @@ h1 {
   transition: all 0.3s ease;
   flex: 1;
 }
-
 .cancel-btn:hover {
   background: #e4e4e4;
 }
-
 .modal-buttons .submit-btn {
   flex: 1;
 }
-
 .error-message {
   color: #ff4444;
   margin: 10px 0;
@@ -345,20 +347,12 @@ h1 {
   font-size: 14px;
   text-align: center;
 }
-
-.submit-btn:disabled {
-  background: #cccccc;
-  cursor: not-allowed;
-  transform: none;
-}
-
 @media (max-width: 768px) {
   .login {
     margin: 20px;
   }
-  
   .modal-content {
     margin: 20px;
   }
 }
-</style>
+</style> 

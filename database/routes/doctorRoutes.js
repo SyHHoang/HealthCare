@@ -1,8 +1,10 @@
 import express from 'express';
-import { 
+import {
   register,
   login,
   forgotPassword,
+  resetDoctorPassword,
+  testCreateDoctor,
   getProfile,
   updateProfile,
   changePassword,
@@ -35,6 +37,8 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetDoctorPassword); // Endpoint để fix lỗi double hash
+router.post('/test-create', testCreateDoctor); // Endpoint để test tạo bác sĩ
 router.get('/active/isActive', getDoctorsActive);
 router.get('/getPublicDoctorProfile/:id', getPublicProfileDoctorById);
 

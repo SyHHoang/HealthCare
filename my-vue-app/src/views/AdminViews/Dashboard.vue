@@ -56,7 +56,7 @@
         </div>
         <div class="stat-info">
           <h3>Bác sĩ đang hoạt động</h3>
-          <p class="stat-number">2</p>
+          <p class="stat-number">45</p>
         </div>
       </div>
 

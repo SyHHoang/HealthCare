@@ -32,10 +32,10 @@ export const login = async (req, res) => {
   }
 };
 
-export const register = async (req, res) => {
+export const UserRegister = async (req, res) => {
   try {
-    const { email, password, role, fullname, gender, specialization, license, experience, education, hospital, hospitalAddress } = req.body;
-
+    const { email, password } = req.body;
+    const role = 'user';
     // Kiểm tra email đã tồn tại
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -50,8 +50,6 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      fullname,
-      gender
     };
     // Khởi tạo và lưu user
     const user = new User(userData);
@@ -63,6 +61,15 @@ export const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+    res.status(201).json({
+      message: "Đăng ký thành công!",
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
     console.error('Lỗi đăng ký:', error);
     res.status(500).json({ message: "Lỗi server!", error: error.message });

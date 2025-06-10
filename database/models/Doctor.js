@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 const doctorSchema = new mongoose.Schema({
   fullName: {
     type: String,
-    required: [true, 'Vui lòng nhập họ và tên'],
     trim: true
   },
   fcmTokens: {
@@ -31,7 +30,6 @@ const doctorSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Vui lòng nhập số điện thoại'],
     trim: true,
     match: [/^[0-9]{10}$/, 'Vui lòng nhập số điện thoại hợp lệ']
   },
@@ -117,33 +115,13 @@ const doctorSchema = new mongoose.Schema({
     }],
     default: new Map()
   },
-  price: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0
-    },
   verifiID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'VerificationRequest',
     default: null
   },
 });
-
-// Hash mật khẩu trước khi lưu
-doctorSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
-
 // Phương thức kiểm tra mật khẩu
-doctorSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
 const Doctor = mongoose.model('Doctor', doctorSchema);
 
 export default Doctor; 

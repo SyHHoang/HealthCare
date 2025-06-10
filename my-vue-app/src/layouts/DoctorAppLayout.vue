@@ -398,7 +398,7 @@ const logout = () => {
   socketService.disconnect();
   localStorage.removeItem('token');
   localStorage.removeItem('doctorInfo');
-  router.push('/auth/doctor/login');
+  router.push('/auth/login');
 };
 
 const handleClickOutside = (event) => {

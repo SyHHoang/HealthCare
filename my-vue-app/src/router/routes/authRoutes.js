@@ -7,23 +7,13 @@ export default [
       {
         path: 'login',
         name: 'login',
-        component: () => import('@/views/AuthView/LoginView.vue') // Lazy load
+        component: () => import('@/views/AuthView/CombinedLoginView.vue') // Lazy load
       },
       {
         path: 'register',
         name: 'register',
-        component: () => import('@/views/AuthView/RegisterView.vue') // Lazy load
+        component: () => import('@/views/AuthView/CombinedRegisterView.vue') // Lazy load
       },
-      {
-        path: 'doctor/login',
-        name: 'doctor-login',
-        component: () => import('@/views/AuthView/DoctorLoginView.vue') // Lazy load
-      },
-      {
-        path: 'doctor/register',
-        name: 'doctor-register',
-        component: () => import('@/views/AuthView/DoctorRegisterView.vue') // Lazy load
-      }
     ]
   }
 ];

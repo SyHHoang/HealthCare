@@ -26,7 +26,7 @@ router.beforeEach((to, from, next) => {
   const role = localStorage.getItem('role');
   
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!token) {
+    if (!token && to.path !== '/auth/login') {
       next({
         path: '/auth/login',
         query: { redirect: to.fullPath }

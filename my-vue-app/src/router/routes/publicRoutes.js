@@ -64,6 +64,11 @@ export default [
     name: 'chat',
     component: () => import('@/views/UserView/ChatView.vue') // Lazy load
       },
+      {
+        path: 'test-doctor-auth',
+        name: 'TestDoctorAuth',
+        component: () => import('@/views/TestDoctorAuth.vue') // Test doctor authentication
+      },
       // {
       //   path: 'doctors/:doctorId',
       //   name: 'DoctorDetails',
