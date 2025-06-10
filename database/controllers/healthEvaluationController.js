@@ -14,34 +14,68 @@ const healthEvaluationController = {
     try {
       const { symptoms, allergies, lifestyle, healthData } = req.body;
 
-      // Tạo prompt cho Gemini
+      // Log dữ liệu đầu vào để debug
+      console.log('symptoms:', symptoms);
+      console.log('allergies:', allergies);
+      console.log('lifestyle:', lifestyle);
+      console.log('healthData:', healthData);
+
+      // Prompt mới yêu cầu trả về đúng cấu trúc JSON
       const prompt = `
-        Hãy đánh giá tình trạng sức khỏe dựa trên các thông tin sau:
+Bạn là một bác sĩ AI. Hãy đánh giá sức khỏe dựa trên các thông tin sau:
 
-        Triệu chứng:
-        ${JSON.stringify(symptoms, null, 2)}
+Triệu chứng:
+${JSON.stringify(symptoms, null, 2)}
 
-        Dị ứng:
-        ${JSON.stringify(allergies, null, 2)}
+Dị ứng:
+${JSON.stringify(allergies, null, 2)}
 
-        Lối sống:
-        ${JSON.stringify(lifestyle, null, 2)}
+Lối sống:
+${JSON.stringify(lifestyle, null, 2)}
 
-        Dữ liệu sức khỏe:
-        ${JSON.stringify(healthData, null, 2)}
+Dữ liệu sức khỏe:
+${JSON.stringify(healthData, null, 2)}
 
-        Hãy phân tích và đưa ra:
-        1. Đánh giá chi tiết từng mục
-        2. Kết luận tổng quan về tình trạng sức khỏe
-        3. Các lời khuyên và khuyến nghị
-      `;
+Hãy trả lời đúng theo cấu trúc JSON sau (KHÔNG GIẢI THÍCH, KHÔNG THÊM GÌ NGOÀI JSON):
+
+{
+  "detailedEvaluation": {
+    "Triệu chứng": {
+      "Tên triệu chứng": "Đánh giá chi tiết"
+    },
+    "Dị ứng": {
+      "Tên dị ứng": "Đánh giá chi tiết"
+    },
+    "Lối sống": "Đánh giá lối sống",
+    "Dữ liệu sức khỏe": "Đánh giá dữ liệu sức khỏe"
+  },
+  "conclusion": "Kết luận tổng quan",
+  "recommendations": [
+    "Lời khuyên 1",
+    "Lời khuyên 2"
+  ]
+}
+`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      console.log('response:', response);
-      // Phân tích response và format lại thành cấu trúc JSON
-      const evaluation = parseEvaluationResponse(text);
+      console.log('response text:', text);
+
+      let evaluation;
+      try {
+        // Tìm đoạn JSON đầu tiên trong text
+        const jsonStart = text.indexOf('{');
+        const jsonEnd = text.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          const jsonString = text.substring(jsonStart, jsonEnd + 1);
+          evaluation = JSON.parse(jsonString);
+        } else {
+          throw new Error('No JSON found');
+        }
+      } catch (e) {
+        evaluation = parseEvaluationResponse(text);
+      }
 
       res.json(evaluation);
     } catch (error) {
