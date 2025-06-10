@@ -112,6 +112,7 @@ export const handleVerificationRequest = async (req, res) => {
     
     // Kiểm tra xem yêu cầu xác thực có tồn tại không
     const request = await VerificationRequest.findById(requestId);
+    console.log('yêu cầu xác thực:', request);
     if (!request) {
       return res.status(404).json({ message: 'Không tìm thấy yêu cầu xác thực' });
     }
@@ -129,6 +130,17 @@ export const handleVerificationRequest = async (req, res) => {
       doctorId,
       { 
         status: action === 'approved' ? 'active' : 'inactive',
+        fullName: request.fullName,
+        email: request.email,
+        phone: request.phone,
+        avatar: request.avatar,
+        specialty: request.specialty,
+        otherSpecialties: request.otherSpecialties,
+        experience: request.experience,
+        currentWorkplace: request.currentWorkplace,
+        education: request.education,
+        graduationYear: request.graduationYear,
+        licenseNumber: request.licenseNumber,
       },
       { new: true }
     );

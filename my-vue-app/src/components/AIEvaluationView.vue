@@ -7,80 +7,38 @@
       </button>
     </div>
 
-    <div class="evaluation-content">
+    <div v-if="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Đang phân tích dữ liệu sức khỏe...</p>
+    </div>
+
+    <div v-else class="evaluation-content">
       <!-- Phần đánh giá các mục sức khỏe -->
       <div class="evaluation-section">
         <h3><i class="bi bi-clipboard-check"></i> Đánh giá chi tiết</h3>
         <div class="health-metrics">
-          <!-- Dị ứng -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-exclamation-triangle"></i>
-              <span>Dị ứng</span>
-             
+          <template v-if="evaluation && evaluation.detailedEvaluation && Object.keys(evaluation.detailedEvaluation).length">
+            <div v-for="(value, key) in evaluation.detailedEvaluation" :key="key" class="metric-item">
+              <div class="metric-header">
+                <i :class="getIconForMetric(key)"></i>
+                <span>{{ key }}</span>
+              </div>
+              <div class="metric-content">
+                <template v-if="typeof value === 'object' && value !== null">
+                  <div v-for="(subValue, subKey) in value" :key="subKey" class="metric-subitem">
+                    <div class="metric-subheader">{{ subKey }}</div>
+                    <p>{{ subValue }}</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <p>{{ value }}</p>
+                </template>
+              </div>
             </div>
-            <p>Có 2 dị ứng đang hoạt động: Penicillin (Nặng) và Đậu phộng (Trung bình). Cần thận trọng khi sử dụng thuốc và thực phẩm.</p>
-          </div>
-
-          <!-- Dữ liệu sức khỏe -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-heart-pulse"></i>
-              <span>Chỉ số sức khỏe</span>
-              
-            </div>
-            <p>Huyết áp: 120/80 mmHg, Nhịp tim: 75 bpm, Đường huyết: 5.5 mmol/L. Các chỉ số đều trong giới hạn bình thường.</p>
-          </div>
-
-          <!-- Lối sống -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-person-walking"></i>
-              <span>Lối sống</span>
-              
-            </div>
-            <p>Tập thể dục đều đặn 30 phút/ngày, chế độ ăn cân bằng. Cần cải thiện thời gian ngủ.</p>
-          </div>
-
-          <!-- Thuốc men -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-capsule"></i>
-              <span>Thuốc men</span>
-           
-            </div>
-            <p>Đang sử dụng 3 loại thuốc thường xuyên. Cần tuân thủ đúng liều lượng và thời gian.</p>
-          </div>
-
-          <!-- Triệu chứng -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-thermometer-half"></i>
-              <span>Triệu chứng</span>
-              
-            </div>
-            <p>Có triệu chứng đau đầu và mệt mỏi kéo dài. Cần theo dõi và tái khám nếu không cải thiện.</p>
-          </div>
-
-          <!-- Phác đồ điều trị -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-stethoscope"></i>
-              <span>Điều trị</span>
-              
-            </div>
-            <p>Đang trong quá trình điều trị viêm xoang. Tuân thủ tốt phác đồ điều trị.</p>
-          </div>
-
-          <!-- Tiêm chủng -->
-          <div class="metric-item">
-            <div class="metric-header">
-              <i class="bi bi-syringe"></i>
-              <span>Tiêm chủng</span>
-              
-            </div>
-            <p>Đã tiêm đầy đủ các mũi vắc xin cơ bản. Cần tiêm nhắc lại vắc xin cúm.</p>
-          </div>
+          </template>
+          <template v-else>
+            <p style="color: #f44336; text-align: center; font-weight: 600;">Không có dữ liệu đánh giá sức khỏe</p>
+          </template>
         </div>
       </div>
 
@@ -88,13 +46,7 @@
       <div class="evaluation-section">
         <h3><i class="bi bi-stethoscope"></i> Kết luận tình trạng</h3>
         <div class="conclusion">
-          <p>Tình trạng sức khỏe chung đang ở mức tốt. Các chỉ số cơ bản đều trong giới hạn cho phép. Tuy nhiên, cần lưu ý:</p>
-          <ul>
-            <li>Quản lý tốt các dị ứng đang hoạt động</li>
-            <li>Theo dõi các triệu chứng đau đầu và mệt mỏi</li>
-            <li>Tuân thủ đúng phác đồ điều trị và lịch uống thuốc</li>
-            <li>Cải thiện thời gian ngủ và chất lượng giấc ngủ</li>
-          </ul>
+          <p>{{ evaluation.conclusion }}</p>
         </div>
       </div>
 
@@ -102,25 +54,9 @@
       <div class="evaluation-section">
         <h3><i class="bi bi-lightbulb"></i> Lời khuyên</h3>
         <div class="recommendations">
-          <div class="recommendation-item">
+          <div v-for="(recommendation, index) in evaluation.recommendations" :key="index" class="recommendation-item">
             <i class="bi bi-check-circle"></i>
-            <p>Duy trì chế độ ăn uống lành mạnh, tránh các thực phẩm gây dị ứng</p>
-          </div>
-          <div class="recommendation-item">
-            <i class="bi bi-check-circle"></i>
-            <p>Tiếp tục tập thể dục đều đặn 30 phút mỗi ngày</p>
-          </div>
-          <div class="recommendation-item">
-            <i class="bi bi-check-circle"></i>
-            <p>Đặt lịch tái khám định kỳ sau 2 tuần</p>
-          </div>
-          <div class="recommendation-item">
-            <i class="bi bi-check-circle"></i>
-            <p>Ghi chú lại các triệu chứng bất thường để báo cáo với bác sĩ</p>
-          </div>
-          <div class="recommendation-item">
-            <i class="bi bi-check-circle"></i>
-            <p>Đặt lịch tiêm vắc xin cúm trong tháng tới</p>
+            <p>{{ recommendation }}</p>
           </div>
         </div>
       </div>
@@ -129,7 +65,81 @@
 </template>
 
 <script setup>
-defineEmits(['close'])
+import { ref, onMounted, watch } from 'vue';
+import axiosInstance from '../services/axiosInstance.js';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
+const evaluation = ref({
+  detailedEvaluation: {},
+  conclusion: '',
+  recommendations: []
+});
+const loading = ref(false);
+
+watch(evaluation, (val) => {
+  console.log('AI evaluation:', val);
+}, { immediate: true });
+
+const fetchHealthData = async () => {
+  try {
+    loading.value = true;
+    
+    // Lấy dữ liệu từ các API
+    const [symptomsRes, allergiesRes, lifestyleRes, healthDataRes] = await Promise.all([
+      axiosInstance.get('/api/medical-record/symptoms'),
+      axiosInstance.get('/api/medical-record/allergies'),
+      axiosInstance.get('/api/medical-record/lifestyles'),
+      axiosInstance.get('/api/medical-record/health-data')
+    ]);
+
+    // Log dữ liệu đầu vào
+    console.log('symptoms:', symptomsRes.data);
+    console.log('allergies:', allergiesRes.data);
+    console.log('lifestyle:', lifestyleRes.data);
+    console.log('healthData:', healthDataRes.data);
+
+    // Kiểm tra nếu tất cả đều rỗng thì báo lỗi
+    const isAllEmpty = (
+      (!symptomsRes.data || (Array.isArray(symptomsRes.data) && symptomsRes.data.length === 0)) &&
+      (!allergiesRes.data || (Array.isArray(allergiesRes.data) && allergiesRes.data.length === 0)) &&
+      (!lifestyleRes.data || (Array.isArray(lifestyleRes.data) && lifestyleRes.data.length === 0)) &&
+      (!healthDataRes.data || (Array.isArray(healthDataRes.data) && healthDataRes.data.length === 0))
+    );
+    if (isAllEmpty) {
+      toast.error('Bạn cần nhập ít nhất một dữ liệu sức khỏe để AI có thể đánh giá!');
+      evaluation.value = {
+        detailedEvaluation: {},
+        conclusion: '',
+        recommendations: []
+      };
+      loading.value = false;
+      return;
+    }
+
+    // Gửi dữ liệu để đánh giá
+    const response = await axiosInstance.post('/api/health-evaluation/evaluate', {
+      symptoms: symptomsRes.data,
+      allergies: allergiesRes.data,
+      lifestyle: lifestyleRes.data,
+      healthData: healthDataRes.data
+    });
+
+    evaluation.value = response.data;
+    console.log('evaluation:', evaluation.value);
+  } catch (error) {
+    toast.error('Không thể tải đánh giá sức khỏe');
+    console.error('Error fetching health evaluation:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchHealthData();
+});
+
+defineEmits(['close']);
 </script>
 
 <style scoped>
@@ -193,6 +203,15 @@ defineEmits(['close'])
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.evaluation-section h3 i {
+  color: #3498db;
+  font-size: 24px;
 }
 
 .health-metrics {
@@ -205,18 +224,56 @@ defineEmits(['close'])
   border-radius: 10px;
   padding: 15px;
   border: 1px solid #eee;
+  margin-bottom: 15px;
 }
 
 .metric-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .metric-header i {
   color: #3498db;
-  font-size: 18px;
+  font-size: 20px;
+}
+
+.metric-header span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 4px;
+  display: inline-block;
+}
+
+.metric-content {
+  margin-top: 8px;
+}
+
+.metric-subitem {
+  margin-bottom: 10px;
+}
+
+.metric-subheader {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3498db;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  text-transform: capitalize;
+}
+
+.metric-item p {
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+  color: #495057;
+  font-size: 15px;
+  padding-left: 34px;
 }
 
 .status {
@@ -247,12 +304,14 @@ defineEmits(['close'])
   border-radius: 10px;
   padding: 20px;
   border: 1px solid #eee;
+  margin-bottom: 20px;
 }
 
 .conclusion p {
-  margin: 0 0 15px 0;
-  line-height: 1.6;
-  color: #2c3e50;
+  margin: 0;
+  line-height: 1.8;
+  color: #495057;
+  font-size: 16px;
 }
 
 .conclusion ul {
@@ -282,14 +341,15 @@ defineEmits(['close'])
 
 .recommendation-item i {
   color: #2ecc71;
-  font-size: 18px;
+  font-size: 20px;
   margin-top: 2px;
 }
 
 .recommendation-item p {
   margin: 0;
   line-height: 1.6;
-  color: #2c3e50;
+  color: #495057;
+  font-size: 15px;
 }
 
 @media (max-width: 768px) {
@@ -301,4 +361,44 @@ defineEmits(['close'])
     grid-template-columns: 1fr;
   }
 }
-</style> 
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+// Thêm hàm helper để lấy icon cho từng loại metric
+function getIconForMetric(metric) {
+  const icons = {
+    'Triệu chứng': 'bi bi-thermometer-half',
+    'Dị ứng': 'bi bi-exclamation-triangle',
+    'Lối sống': 'bi bi-person-walking',
+    'Dữ liệu sức khỏe': 'bi bi-heart-pulse',
+    'Thuốc men': 'bi bi-capsule',
+    'Điều trị': 'bi bi-stethoscope',
+    'Tiêm chủng': 'bi bi-syringe'
+  };
+  return icons[metric] || 'bi bi-info-circle';
+}
+</script> 

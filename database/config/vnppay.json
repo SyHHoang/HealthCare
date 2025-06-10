@@ -3,6 +3,6 @@
     "vnp_HashSecret":"2M45F7AS2SP46SE6OI7PIFCEDLS9R36T",
     "vnp_Url":"https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
     "vnp_Api":"https://sandbox.vnpayment.vn/merchant_webapi/api/transaction",
-    "vnp_ReturnUrl": "https://8609-2a09-bac1-7aa0-50-00-3d0-1.ngrok-free.app/api/vnpay/vnpay_return",
-    "vnp_IpnUrl":"https://8609-2a09-bac1-7aa0-50-00-3d0-1.ngrok-free.app/api/vnpay/vnpay_ipn"
+    "vnp_ReturnUrl": "https://a7c2-2a09-bac5-d459-16dc-00-247-100.ngrok-free.app/api/vnpay/vnpay_return",
+    "vnp_IpnUrl":"https://a7c2-2a09-bac5-d459-16dc-00-247-100.ngrok-free.app/api/vnpay/vnpay_ipn"
   }

@@ -58,10 +58,8 @@
 
 <script>
 import Symptoms from './MedicalRecord/Symptoms.vue';
-import Prescription from './MedicalRecord/Prescription.vue';
 import Allergy from './MedicalRecord/Allergy.vue';
-import Vaccination from './MedicalRecord/Vaccination.vue';
-import Treatment from './MedicalRecord/Treatment.vue';
+
 import Lifestyle from './MedicalRecord/Lifestyle.vue';
 import HealthData from './MedicalRecord/HealthData.vue';
 import AIEvaluationView from './AIEvaluationView.vue';

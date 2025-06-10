@@ -40,6 +40,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import Consultation from './models/Consultation.js';
 import geminiRoutes from './routes/geminiRoutes.js';
+import healthEvaluationRouter from './routes/healthEvaluation.js';
 
 // Tạo __dirname cho ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -693,6 +694,7 @@ app.use('/api/video-call', videoCallRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/gemini', geminiRoutes);
+app.use('/api/health-evaluation', healthEvaluationRouter);
 app.use(fileUpload({
   limits: { fileSize: 10 * 1024 * 1024 },
   useTempFiles: true
