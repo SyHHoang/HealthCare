@@ -444,7 +444,7 @@
     <!-- Chatbot Modal -->
     <div v-if="showChatbot" class="chatbot-modal">
       <div class="chatbot-modal-content">
-        <AIEvaluationView @close="showChatbot = false" />
+        <AIEvaluationView :patient-id="route.params.id" @close="showChatbot = false" />
       </div>
     </div>
   </div>

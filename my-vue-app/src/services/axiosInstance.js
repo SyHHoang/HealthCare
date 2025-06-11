@@ -47,8 +47,12 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('user');
+      
       // Kiểm tra nếu không phải đang ở trang đăng nhập thì mới điều hướng
-  
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

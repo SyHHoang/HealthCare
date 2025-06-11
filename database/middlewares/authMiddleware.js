@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Doctor from "../models/Doctor.js";
 //xác thực các chức năng sau khi đăng nhập
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -12,14 +13,24 @@ export const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId).select('-password');
-
+    
+    // Kiểm tra cả User và Doctor
+    let user = await User.findById(decoded.userId).select('-password');
+    let doctor = null;
+    
     if (!user) {
-      return res.status(401).json({ message: "Người dùng không tồn tại!" });
+      doctor = await Doctor.findById(decoded.userId).select('-password');
+      if (!doctor) {
+        return res.status(401).json({ message: "Người dùng không tồn tại!" });
+      }
+      req.user = { ...decoded, role: 'doctor' };
+    } else {
+      req.user = { ...decoded, role: user.role };
     }
-    req.user = decoded;
+    
     next();
   } catch (error) {
+    console.error('Auth error:', error);
     return res.status(403).json({ message: "Token không hợp lệ!" });
   }
 };

@@ -68,6 +68,13 @@
 import { ref, onMounted, watch } from 'vue';
 import axiosInstance from '../services/axiosInstance.js';
 import { useToast } from 'vue-toastification';
+import axios from 'axios';
+const props = defineProps({
+  patientId: {
+    type: String,
+    required: false
+  }
+});
 
 const toast = useToast();
 const evaluation = ref({
@@ -86,11 +93,23 @@ const fetchHealthData = async () => {
     loading.value = true;
     
     // Lấy dữ liệu từ các API
+    let symptomsUrl, allergiesUrl, lifestyleUrl, healthDataUrl;
+    if (props.patientId) {
+      symptomsUrl = `/api/medical-record/symptoms/doctor/${props.patientId}`;
+      allergiesUrl = `/api/medical-record/allergies/doctor/${props.patientId}`;
+      lifestyleUrl = `/api/medical-record/lifestyles/doctor/${props.patientId}`;
+      healthDataUrl = `/api/medical-record/health-data/doctor/${props.patientId}`;
+    } else {
+      symptomsUrl = '/api/medical-record/symptoms';
+      allergiesUrl = '/api/medical-record/allergies';
+      lifestyleUrl = '/api/medical-record/lifestyles';
+      healthDataUrl = '/api/medical-record/health-data';
+    }
     const [symptomsRes, allergiesRes, lifestyleRes, healthDataRes] = await Promise.all([
-      axiosInstance.get('/api/medical-record/symptoms'),
-      axiosInstance.get('/api/medical-record/allergies'),
-      axiosInstance.get('/api/medical-record/lifestyles'),
-      axiosInstance.get('/api/medical-record/health-data')
+      axiosInstance.get(symptomsUrl),
+      axiosInstance.get(allergiesUrl),
+      axiosInstance.get(lifestyleUrl),
+      axiosInstance.get(healthDataUrl)
     ]);
 
     // Log dữ liệu đầu vào
@@ -118,7 +137,7 @@ const fetchHealthData = async () => {
     }
 
     // Gửi dữ liệu để đánh giá
-    const response = await axiosInstance.post('/api/health-evaluation/evaluate', {
+    const response = await axios.post('http://localhost:5000/api/health-evaluation/evaluate', {
       symptoms: symptomsRes.data,
       allergies: allergiesRes.data,
       lifestyle: lifestyleRes.data,
