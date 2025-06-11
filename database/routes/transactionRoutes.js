@@ -67,7 +67,62 @@ router.get('/:id', authenticateToken, isAdmin, async (req, res) => {
     }
 });
 
-// Thống kê giao dịch
+// Thống kê doanh thu 30 ngày gần nhất
+router.get('/stats/revenue', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const last30Days = moment().subtract(29, 'days').startOf('day');
+
+        // Doanh thu 30 ngày gần nhất
+        const revenueData = await Transaction.aggregate([
+            {
+                $match: {
+                    transactionDate: {
+                        $gte: last30Days.toDate(),
+                        $lte: moment().endOf('day').toDate()
+                    },
+                    status: { $in: ['success', 'paid_to_doctor'] }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$transactionDate'
+                        }
+                    },
+                    revenue: { $sum: '$amount' }
+                }
+            },
+            {
+                $sort: { '_id': 1 }
+            }
+        ]);
+
+        // Xử lý dữ liệu cho biểu đồ
+        const result = [];
+        let currentDate = last30Days;
+
+        while (currentDate <= moment()) {
+            const dateStr = currentDate.format('YYYY-MM-DD');
+            const revenue = revenueData.find(item => item._id === dateStr);
+            
+            result.push({
+                date: dateStr,
+                revenue: revenue ? revenue.revenue : 0
+            });
+            
+            currentDate = currentDate.clone().add(1, 'day');
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error getting revenue stats:', error);
+        res.status(500).json({ message: 'Lỗi khi lấy thống kê doanh thu' });
+    }
+});
+
+// Thống kê tổng quan
 router.get('/stats/summary', authenticateToken, isAdmin, async (req, res) => {
     try {
         const today = moment().startOf('day');
@@ -97,64 +152,33 @@ router.get('/stats/summary', authenticateToken, isAdmin, async (req, res) => {
             {
                 $group: {
                     _id: '$status',
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // Doanh thu 7 ngày gần nhất
-        const revenueData = await Transaction.aggregate([
-            {
-                $match: {
-                    transactionDate: {
-                        $gte: last7Days.toDate(),
-                        $lte: moment().endOf('day').toDate()
-                    },
-                    status: { $in: ['success', 'paid_to_doctor'] }
-                }
-            },
-            {
-                $group: {
-                    _id: {
-                        $dateToString: {
-                            format: '%Y-%m-%d',
-                            date: '$transactionDate'
-                        }
-                    },
+                    count: { $sum: 1 },
                     totalAmount: { $sum: '$amount' }
                 }
-            },
-            {
-                $sort: { '_id': 1 }
             }
         ]);
 
-        // Xử lý dữ liệu cho biểu đồ
-        const labels = [];
-        const data = [];
-        let currentDate = last7Days;
-
-        while (currentDate <= moment()) {
-            const dateStr = currentDate.format('YYYY-MM-DD');
-            const revenue = revenueData.find(item => item._id === dateStr);
-            
-            labels.push(currentDate.format('DD/MM'));
-            data.push(revenue ? revenue.totalAmount : 0);
-            
-            currentDate = currentDate.clone().add(1, 'day');
-        }
+        // Tổng doanh thu (tất cả giao dịch thành công)
+        const totalRevenueAgg = await Transaction.aggregate([
+            { $match: { status: { $in: ['success', 'paid_to_doctor'] } } },
+            { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]);
+        const totalRevenue = totalRevenueAgg[0]?.total || 0;
 
         // Chuyển đổi mảng statusStats thành đối tượng
         const byStatus = {};
         statusStats.forEach(item => {
-            byStatus[item._id] = item.count;
+            byStatus[item._id] = {
+                count: item.count,
+                totalAmount: item.totalAmount
+            };
         });
 
         // Đảm bảo tất cả các trạng thái đều có giá trị
         const allStatuses = ['success', 'failed', 'pending', 'paid_to_doctor'];
         allStatuses.forEach(status => {
             if (!byStatus[status]) {
-                byStatus[status] = 0;
+                byStatus[status] = { count: 0, totalAmount: 0 };
             }
         });
 
@@ -165,13 +189,9 @@ router.get('/stats/summary', authenticateToken, isAdmin, async (req, res) => {
                 count: dailyStats[0]?.count || 0
             },
             byStatus,
-            revenueChart: {
-                labels,
-                data
-            }
+            totalRevenue
         };
 
-        console.log('Stats response:', response);
         res.json(response);
     } catch (error) {
         console.error('Error getting stats:', error);

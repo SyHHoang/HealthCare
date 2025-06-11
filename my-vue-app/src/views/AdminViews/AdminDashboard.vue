@@ -56,6 +56,16 @@
         </div>
       </div>
 
+      <!-- Biểu đồ doanh thu 30 ngày gần nhất -->
+      <div class="card" data-aos="fade-up" style="margin-bottom: 30px;">
+        <div class="card-header">
+          <h5>Doanh thu 30 ngày gần nhất</h5>
+        </div>
+        <div class="card-body chart-container">
+          <canvas id="revenueChart" ref="revenueChart"></canvas>
+        </div>
+      </div>
+
       <div class="row dashboard-analytics">
         <!-- Biểu đồ thống kê lượt xem theo thời gian -->
         <div class="col-lg-8" data-aos="fade-up">
@@ -171,6 +181,8 @@ const topArticles = ref([])
 const selectedArticle = ref('')
 const viewsChart = ref(null)
 const categoryChart = ref(null)
+const revenueChart = ref(null)
+const revenueStats = ref([])
 
 const categories = [
   { value: 'health', name: 'Sức khỏe', color: '#4CAF50' },
@@ -235,6 +247,16 @@ const fetchFeedbackCount = async () => {
   } catch (error) {
     console.error('Lỗi khi lấy số lượng phản hồi:', error)
     feedbackCount.value = 0
+  }
+}
+
+const fetchRevenueStats = async () => {
+  try {
+    const response = await dashboardService.getRevenueStats()
+    revenueStats.value = response.data
+    renderRevenueChart()
+  } catch (error) {
+    console.error('Lỗi khi lấy thống kê doanh thu:', error)
   }
 }
 
@@ -411,6 +433,47 @@ const renderArticleViewsChart = (articleStats) => {
   })
 }
 
+const renderRevenueChart = () => {
+  if (revenueChart.value) {
+    revenueChart.value.destroy()
+  }
+  const ctx = document.getElementById('revenueChart').getContext('2d')
+  const labels = revenueStats.value.map(item =>
+    new Date(item.date).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' })
+  )
+  const data = revenueStats.value.map(item => item.revenue)
+
+  revenueChart.value = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data,
+        fill: true,
+        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+        borderColor: '#FFC107',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => value.toLocaleString('vi-VN')
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  })
+}
+
 const viewArticleStats = (articleId) => {
   selectedArticle.value = articleId
   fetchArticleStats()
@@ -439,6 +502,7 @@ onMounted(() => {
   fetchStats()
   fetchUserCount()
   fetchFeedbackCount()
+  fetchRevenueStats()
 })
 </script>
 

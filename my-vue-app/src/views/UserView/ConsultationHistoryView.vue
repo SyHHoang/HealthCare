@@ -142,16 +142,16 @@
                       <div class="row align-items-center">
                         <div class="col-md-3">
                           <img 
-                            :src="consultation.doctorId.avatar || '/images/default-doctor.jpg'" 
+                            :src="consultation.doctorId?.avatar || '/images/default-doctor.jpg'" 
                             class="doctor-avatar rounded-circle"
-                            :alt="consultation.doctorId.fullName"
+                            :alt="consultation.doctorId?.fullName || 'Bác sĩ'"
                           >
                         </div>
                         <div class="col-md-9">
-                          <h5 class="card-title">{{ consultation.doctorId.fullName }}</h5>
+                          <h5 class="card-title">{{ consultation.doctorId?.fullName || 'Bác sĩ' }}</h5>
                           <p class="card-text text-muted">
                             <i class="bi bi-stethoscope me-2"></i>
-                            {{ consultation.doctorId.specialty }}
+                            {{ consultation.doctorId?.specialty || 'Chuyên khoa' }}
                           </p>
                           <p class="card-text">
                             <i class="bi bi-calendar-event me-2"></i>

@@ -15,8 +15,8 @@
           <i class="bi bi-people-fill"></i>
         </div>
         <div class="stat-info">
-          <h3>Tổng số người dùng</h3>
-          <p class="stat-number">{{ formatNumber(stats.totalUsers) }}</p>
+          <h3>Tổng số bệnh nhân</h3>
+          <p class="stat-number">{{ formatNumber(stats.totalUsers || 0) }}</p>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
         </div>
         <div class="stat-info">
           <h3>Tổng số bài viết</h3>
-          <p class="stat-number">{{ formatNumber(stats.totalPosts) }}</p>
+          <p class="stat-number">{{ formatNumber(stats.totalPosts || 0) }}</p>
         </div>
       </div>
 
@@ -36,7 +36,7 @@
         </div>
         <div class="stat-info">
           <h3>Tổng doanh thu</h3>
-          <p class="stat-number">50.000.000 (VNĐ)</p>
+          <p class="stat-number">{{ formatCurrency(stats.totalRevenue || 0) }}</p>
         </div>
       </div>
 
@@ -46,7 +46,7 @@
         </div>
         <div class="stat-info">
           <h3>Doanh thu thực tế</h3>
-          <p class="stat-number">25.000.000 (VNĐ)</p>
+          <p class="stat-number">{{ formatCurrency(stats.actualRevenue || 0) }}</p>
         </div>
       </div>
 
@@ -55,8 +55,11 @@
           <i class="bi bi-person-badge"></i>
         </div>
         <div class="stat-info">
-          <h3>Bác sĩ đang hoạt động</h3>
-          <p class="stat-number">45</p>
+          <h3>Bác sĩ đã xác thực</h3>
+          <p class="stat-number">{{ formatNumber(stats.verifiedDoctors || 0) }}</p>
+          <p class="stat-subtitle">
+            {{ calculatePercentage(stats.verifiedDoctors, stats.totalDoctors) }}% tổng số
+          </p>
         </div>
       </div>
 
@@ -65,8 +68,11 @@
           <i class="bi bi-person-badge"></i>
         </div>
         <div class="stat-info">
-          <h3>Bác sĩ chưa kích hoạt</h3>
-          <p class="stat-number">1</p>
+          <h3>Bác sĩ chưa xác thực</h3>
+          <p class="stat-number">{{ formatNumber(stats.unverifiedDoctors || 0) }}</p>
+          <p class="stat-subtitle">
+            {{ calculatePercentage(stats.unverifiedDoctors, stats.totalDoctors) }}% tổng số
+          </p>
         </div>
       </div>
 
@@ -76,7 +82,7 @@
         </div>
         <div class="stat-info">
           <h3>Tổng số phản hồi</h3>
-          <p class="stat-number">{{ formatNumber(stats.totalFeedbacks) }}</p>
+          <p class="stat-number">{{ formatNumber(stats.totalFeedbacks || 0) }}</p>
         </div>
       </div>
 
@@ -86,14 +92,25 @@
         </div>
         <div class="stat-info">
           <h3>Tổng lượt tư vấn</h3>
-          <p class="stat-number">30</p>
+          <p class="stat-number">{{ formatNumber(stats.totalConsultations || 0) }}</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Biểu đồ doanh thu 30 ngày gần nhất -->
+    <div class="card" style="margin-bottom: 30px;">
+      <div class="card-header">
+        <h5>Doanh thu 30 ngày gần nhất</h5>
+      </div>
+      <div class="card-body" style="height: 320px;">
+        <canvas id="revenueChart" ref="revenueChart"></canvas>
       </div>
     </div>
   </div>
 </template>
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import Chart from 'chart.js/auto'
 import { dashboardService } from '@/services/dashboardService'
 
 // Định dạng số
@@ -123,11 +140,12 @@ const currentDate = computed(() => {
 const stats = ref({
   totalUsers: 0,
   totalPosts: 0,
+  totalFeedbacks: 0,
   totalRevenue: 0,
   actualRevenue: 0,
-  activeDoctors: 0,
-  inactiveDoctors: 0,
-  totalFeedbacks: 0,
+  verifiedDoctors: 0,
+  unverifiedDoctors: 0,
+  totalDoctors: 0,
   totalConsultations: 0
 })
 
@@ -141,18 +159,111 @@ const inactiveDoctorsChange = ref(-2)
 const feedbackChange = ref(15)
 const consultationChange = ref(10)
 
-// Hàm lấy dữ liệu thống kê
+const revenueChart = ref(null)
+const revenueStats = ref([])
+
 const fetchStats = async () => {
   try {
-    const data = await dashboardService.getStats()
-    stats.value = data
+    const [data, totalPosts, totalFeedbacks, totalRevenue, totalConsultations] = await Promise.all([
+      dashboardService.getStats(),
+      dashboardService.getTotalPosts(),
+      dashboardService.getTotalFeedbacks(),
+      dashboardService.getTotalRevenue(),
+      dashboardService.getTotalConsultations()
+    ])
+    if (data) {
+      stats.value = {
+        totalUsers: data.totalUsers || 0,
+        totalPosts: totalPosts || 0,
+        totalFeedbacks: totalFeedbacks || 0,
+        totalRevenue: totalRevenue || 0,
+        actualRevenue: Math.round((totalRevenue || 0) * 0.25),
+        totalConsultations: totalConsultations || 0,
+        verifiedDoctors: data.verifiedDoctors || 0,
+        unverifiedDoctors: data.unverifiedDoctors || 0,
+        totalDoctors: data.totalDoctors || 0
+      }
+    }
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu thống kê:', error)
   }
 }
 
+const fetchRevenueStats = async () => {
+  try {
+    const response = await dashboardService.getRevenueStats()
+    if (Array.isArray(response)) {
+      revenueStats.value = response
+      renderRevenueChart()
+    } else {
+      console.error('Dữ liệu không đúng định dạng:', response)
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy thống kê doanh thu:', error)
+    revenueStats.value = []
+  }
+}
+
+const renderRevenueChart = () => {
+  const ctx = document.getElementById('revenueChart')
+  if (!ctx) return
+
+  // Destroy chart cũ nếu tồn tại
+  if (revenueChart.value instanceof Chart) {
+    revenueChart.value.destroy()
+  }
+
+  // Kiểm tra dữ liệu trước khi render
+  if (!Array.isArray(revenueStats.value) || revenueStats.value.length === 0) {
+    console.log('Không có dữ liệu để hiển thị biểu đồ')
+    return
+  }
+
+  const labels = revenueStats.value.map(item =>
+    new Date(item.date).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' })
+  )
+  const data = revenueStats.value.map(item => item.revenue)
+
+  revenueChart.value = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data,
+        fill: true,
+        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+        borderColor: '#FFC107',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => value.toLocaleString('vi-VN')
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  })
+}
+
+// Hàm tính phần trăm
+const calculatePercentage = (value, total) => {
+  if (!total) return 0;
+  return Math.round((value / total) * 100);
+};
+
 onMounted(() => {
   fetchStats()
+  fetchRevenueStats()
 })
 </script>
 
@@ -283,6 +394,13 @@ onMounted(() => {
 
 .consultations-card {
   background: linear-gradient(135deg, #3F51B5 0%, #303F9F 100%);
+}
+
+.stat-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 4px 0 0 0;
+  font-weight: 500;
 }
 
 @media (max-width: 1200px) {

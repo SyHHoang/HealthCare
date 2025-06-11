@@ -29,20 +29,16 @@
              :class="{ 'message-user': message.senderModel === 'User' }">
           <div v-if="message.content" class="message-content">
             <p>{{ message.content }}</p>
-            <span v-if="message.senderModel === 'User'" class="read-status">
-              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
-              <i v-else class="bi bi-check2 text-muted"></i>
-            </span>
           </div>
           <div v-if="message.image" class="message-image-wrapper">
             <img :src="message.image.url" alt="Hình ảnh" class="message-image" @click="openImagePreview(message.image.url)" />
-            <span v-if="message.senderModel === 'User'" class="read-status">
-              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
-              <i v-else class="bi bi-check2 text-muted"></i>
-            </span>
           </div>
           <div class="message-time">
             {{ new Date(message.createdAt).toLocaleTimeString() }}
+            <span v-if="message.senderModel === 'User' && isLatestMessage(message)" class="read-status">
+              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
+              <i v-else class="bi bi-check2 text-muted"></i>
+            </span>
           </div>
         </div>
       </div>
@@ -529,7 +525,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   background: #fff;
-  max-width: calc(100% - 280px);
+  max-width: 100%;
 }
 
 .chat-header {
@@ -542,7 +538,7 @@ onBeforeUnmount(() => {
 
 .chat-messages {
   flex: 1;
-  padding: 12px;
+  padding: 32px 0 16px 24px;
   overflow-y: auto;
   background: #f8f9fa;
   scroll-behavior: smooth;
@@ -553,20 +549,19 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: flex-start;
   margin-bottom: 8px;
-  max-width: 85%; /* Tăng từ 40% lên 70% để tin nhắn dài ra */
+  max-width: 60%;
   word-break: break-word;
 }
 
 .message-user {
   align-self: flex-end;
-   display: flex;
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   margin-bottom: 8px;
-  max-width: 85%; /* Tăng từ 40% lên 70% để tin nhắn dài ra */
+  max-width: 95%;
   word-break: break-word;
-  margin-left: 750px; 
-   
+  margin-right: 0;
 }
 
 .message-content {

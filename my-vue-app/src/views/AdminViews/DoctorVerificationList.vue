@@ -69,6 +69,10 @@
           </div>
         </div>
       </div>
+
+      <div v-if="requests.length === 0" class="text-center text-muted py-5">
+        Không có yêu cầu xác thực nào.
+      </div>
     </div>
 
     <!-- Modal chi tiết yêu cầu -->
@@ -326,6 +330,8 @@ const fetchRequests = async () => {
   }
 };
 
+onMounted(fetchRequests);
+
 // Mở modal chi tiết
 const openDetailModal = async (request) => {
   selectedRequest.value = request;
@@ -405,23 +411,23 @@ const handleRequest = async (requestId, status) => {
       status === 'rejected' ? rejectionReason.value : ''
     );
 
-    if (response.message==='Yêu cầu xác thực đã được từ chối') {
+    if (
+      response.message === 'Yêu cầu xác thực đã được từ chối' ||
+      response.message === 'Yêu cầu xác thực đã được duyệt'
+    ) {
       toast.add({
         severity: 'success',
         summary: 'Thành công',
-        detail: 'Đã từ chối yêu cầu thành công!',
+        detail: response.message,
         life: 3000
       });
-
       // Cập nhật lại danh sách
       await fetchRequests();
-      
-      // Đóng modal và reset form
+      // Đóng modal và reset form nếu từ chối
       if (status === 'rejected') {
         closeModal();
         rejectionReason.value = '';
       }
-
       // Nếu đang xem chi tiết, cập nhật lại thông tin
       if (selectedRequest.value && selectedRequest.value._id === requestId) {
         const updatedRequest = requests.value.find(r => r._id === requestId);
@@ -460,10 +466,6 @@ const formatDate = (dateString) => {
     minute: '2-digit'
   });
 };
-
-onMounted(() => {
-  fetchRequests();
-});
 </script>
 
 <style scoped>

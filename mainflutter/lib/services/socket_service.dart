@@ -46,7 +46,7 @@ class SocketService {
       debugPrint('  - Role: $role');
       debugPrint('  - URL: http://192.168.2.101:5000');
 
-      _socket = IO.io('http://192.168.22.80:5000', <String, dynamic>{
+      _socket = IO.io('http://192.168.22.133:5000', <String, dynamic>{
         'transports': ['websocket', 'polling'],
         'autoConnect': true,
         'auth': {'token': token, 'role': role},

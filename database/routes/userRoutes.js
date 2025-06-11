@@ -16,6 +16,78 @@ router.post("/admin/create", authenticateToken, isAdmin, createUser);
 router.put("/admin/:id", authenticateToken, isAdmin, updateUser);
 router.delete("/admin/:id", authenticateToken, isAdmin, deleteUser);
 router.get("/imageId", authenticateToken, getImageId);
+
+// Thêm route lấy tổng số bệnh nhân
+router.get("/stats/total", authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const inactiveUsers = await User.countDocuments({ isActive: false });
+
+    // Thống kê theo thời gian đăng ký
+    const registrationStats = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': -1, '_id.month': -1 }
+      }
+    ]);
+
+    // Thống kê theo độ tuổi
+    const ageStats = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            $switch: {
+              branches: [
+                { case: { $lt: ['$age', 18] }, then: 'Dưới 18' },
+                { case: { $lt: ['$age', 30] }, then: '18-29' },
+                { case: { $lt: ['$age', 40] }, then: '30-39' },
+                { case: { $lt: ['$age', 50] }, then: '40-49' },
+                { case: { $lt: ['$age', 60] }, then: '50-59' }
+              ],
+              default: 'Trên 60'
+            }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Thống kê theo giới tính
+    const genderStats = await User.aggregate([
+      {
+        $group: {
+          _id: '$gender',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    res.json({
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      registrationStats,
+      ageStats,
+      genderStats
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy thống kê bệnh nhân:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 // Doctor routes
 router.get("/doctor/user/:id", authenticateDoctor, doctorGetUserProfile);
 

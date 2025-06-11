@@ -9,7 +9,6 @@
         <img :src="chat.userId?.avatar" class="avatar" />
         <div class="chat-info">
           <h3>{{ chat.userId?.fullname || 'Bệnh nhân' }}</h3>
-          <p class="last-message">{{ chat.lastMessage?.content || 'Chưa có tin nhắn' }}</p>
           <span class="online-status" :class="{ online: isUserOnline(chat.userId?._id) }">
             {{ isUserOnline(chat.userId?._id) ? 'Online' : 'Offline' }}
           </span>
@@ -30,20 +29,16 @@
              :class="{ 'message-doctor': message.senderModel === 'Doctor' || message.sender.model === 'Doctor' }">
           <div v-if="message.content" class="message-content">
             <p>{{ message.content }}</p>
-            <span v-if="message.senderModel === 'Doctor' || message.sender.model === 'Doctor'" class="read-status">
-              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
-              <i v-else class="bi bi-check2 text-muted"></i>
-            </span>
           </div>
           <div v-if="message.image" class="message-image-wrapper">
             <img :src="message.image.url" alt="Hình ảnh" class="message-image" @click="openImagePreview(message.image.url)" />
-            <span v-if="message.senderModel === 'Doctor' || message.sender.model === 'Doctor'" class="read-status">
-              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
-              <i v-else class="bi bi-check2 text-muted"></i>
-            </span>
           </div>
           <div class="message-time">
             {{ new Date(message.createdAt).toLocaleTimeString() }}
+            <span v-if="(message.senderModel === 'Doctor' || message.sender.model === 'Doctor') && isLatestMessage(message)" class="read-status">
+              <i v-if="message.isRead" class="bi bi-check2-all text-primary"></i>
+              <i v-else class="bi bi-check2 text-muted"></i>
+            </span>
           </div>
         </div>
       </div>
@@ -468,17 +463,35 @@ onBeforeUnmount(() => {
 <style scoped>
 .chat-container {
   display: flex;
-  height: calc(100vh - 100px);
-  margin: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  height: calc(100vh - 110px);
+  margin: 10px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 1200px;
 }
 
 .chat-sidebar {
-  width: 300px;
-  border-right: 1px solid #ddd;
-  padding: 20px;
+  width: 280px;
+  background: #f8f9fa;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-sidebar h2 {
+  padding: 16px;
+  margin: 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.chat-list {
+  flex: 1;
   overflow-y: auto;
+  padding: 8px;
 }
 
 .chat-item {
@@ -486,38 +499,49 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 10px;
   cursor: pointer;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+  background: #fff;
+  border: 1px solid #e9ecef;
 }
 
 .chat-item:hover {
-  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .chat-item.active {
-  background-color: #e3f2fd;
+  background: #e3f2fd;
+  border-color: #90caf9;
 }
 
 .avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .chat-info {
   flex: 1;
+  min-width: 0;
 }
 
 .chat-info h3 {
-  margin: 0;
-  font-size: 16px;
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .last-message {
   margin: 0;
-  color: #666;
-  font-size: 14px;
+  color: #6c757d;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -527,12 +551,15 @@ onBeforeUnmount(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: #fff;
+  max-width: calc(100% - 280px);
 }
 
 .chat-messages {
   flex: 1;
-  padding: 20px;
+  padding: 32px 24px 16px 24px;
   overflow-y: auto;
+  background: #f8f9fa;
   scroll-behavior: smooth;
 }
 
@@ -540,187 +567,146 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 10px;
-  max-width: 70%;
+  margin-bottom: 8px;
+  max-width: 60%;
+  word-break: break-word;
 }
 
 .message-doctor {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
   align-items: flex-end;
-  margin-left: auto;
+  margin-bottom: 8px;
+  max-width: 95%;
+  word-break: break-word;
+  margin-right: 0;
 }
 
 .message-content {
-  background-color: #f0f0f0;
   padding: 10px 15px;
-  border-radius: 15px;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  background: #e9ecef;
+  color: #2c3e50;
+  word-break: break-word;
 }
 
 .message-doctor .message-content {
-  background-color: #28a745;
-  color: white;
+  background: #007bff;
+  color: #fff;
 }
 
 .message-time {
-  font-size: 12px;
-  color: #666;
+  font-size: 10px;
+  color: #6c757d;
+  margin-top: 2px;
+  padding: 0 4px;
 }
 
 .chat-input {
-  padding: 20px;
-  border-top: 1px solid #ddd;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #e9ecef;
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  align-items: center;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border-color: #90caf9;
+  box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.2);
 }
 
 .chat-input button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
+  padding: 8px 16px;
+  background: #007bff;
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .chat-input button:hover {
-  background-color: #218838;
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.chat-input button:active {
+  transform: translateY(0);
+}
+
+.online-status {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.online-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6c757d;
+}
+
+.online-status.online::before {
+  background: #28a745;
+}
+
+.read-status {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.load-more {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.load-more-btn {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .no-chat-selected {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #666;
-}
-
-.online-status {
-  font-size: 12px;
-  color: #666;
-}
-
-.online-status.online {
-  color: #28a745;
-}
-
-.online-status::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 4px;
-  background-color: #666;
-}
-
-.online-status.online::before {
-  background-color: #28a745;
-}
-
-.read-status {
-  font-size: 14px;
-  margin-left: 5px;
-}
-
-.read-status i {
-  font-size: 14px;
-}
-
-.text-primary {
-  color: #007bff;
-}
-
-.text-muted {
   color: #6c757d;
-}
-
-.load-more {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-.load-more-btn {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #6c757d;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.load-more-btn:hover:not(:disabled) {
-  background-color: #e9ecef;
-  color: #495057;
-}
-
-.load-more-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.load-more-btn i {
-  font-size: 12px;
-}
-
-.image-preview-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  cursor: pointer;
-}
-
-.image-preview-content {
-  position: relative;
-  max-width: 90%;
-  max-height: 90vh;
-  cursor: default;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.close-preview-btn {
-  position: absolute;
-  top: -40px;
-  right: 0;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 8px;
-  transition: transform 0.2s;
-}
-
-.close-preview-btn:hover {
-  transform: scale(1.1);
+  background: #f8f9fa;
+  gap: 16px;
 }
 
 .upload-btn {
@@ -769,5 +755,78 @@ onBeforeUnmount(() => {
 
 .message-doctor .message-image {
   border-radius: 12px 12px 0 12px;
+}
+
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.image-preview-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+  cursor: default;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.close-preview-btn {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.2s;
+}
+
+.close-preview-btn:hover {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    margin: 0;
+    height: calc(100vh - 70px);
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .chat-sidebar {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .chat-sidebar.active {
+    transform: translateX(0);
+  }
+
+  .chat-main {
+    max-width: 100%;
+  }
 }
 </style> 

@@ -188,8 +188,30 @@ export const bookConsultation = async (req, res) => {
   try {
     const { doctorId, consultationDate } = req.body;
     const userId = req.user.userId;
-    console.log("doctorId",doctorId);
-    console.log("consultationDate",consultationDate);
+    const newDate = new Date(consultationDate);
+
+    // Kiểm tra trùng lịch trong vòng 30 phút cùng ngày
+    const startOfDay = new Date(newDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(newDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const overlappingConsultation = await Consultation.findOne({
+      userId,
+      consultationDate: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    }).where('consultationDate').gte(new Date(newDate.getTime() - 30 * 60 * 1000))
+      .lte(new Date(newDate.getTime() + 30 * 60 * 1000));
+
+    if (overlappingConsultation) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bạn đã có cuộc hẹn khác trong vòng 30 phút. Vui lòng chọn thời gian khác.'
+      });
+    }
+
     // Kiểm tra số lần tư vấn còn lại
     const consultationList = await ConsultationList.findOne({ userId, doctorId });
     if (!consultationList) {
@@ -207,10 +229,9 @@ export const bookConsultation = async (req, res) => {
     }
 
     // Kiểm tra lịch trùng
-    const date = new Date(consultationDate);
     const existingConsultation = await Consultation.findOne({
       doctorId,
-      consultationDate: date
+      consultationDate: new Date(consultationDate)
     });
 
     if (existingConsultation) {

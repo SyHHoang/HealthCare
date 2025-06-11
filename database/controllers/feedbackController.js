@@ -144,3 +144,12 @@ export const deleteFeedback = async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi xóa đánh giá', error: error.message });
   }
 };
+
+export const getFeedbackSummary = async (req, res) => {
+  try {
+    const totalFeedbacks = await Feedback.countDocuments();
+    res.json({ totalFeedbacks });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server!', error: error.message });
+  }
+};

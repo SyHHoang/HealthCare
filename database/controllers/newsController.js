@@ -330,3 +330,13 @@ export const getLatestNews = async (req, res) => {
     });
   }
 };
+
+// Lấy tổng số bài viết
+export const getNewsSummary = async (req, res) => {
+  try {
+    const totalPosts = await News.countDocuments();
+    res.json({ totalPosts });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server!", error: error.message });
+  }
+};

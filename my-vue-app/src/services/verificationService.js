@@ -23,21 +23,8 @@ const verificationService = {
 
   // Lấy danh sách yêu cầu xác thực (cho admin)
   async getVerificationRequests() {
-    try {
-      const response = await axiosInstance.get('/api/verification/requests');
-      if (response.data && Array.isArray(response.data)) {
-        return response.data.map(request => ({
-          ...request,
-          doctorId: request.doctor, // Đảm bảo có trường doctorId
-          submittedAt: request.submittedAt || new Date().toISOString(),
-          reviewedAt: request.reviewedAt || null
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching verification requests:', error);
-      throw error;
-    }
+    const response = await axiosInstance.get('/api/verification/requests');
+    return response.data;
   },
 
   // Xử lý yêu cầu xác thực (cho admin)

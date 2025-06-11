@@ -57,6 +57,59 @@ router.post('/', upload.single('avatar'), createDoctor);
 router.put('/:id', upload.single('avatar'), updateDoctor);
 router.delete('/:id', deleteDoctor);
 
+// Thêm route lấy thống kê bác sĩ
+router.get('/stats/total', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const totalDoctors = await Doctor.countDocuments();
+    const activeDoctors = await Doctor.countDocuments({ isActive: true });
+    const inactiveDoctors = await Doctor.countDocuments({ isActive: false });
+    const verifiedDoctors = await Doctor.countDocuments({ isVerified: true });
+    const unverifiedDoctors = await Doctor.countDocuments({ isVerified: false });
+    
+    // Thống kê theo chuyên khoa
+    const specialtyStats = await Doctor.aggregate([
+      {
+        $group: {
+          _id: '$specialty',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Thống kê theo thời gian đăng ký
+    const registrationStats = await Doctor.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': -1, '_id.month': -1 }
+      }
+    ]);
+    
+    res.json({
+      totalDoctors,
+      activeDoctors,
+      inactiveDoctors,
+      verifiedDoctors,
+      unverifiedDoctors,
+      specialtyStats,
+      registrationStats
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy thống kê bác sĩ:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 // Route công khai - không cần xác thực
 router.get('/public', getPublicDoctors);
 
