@@ -63,14 +63,7 @@
               <label>Họ tên</label>
               <input type="text" v-model="patient.fullname" disabled>
             </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" v-model="patient.email" disabled>
-            </div>
-            <div class="form-group">
-              <label>Số điện thoại</label>
-              <input type="tel" v-model="patient.phone" disabled>
-            </div>
+
             <div class="form-group">
               <label>Giới tính</label>
               <input type="text" :value="patient.gender === 'male' ? 'Nam' : 'Nữ'" disabled>
@@ -78,10 +71,6 @@
             <div class="form-group">
               <label>Tuổi</label>
               <input type="number" v-model="patient.age" disabled>
-            </div>
-            <div class="form-group">
-              <label>Địa chỉ</label>
-              <input type="text" v-model="patient.address" disabled>
             </div>
           </div>
         </div>
@@ -485,10 +474,7 @@ const healthDataList = ref([])
 const menus = [
   { id: 'user-info', name: 'Thông tin người dùng', icon: 'bi bi-person' },
   { id: 'symptoms', name: 'Triệu chứng', icon: 'bi bi-thermometer-half' },
-
   { id: 'allergies', name: 'Dị ứng', icon: 'bi bi-exclamation-triangle' },
-  { id: 'vaccinations', name: 'Tiêm chủng', icon: 'bi bi-file-earmark-medical' },
-  { id: 'treatments', name: 'Điều trị', icon: 'bi bi-bar-chart-line' },
   { id: 'lifestyle', name: 'Lối sống', icon: 'bi bi-heart-pulse' },
   { id: 'health-data', name: 'Dữ liệu sức khỏe', icon: 'bi bi-bar-chart-line' }
 ]

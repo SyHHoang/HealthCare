@@ -18,7 +18,7 @@
             </div>
             <div class="stat-info">
               <h3>Lịch hẹn hôm nay</h3>
-              <p class="stat-number">0</p>
+              <p class="stat-number">{{ todayAppointments }}</p>
 
             </div>
           </div>
@@ -29,7 +29,7 @@
             </div>
             <div class="stat-info">
               <h3>Tổng số bệnh nhân</h3>
-              <p class="stat-number">10</p>
+              <p class="stat-number">{{ totalPatients }}</p>
 
             </div>
           </div>
@@ -56,7 +56,7 @@
             </div>
             <div class="stat-info">
               <h3>Tổng doanh thu</h3>
-              <p class="stat-number">2.500.000 VNĐ</p>
+              <p class="stat-number">{{ formatCurrency(doctorActualRevenue.valueOf) }}</p>
         
             </div>
           </div>
@@ -205,9 +205,9 @@ import axios from 'axios';
 const router = useRouter();
 
 // Data
-const todayAppointments = ref(8);
+const todayAppointments = ref(0);
 const appointmentChange = ref(2);
-const totalPatients = ref(156);
+const totalPatients = ref(0);
 const patientChange = ref(5);
 const totalRevenue = ref(15000000);
 const revenueChange = ref(15);
@@ -367,7 +367,13 @@ const fetchFeaturedNews = async () => {
 
 // Gọi API khi component được mount
 onMounted(() => {
+  fetchTodayAppointments();
+  fetchDoctorRevenue();
+  fetchTotalPatients();
   fetchFeaturedNews();
+  fetchGuideArticles();
+  fetchRatingStats();
+  fetchReviews();
 });
 
 const loadingGuides = ref(true);
@@ -387,10 +393,6 @@ const fetchGuideArticles = async () => {
     loadingGuides.value = false;
   }
 };
-
-onMounted(() => {
-  fetchGuideArticles();
-});
 
 const ratingCard = ref({
   averageRating: 0,
@@ -430,10 +432,50 @@ const fetchReviews = async () => {
   }
 };
 
-onMounted(() => {
-  fetchRatingStats();
-  fetchReviews();
-});
+const doctorRevenue = ref(0);
+const doctorActualRevenue = computed(() => Math.round(Number(doctorRevenue.value || 0) * 0.75));
+
+const fetchDoctorRevenue = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/transactions/doctor/summary', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    doctorRevenue.value = Number(response.data.totalRevenue) || 0;
+  } catch (error) {
+    doctorRevenue.value = 0;
+    console.error('Lỗi khi lấy tổng doanh thu bác sĩ:', error);
+  }
+};
+
+const fetchTodayAppointments = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/consultationList/doctor/today', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    todayAppointments.value = response.data.todayAppointments || 0;
+  } catch (error) {
+    todayAppointments.value = 0;
+    console.error('Lỗi khi lấy số lịch hẹn hôm nay:', error);
+  }
+};
+
+const fetchTotalPatients = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/consultationList/doctor/patients', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    totalPatients.value = response.data.totalPatients || 0;
+  } catch (error) {
+    totalPatients.value = 0;
+    console.error('Lỗi khi lấy tổng số bệnh nhân:', error);
+  }
+};
 </script>
 
 <style scoped>

@@ -288,39 +288,16 @@ router.get('/doctor-statspublicpublic/:doctorId', async (req, res) => {
   }
 });
 
-// Lấy danh sách đánh giá của bác sĩ đang đăng nhập
+// Lấy danh sách đánh giá của chính bác sĩ đang đăng nhập
 router.get('/doctor-reviews', authenticateDoctor, async (req, res) => {
   try {
     const doctorId = req.doctor.id;
-
-    // Lấy tất cả đánh giá của bác sĩ
     const reviews = await Review.find({ doctorId })
-      .populate('userId', 'fullname avatar')
+      .populate('userId', 'fullName avatar')
       .sort({ createdAt: -1 });
-
-    // Format lại dữ liệu trả về
-    const formattedReviews = reviews.map(review => ({
-      _id: review._id,
-      rating: review.rating,
-      content: review.content,
-      createdAt: review.createdAt,
-      user: {
-        fullname: review.userId.fullname,
-        avatar: review.userId.avatar
-      }
-    }));
-
-    res.json({
-      success: true,
-      data: formattedReviews
-    });
+    res.json({ success: true, data: reviews });
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách đánh giá:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lỗi server',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
   }
 });
 

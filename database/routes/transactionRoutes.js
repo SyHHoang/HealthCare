@@ -2,6 +2,7 @@ import express from 'express';
 import Transaction from '../models/Transaction.js';
 import { authenticateToken, isAdmin } from '../middlewares/authMiddleware.js';
 import moment from 'moment';
+import { authenticateDoctor } from '../middlewares/doctorAuthMiddleware.js';
 
 const router = express.Router();
 
@@ -227,6 +228,21 @@ router.patch('/:id/status', authenticateToken, isAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error updating transaction status:', error);
         res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái giao dịch' });
+    }
+});
+
+// Tổng doanh thu của bác sĩ hiện tại
+router.get('/doctor/summary', authenticateDoctor, async (req, res) => {
+    try {
+        const doctorId = req.doctor.id;
+        const totalRevenueAgg = await Transaction.aggregate([
+            { $match: { doctorId: doctorId, status: 'paid_to_doctor' } },
+            { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]);
+        const totalRevenue = totalRevenueAgg[0]?.total || 0;
+        res.json({ totalRevenue });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy tổng doanh thu bác sĩ', error: error.message });
     }
 });
 
