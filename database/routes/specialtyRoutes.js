@@ -64,8 +64,36 @@ router.post('/predict', async (req, res) => {
             description
         });
         
-        // Trả về kết quả từ API bên ngoài
-        res.json(response.data);
+        // Lấy danh sách chuyên khoa từ kết quả API
+        const specialties = response.data.specialties || [];
+        const confidences = response.data.confidences || {};
+        
+        // Tìm thông tin chi tiết của các chuyên khoa trong database
+        const specialtyDetails = await Specialty.find({
+            name: { $in: specialties }
+        });
+        
+        // Tạo map để dễ dàng truy cập thông tin chuyên khoa
+        const specialtyMap = {};
+        specialtyDetails.forEach(specialty => {
+            specialtyMap[specialty.name] = {
+                description: specialty.description,
+                icon: specialty.icon
+            };
+        });
+        
+        // Tạo danh sách mô tả cho các chuyên khoa
+        const descriptions = {};
+        specialties.forEach(specialty => {
+            descriptions[specialty] = specialtyMap[specialty]?.description || 'Chưa có mô tả chi tiết';
+        });
+        
+        // Trả về kết quả với thông tin mô tả
+        res.json({
+            specialties,
+            confidences,
+            descriptions
+        });
     } catch (error) {
         console.error('Lỗi khi gọi API bên ngoài:', error);
         res.status(500).json({

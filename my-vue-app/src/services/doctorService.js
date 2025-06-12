@@ -187,7 +187,7 @@ export const doctorService = {
   // Lấy trạng thái yêu cầu xác thực
   getVerificationStatus: async () => {
     try {
-      const response = await axiosInstance.get('/api/verification/doctor/request');
+      const response = await axiosInstance.get('/api/verification/doctor/verification-details');
       return response.data;
     } catch (error) {
       throw error;

@@ -35,7 +35,10 @@ export const requestVerification = async (req, res) => {
       education: req.body.education,
       graduationYear: req.body.graduationYear,
       licenseNumber: req.body.licenseNumber,
-      status: 'pending'
+      status: 'pending',
+      licenseImageUrl: req.body.licenseImageUrl,
+      idCardFrontUrl: req.body.idCardFrontUrl,
+      idCardBackUrl: req.body.idCardBackUrl
     });
 
     await verificationRequest.save();

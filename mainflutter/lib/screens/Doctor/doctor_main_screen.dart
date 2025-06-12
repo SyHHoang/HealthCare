@@ -9,7 +9,7 @@ import 'doctor_patients_screen.dart';
 import '../news_list_screen.dart';
 import 'doctor_chat_option_screen.dart';
 import 'doctor_profile_screen.dart';
-import '';
+import 'doctor_settings_screen.dart';
 class DoctorMainScreen extends ConsumerStatefulWidget {
   final Doctor doctor;
 
@@ -105,7 +105,7 @@ class _DoctorMainScreenState extends ConsumerState<DoctorMainScreen> {
       case 3:
         return DoctorChatOptionScreen(doctor: widget.doctor);
       case 4:
-        return DoctorProfileScreen(doctor: widget.doctor);
+        return DoctorSettingsScreen(doctor: widget.doctor);
       default:
         return DoctorHomeScreen(doctor: widget.doctor);
     }

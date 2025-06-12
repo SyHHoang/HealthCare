@@ -100,6 +100,58 @@
               <input type="text" class="form-control" v-model="formData.licenseNumber" />
             </div>
           </div>
+
+          <!-- Tài liệu xác thực -->
+          <div class="mb-4">
+            <h5 class="card-title">Tài liệu xác thực</h5>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Giấy phép hành nghề <span class="text-danger">*</span></label>
+                  <input 
+                    type="file" 
+                    class="form-control" 
+                    @change="handleLicenseUpload" 
+                    accept="image/*"
+                    required
+                  />
+                  <div v-if="formData.licenseImageUrl" class="preview-image mt-2">
+                    <img :src="formData.licenseImageUrl" alt="Giấy phép hành nghề" class="img-fluid" />
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">CMND/CCCD mặt trước <span class="text-danger">*</span></label>
+                  <input 
+                    type="file" 
+                    class="form-control" 
+                    @change="handleIdCardFrontUpload" 
+                    accept="image/*"
+                    required
+                  />
+                  <div v-if="formData.idCardFrontUrl" class="preview-image mt-2">
+                    <img :src="formData.idCardFrontUrl" alt="CMND/CCCD mặt trước" class="img-fluid" />
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">CMND/CCCD mặt sau <span class="text-danger">*</span></label>
+                  <input 
+                    type="file" 
+                    class="form-control" 
+                    @change="handleIdCardBackUpload" 
+                    accept="image/*"
+                    required
+                  />
+                  <div v-if="formData.idCardBackUrl" class="preview-image mt-2">
+                    <img :src="formData.idCardBackUrl" alt="CMND/CCCD mặt sau" class="img-fluid" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
 
@@ -139,7 +191,10 @@ const formData = ref({
   education: '',
   graduationYear: '',
   licenseNumber: '',
-  status: '' // Thêm trường status
+  status: '',
+  licenseImageUrl: '',
+  idCardFrontUrl: '',
+  idCardBackUrl: ''
 });
 
 // Lấy thông tin bác sĩ
@@ -438,6 +493,17 @@ const validateDoctorInfo = () => {
     return false;
   }
 
+  // Kiểm tra ảnh xác thực
+  if (!formData.value.licenseImageUrl || !formData.value.idCardFrontUrl || !formData.value.idCardBackUrl) {
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Vui lòng tải lên đầy đủ các ảnh xác thực',
+      life: 3000
+    });
+    return false;
+  }
+
   return true;
 };
 
@@ -451,8 +517,26 @@ const handleVerification = async () => {
       return;
     }
 
+    // Chuẩn bị dữ liệu gửi đi
+    const verificationData = {
+      fullName: formData.value.fullName,
+      email: formData.value.email,
+      phone: formData.value.phone,
+      avatar: formData.value.avatar,
+      specialty: formData.value.specialty,
+      otherSpecialties: formData.value.otherSpecialties,
+      experience: formData.value.experience,
+      currentWorkplace: formData.value.currentWorkplace,
+      education: formData.value.education,
+      graduationYear: formData.value.graduationYear,
+      licenseNumber: formData.value.licenseNumber,
+      licenseImageUrl: formData.value.licenseImageUrl,
+      idCardFrontUrl: formData.value.idCardFrontUrl,
+      idCardBackUrl: formData.value.idCardBackUrl
+    };
+    console.log(verificationData);
     // Gửi yêu cầu xác thực
-    const response = await doctorService.requestVerification(formData.value);
+    const response = await doctorService.requestVerification(verificationData);
     
     if (response.success) {
       toast.add({
@@ -480,6 +564,115 @@ const handleVerification = async () => {
       severity: 'error',
       summary: 'Lỗi',
       detail: error.response?.data?.message || 'Gửi yêu cầu xác thực thất bại',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Thêm các hàm xử lý upload ảnh xác thực
+const handleLicenseUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    loading.value = true;
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', file);
+    
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+      uploadFormData
+    );
+
+    if (response.data.success) {
+      formData.value.licenseImageUrl = response.data.data.url;
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Tải lên ảnh giấy phép hành nghề thành công!',
+        life: 3000
+      });
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải lên ảnh:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tải lên ảnh giấy phép hành nghề',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleIdCardFrontUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    loading.value = true;
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', file);
+    
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+      uploadFormData
+    );
+
+    if (response.data.success) {
+      formData.value.idCardFrontUrl = response.data.data.url;
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Tải lên ảnh CMND/CCCD mặt trước thành công!',
+        life: 3000
+      });
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải lên ảnh:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tải lên ảnh CMND/CCCD mặt trước',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleIdCardBackUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    loading.value = true;
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', file);
+    
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+      uploadFormData
+    );
+
+    if (response.data.success) {
+      formData.value.idCardBackUrl = response.data.data.url;
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Tải lên ảnh CMND/CCCD mặt sau thành công!',
+        life: 3000
+      });
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải lên ảnh:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể tải lên ảnh CMND/CCCD mặt sau',
       life: 3000
     });
   } finally {
@@ -551,5 +744,18 @@ onMounted(async () => {
   background-color: #f8d7da;
   border-color: #f5c6cb;
   color: #721c24;
+}
+
+.preview-image {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  background-color: #f8f9fa;
+}
+
+.preview-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
 }
 </style> 

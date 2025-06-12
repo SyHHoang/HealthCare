@@ -120,6 +120,39 @@
                 </div>
 
                 <div class="info-group">
+                  <h4>Tài liệu xác thực</h4>
+                  <div class="verification-images">
+                    <div class="image-item">
+                      <h5>Giấy phép hành nghề</h5>
+                      <img 
+                        :src="selectedRequest.licenseImageUrl" 
+                        alt="Giấy phép hành nghề"
+                        @click="openImageModal(selectedRequest.licenseImageUrl)"
+                        class="verification-image"
+                      />
+                    </div>
+                    <div class="image-item">
+                      <h5>CMND/CCCD mặt trước</h5>
+                      <img 
+                        :src="selectedRequest.idCardFrontUrl" 
+                        alt="CMND/CCCD mặt trước"
+                        @click="openImageModal(selectedRequest.idCardFrontUrl)"
+                        class="verification-image"
+                      />
+                    </div>
+                    <div class="image-item">
+                      <h5>CMND/CCCD mặt sau</h5>
+                      <img 
+                        :src="selectedRequest.idCardBackUrl" 
+                        alt="CMND/CCCD mặt sau"
+                        @click="openImageModal(selectedRequest.idCardBackUrl)"
+                        class="verification-image"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-group">
                   <h4>Thông tin chuyên môn</h4>
                   <div class="info-item">
                     <i class="fas fa-briefcase"></i>
@@ -293,6 +326,21 @@
         </div>
       </div>
     </div>
+
+    <!-- Thêm modal xem ảnh -->
+    <div v-if="showImageModal" class="modal image-modal" @click="closeImageModal">
+      <div class="modal-content image-modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Xem ảnh</h3>
+          <button @click="closeImageModal" class="close-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <img :src="selectedImage" alt="Ảnh xác thực" class="full-size-image" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -312,6 +360,8 @@ const showDetailModal = ref(false);
 const selectedRequest = ref(null);
 const currentDoctor = ref(null);
 const showDoctorInfo = ref(false);
+const showImageModal = ref(false);
+const selectedImage = ref('');
 
 // Lấy danh sách yêu cầu
 const fetchRequests = async () => {
@@ -465,6 +515,16 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+const openImageModal = (imageUrl) => {
+  selectedImage.value = imageUrl;
+  showImageModal.value = true;
+};
+
+const closeImageModal = () => {
+  showImageModal.value = false;
+  selectedImage.value = '';
 };
 </script>
 
@@ -1009,6 +1069,84 @@ const formatDate = (dateString) => {
   
   .modal-footer {
     padding: 10px 15px;
+  }
+}
+
+.verification-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.image-item {
+  text-align: center;
+}
+
+.image-item h5 {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.verification-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 1px solid #ddd;
+}
+
+.verification-image:hover {
+  transform: scale(1.05);
+}
+
+.image-modal {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.image-modal-content {
+  width: 90%;
+  max-width: 1200px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.image-modal .modal-header {
+  background: transparent;
+  border-bottom: none;
+}
+
+.image-modal .modal-header h3 {
+  color: white;
+}
+
+.image-modal .close-btn {
+  color: white;
+}
+
+.image-modal .modal-body {
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.full-size-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .verification-images {
+    grid-template-columns: 1fr;
+  }
+  
+  .verification-image {
+    height: 200px;
   }
 }
 </style> 

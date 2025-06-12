@@ -71,16 +71,19 @@ class _DoctorSearchScreenState extends ConsumerState<DoctorSearchScreen> {
             print('Phát hiện kết quả từ model AI');
             final List<dynamic> specialtiesList = result['specialties'] ?? [];
             final Map<String, dynamic> confidences = result['confidences'] ?? {};
+            final Map<String, dynamic> descriptions = result['descriptions'] ?? {};
             
             print('Danh sách chuyên khoa: $specialtiesList');
             print('Độ tin cậy: $confidences');
+            print('Mô tả: $descriptions');
             
             // Chuyển đổi thành danh sách Specialty
             specialties = specialtiesList.map((name) {
               final confidence = confidences[name]?.toDouble() ?? 0.0;
+              final description = descriptions[name]?.toString() ?? 'Chưa có mô tả chi tiết';
               return Specialty(
                 name: name.toString(),
-                description: 'Chuyên khoa được đề xuất dựa trên mô tả của bạn',
+                description: description,
                 isSuggested: true,
                 confidence: confidence,
               );

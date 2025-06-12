@@ -65,6 +65,18 @@ const verificationRequestSchema = new mongoose.Schema({
   },
   rejectionReason: {
     type: String
+  },
+  licenseImageUrl: {
+    type: String,
+    required: true
+  },
+  idCardFrontUrl: {
+    type: String,
+    required: true
+  },
+  idCardBackUrl: {
+    type: String,
+    required: true
   }
 });
 

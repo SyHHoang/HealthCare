@@ -120,6 +120,18 @@ const doctorSchema = new mongoose.Schema({
     ref: 'VerificationRequest',
     default: null
   },
+  licenseImageUrl: {
+    type: String,
+    default: ''
+  },
+  idCardFrontUrl: {
+    type: String,
+    default: ''
+  },
+  idCardBackUrl: {
+    type: String,
+    default: ''
+  },
 });
 // Phương thức kiểm tra mật khẩu
 const Doctor = mongoose.model('Doctor', doctorSchema);
