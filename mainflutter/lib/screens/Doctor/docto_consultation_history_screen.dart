@@ -74,7 +74,7 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
     try {
       final token = await TokenService.getToken();
       final response = await http.get(
-        Uri.parse('http://10.0.54.25:5000/api/consultationList/doctor/history'),
+        Uri.parse('http://192.168.2.101:5000/api/consultationList/doctor/history'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

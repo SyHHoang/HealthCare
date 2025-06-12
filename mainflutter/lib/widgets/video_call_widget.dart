@@ -445,34 +445,65 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
   }
 
   Widget _buildGridVideo() {
-    return GridView.count(
-      crossAxisCount: 2,
+    // Xác định video nào là của bệnh nhân và bác sĩ
+    final patientRenderer = widget.isDoctor ? _remoteRenderer : _localRenderer;
+    final doctorRenderer = widget.isDoctor ? _localRenderer : _remoteRenderer;
+    final patientLabel = widget.isDoctor ? 'Bệnh nhân' : 'Bạn';
+    final doctorLabel = widget.isDoctor ? 'Bác sĩ' : 'Bác sĩ';
+
+    return Stack(
       children: [
-        _buildVideoBox(
-          _localRenderer,
-          widget.isDoctor ? 'Bác sĩ' : 'Bạn',
-          'local',
+        // Màn hình bệnh nhân toàn màn hình
+        Positioned.fill(
+          child: _buildFullScreenVideo(
+            patientRenderer,
+            patientLabel,
+            widget.isDoctor ? 'remote' : 'local',
+          ),
         ),
-        _buildVideoBox(
-          _remoteRenderer,
-          widget.isDoctor ? 'Bệnh nhân' : 'Bác sĩ',
-          'remote',
+        // Màn hình bác sĩ nhỏ ở góc phải
+        Positioned(
+          top: 20,
+          right: 20,
+          child: Container(
+            width: 120,
+            height: 160,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: _buildSmallVideo(
+                doctorRenderer,
+                doctorLabel,
+                widget.isDoctor ? 'local' : 'remote',
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildExpandedVideo() {
-    return _buildVideoBox(
-      _expandedVideo == 'local' ? _localRenderer : _remoteRenderer,
-      _expandedVideo == 'local'
-          ? (widget.isDoctor ? 'Bác sĩ' : 'Bạn')
-          : (widget.isDoctor ? 'Bệnh nhân' : 'Bác sĩ'),
-      _expandedVideo!,
-    );
+    // Khi expand, hiển thị video được chọn toàn màn hình
+    final renderer = _expandedVideo == 'local' ? _localRenderer : _remoteRenderer;
+    final label = _expandedVideo == 'local'
+        ? (widget.isDoctor ? 'Bác sĩ' : 'Bạn')
+        : (widget.isDoctor ? 'Bệnh nhân' : 'Bác sĩ');
+
+    return _buildFullScreenVideo(renderer, label, _expandedVideo!);
   }
 
-  Widget _buildVideoBox(RTCVideoRenderer renderer, String label, String type) {
+  Widget _buildFullScreenVideo(RTCVideoRenderer renderer, String label, String type) {
     return GestureDetector(
       onTap: () => _toggleExpand(type),
       child: Stack(
@@ -482,7 +513,7 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
             objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
           ),
           Positioned(
-            bottom: 16,
+            bottom: 80, // Đặt cao hơn để không bị che bởi controls
             left: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -492,25 +523,68 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
               ),
               child: Text(
                 label,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: IconButton(
-              icon: Icon(
-                _expandedVideo == type ? Icons.fullscreen_exit : Icons.fullscreen,
-                color: Colors.white,
-              ),
-              onPressed: () => _toggleExpand(type),
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildSmallVideo(RTCVideoRenderer renderer, String label, String type) {
+    return GestureDetector(
+      onTap: () => _toggleExpand(type),
+      child: Stack(
+        children: [
+          RTCVideoView(
+            renderer,
+            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+          ),
+          Positioned(
+            bottom: 4,
+            left: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.fullscreen,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   Widget _buildControls() {
     return Container(
@@ -543,35 +617,5 @@ class _VideoCallWidgetState extends State<VideoCallWidget> {
     );
   }
 
-  Future<void> _checkConnection() async {
-    if (_peerConnection == null) return;
 
-    final iceState = _peerConnection!.iceConnectionState;
-    final connState = _peerConnection!.connectionState;
-
-    debugPrint('=== CHECKING CONNECTION ===');
-    debugPrint('ICE State: $iceState');
-    debugPrint('Connection State: $connState');
-
-    if (iceState == RTCIceConnectionState.RTCIceConnectionStateFailed ||
-        connState == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
-      debugPrint('❌ Connection failed, attempting to reconnect...');
-      await _reconnect();
-    }
-  }
-
-  Future<void> _reconnect() async {
-    try {
-      debugPrint('=== RECONNECTING ===');
-      // Đóng kết nối cũ
-      await _peerConnection?.close();
-      _peerConnection = null;
-
-      // Khởi tạo lại kết nối
-      await _initializeCall();
-    } catch (e) {
-      debugPrint('❌ Reconnection failed: $e');
-      _endCall();
-    }
-  }
 } 

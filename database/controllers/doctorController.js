@@ -735,18 +735,23 @@ export const addWorkingTime = async (req, res) => {
       });
     }
 
-    // Kiểm tra xung đột thời gian
+    // Kiểm tra xung đột thời gian (mỗi slot cách nhau ít nhất 35 phút)
     const existingSlots = doctor.schedule.get(day) || [];
     const hasConflict = existingSlots.some(slot => {
-      return (
-        (startTime >= slot.startTime && startTime < slot.endTime) 
-      );
+      const [existingHour, existingMinute] = slot.startTime.split(':').map(Number);
+      const [newHour, newMinute] = startTime.split(':').map(Number);
+
+      const existingTotalMinutes = existingHour * 60 + existingMinute;
+      const newTotalMinutes = newHour * 60 + newMinute;
+
+      // Kiểm tra khoảng cách ít nhất 35 phút
+      return Math.abs(newTotalMinutes - existingTotalMinutes) < 35;
     });
 
     if (hasConflict) {
       return res.status(400).json({
         success: false,
-        message: 'Thời gian này đã có lịch làm việc'
+        message: 'Thời gian này phải cách các thời gian khác ít nhất 35 phút'
       });
     }
 

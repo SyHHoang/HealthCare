@@ -37,11 +37,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     });
 
     try {
+      debugPrint('=== LOADING SCHEDULE ===');
+      debugPrint('Doctor ID: ${widget.doctor.id}');
       final schedule = await _doctorService.getSchedule(widget.doctor.id);
+      debugPrint('Schedule loaded: $schedule');
       setState(() {
         _workingTimes = schedule;
       });
     } catch (e) {
+      debugPrint('Error loading schedule: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi khi tải lịch làm việc: $e')),
@@ -80,6 +84,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     if (selectedDay == null) return;
 
     // Hiển thị dialog chọn thời gian
+    if (!mounted) return;
     selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -93,9 +98,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     try {
       final timeString = '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
-      
+
+      debugPrint('=== ADDING WORKING TIME ===');
+      debugPrint('Doctor ID: ${widget.doctor.id}');
+      debugPrint('Selected Day: $selectedDay');
+      debugPrint('Time String: $timeString');
+
       // Kiểm tra xung đột thời gian
       final existingSlots = getWorkingTime(selectedDay);
+      debugPrint('Existing slots: $existingSlots');
+
       final hasConflict = existingSlots.any((slot) {
         final [existingHour, existingMinute] = slot['startTime']!.split(':').map(int.parse).toList();
         final [newHour, newMinute] = timeString.split(':').map(int.parse).toList();
@@ -107,6 +119,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       });
 
       if (hasConflict) {
+        debugPrint('Conflict detected!');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Thời gian này phải cách các thời gian khác ít nhất 35 phút')),
@@ -115,11 +128,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         return;
       }
 
+      debugPrint('No conflict, calling API...');
       await _doctorService.addWorkingTime(
         widget.doctor.id,
         selectedDay,
         timeString,
       );
+      debugPrint('API call successful, reloading schedule...');
       await _loadSchedule();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,6 +142,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         );
       }
     } catch (e) {
+      debugPrint('Error adding working time: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi khi thêm lịch làm việc: $e')),
@@ -184,17 +200,25 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Lịch làm việc',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      const Flexible(
+                        child: Text(
+                          'Lịch làm việc',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: _addWorkingTime,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Thêm thời gian làm việc'),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: ElevatedButton.icon(
+                          onPressed: _addWorkingTime,
+                          icon: const Icon(Icons.add),
+                          label: const Text(
+                            'Thêm thời gian',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                     ],
                   ),

@@ -7,7 +7,11 @@ import '../models/doctor.dart';
 import 'token_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 class AuthService {
-  final apiUrl = dotenv.env['BASE_URL'] ?? 'Không có URL';
+  String get apiUrl {
+    final url = dotenv.env['BASE_URL'] ?? 'http://192.168.2.101:5000/api';
+    debugPrint('AuthService apiUrl: $url');
+    return url;
+  }
 
   Future<dynamic> loginUser(String email, String password) async {
     try {

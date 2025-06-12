@@ -396,7 +396,7 @@ class DoctorService extends _$DoctorService {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/schedule'),
+      Uri.parse('$baseUrl/doctors/schedule'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -409,7 +409,7 @@ class DoctorService extends _$DoctorService {
 
     if (response.statusCode != 200) {
       final data = json.decode(response.body);
-      throw Exception(data['message']);
+      throw Exception(data['message'] ?? 'Lỗi khi thêm lịch làm việc');
     }
   }
 
@@ -420,7 +420,7 @@ class DoctorService extends _$DoctorService {
     }
 
     final response = await http.delete(
-      Uri.parse('$baseUrl/schedule/$day/$index'),
+      Uri.parse('$baseUrl/doctors/schedule/$day/$index'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -429,7 +429,7 @@ class DoctorService extends _$DoctorService {
 
     if (response.statusCode != 200) {
       final data = json.decode(response.body);
-      throw Exception(data['message']);
+      throw Exception(data['message'] ?? 'Lỗi khi xóa lịch làm việc');
     }
   }
 

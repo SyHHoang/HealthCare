@@ -45,8 +45,13 @@ void main() async {
 
   try {
     await dotenv.load(fileName: ".env");
+    debugPrint("✅ Loaded .env file successfully");
+    debugPrint("BASE_URL: ${dotenv.env['BASE_URL']}");
   } catch (e) {
-    debugPrint("Không thể load file .env: $e");
+    debugPrint("❌ Không thể load file .env: $e");
+    debugPrint("Sử dụng default values");
+    // Set default values nếu không load được .env
+    dotenv.env['BASE_URL'] = 'http://192.168.2.101:5000/api';
   }
   
   runApp(

@@ -5,6 +5,7 @@ import '../login_screen.dart';
 import 'schedule_screen.dart';
 import 'docto_consultation_history_screen.dart';
 import 'doctor_notifications_screen.dart';
+import 'doctor_profile_screen.dart';
 
 class DoctorHomeScreen extends StatelessWidget {
   final Doctor doctor;
@@ -204,7 +205,14 @@ class DoctorHomeScreen extends StatelessWidget {
                     icon: Icons.folder,
                     title: 'Hồ sơ bệnh án',
                     description: 'Quản lý hồ sơ bệnh án của bệnh nhân',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DoctorProfileScreen(doctor: doctor),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _MainFunctionCard(

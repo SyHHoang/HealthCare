@@ -4,7 +4,7 @@ import '../models/user.dart';
 import 'token_service.dart';
 
 class UserService {
-  static const String baseUrl = 'http://192.168.22.133:5000/api'; //10.0.2.2
+  static const String baseUrl = 'http://192.168.2.101:5000/api'; //10.0.2.2
 
   Future<User> getUserProfile() async {
     try {
