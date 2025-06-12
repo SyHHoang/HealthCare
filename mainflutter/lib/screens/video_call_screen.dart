@@ -3,7 +3,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:permission_handler/permission_handler.dart';
 import '../services/socket_service.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class VideoCallScreen extends StatefulWidget {
   final String consultationId;
   final bool isDoctor;
@@ -46,7 +46,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   void _connectSocket() {
-    socket = IO.io('http://localhost:5000', <String, dynamic>{
+    socket = IO.io('${dotenv.env['BASE_URL']}', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'query': {'consultationId': widget.consultationId, 'isDoctor': widget.isDoctor}

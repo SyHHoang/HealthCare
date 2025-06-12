@@ -230,382 +230,367 @@ class DoctorInfoScreen extends ConsumerWidget {
           minChildSize: 0.5,
           maxChildSize: 0.9,
           expand: false,
-          builder: (context, scrollController) => Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.calendar_month, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Đặt lịch với bác sĩ ${doctor.fullName}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-                const Divider(),
-                const SizedBox(height: 16),
-                
-                // Thông tin số lần tư vấn còn lại
-                const Text(
-                  'Số lần tư vấn còn lại:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.phone, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text('${callRemaining ?? 0} lần'),
-                    const SizedBox(width: 16),
-                    if (!hasCallRemaining)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade100,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Row(
+          builder: (context, scrollController) => SingleChildScrollView(
+            controller: scrollController,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
                           children: [
-                            Icon(Icons.warning, color: Colors.red, size: 16),
-                            SizedBox(width: 4),
-                            Text(
-                              'Bạn cần gia hạn số lần tư vấn',
-                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            const Icon(Icons.calendar_month, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Đặt lịch với bác sĩ ${doctor.fullName}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                
-                // Chọn ngày
-                const Text(
-                  'Chọn ngày tư vấn:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextField(
-                    controller: dateController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      hintText: 'Chọn ngày',
-                      prefixIcon: const Icon(Icons.calendar_today),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onPressed: hasCallRemaining ? () async {
-                          // Hiển thị thông báo trước khi chọn ngày
-                          scaffoldMessenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Vui lòng chọn ngày trong thời hạn tư vấn để xem lịch làm việc'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDate,
-                            firstDate: startDate ?? DateTime.now(),
-                            lastDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
-                            builder: (context, child) {
-                              return Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: const ColorScheme.light(
-                                    primary: Colors.blue,
-                                    onSurface: Colors.black,
-                                  ),
-                                  textButtonTheme: TextButtonThemeData(
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 12.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Expanded(child: child!),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            selectableDayPredicate: (day) {
-                              return true;
-                            },
-                          );
-                          
-                          if (pickedDate != null && pickedDate != selectedDate) {
-                            setState(() {
-                              selectedDate = pickedDate;
-                              dateController.text = DateFormat('dd/MM/yyyy').format(selectedDate);
-                              selectedTimeSlotId = null; // Reset slot đã chọn
-                              isLoadingSlots = true; // Hiển thị trạng thái đang tải
-                            });
-                            
-                            // Tải dữ liệu và cập nhật UI
-                            try {
-                              final slots = await fetchAvailableTimeSlots(selectedDate);
-                              setState(() {
-                                availableTimeSlots = slots;
-                                isLoadingSlots = false;
-                              });
-                            } catch (e) {
-                              setState(() {
-                                isLoadingSlots = false;
-                              });
-                              debugPrint('Lỗi khi tải khung giờ: $e');
-                            }
-                          }
-                        } : null,
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.info_outline, size: 16, color: Colors.blue),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Ngày đã chọn: ${DateFormat('dd/MM/yyyy').format(selectedDate)} (${getDayOfWeekVietnamese(selectedDate)})',
-                      style: const TextStyle(color: Colors.blue, fontSize: 14),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                
-                // Hiển thị gợi ý về lịch của bác sĩ - không hiển thị thông tin cứng
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 16),
-                  child: Text(
-                    'Vui lòng chọn ngày để xem lịch làm việc của bác sĩ ${doctor.fullName}',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey.shade700),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  
+                  // Thông tin số lần tư vấn còn lại
+                  const Text(
+                    'Số lần tư vấn còn lại:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Giờ làm việc
-                const Text(
-                  'Chọn thời gian:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                
-                if (availableTimeSlots.isEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.access_time, color: Colors.grey, size: 40),
-                        const SizedBox(height: 8),
-                        Text(
-                          isLoadingSlots 
-                              ? 'Đang tải lịch làm việc...'
-                              : 'Không có lịch làm việc cho ${getDayOfWeekVietnamese(selectedDate)}',
-                          style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        if (!isLoadingSlots) const Text(
-                          'Vui lòng chọn ngày khác hoặc liên hệ với bác sĩ để biết thêm thông tin',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ] else ...[
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      'Có ${availableTimeSlots.length} khung giờ có sẵn cho ${getDayOfWeekVietnamese(selectedDate)}',
-                      style: const TextStyle(color: Colors.blue, fontSize: 14),
-                    ),
-                  ),
-                  Expanded(
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      controller: scrollController,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        childAspectRatio: 2.5,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: availableTimeSlots.length,
-                      itemBuilder: (context, index) {
-                        final slot = availableTimeSlots[index];
-                        final isSelected = selectedTimeSlotId == slot['id'];
-                        
-                        return InkWell(
-                          onTap: () {
-                            setState(() {
-                              selectedTimeSlotId = isSelected ? null : slot['id'];
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.blue : Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isSelected ? Colors.blue.shade700 : Colors.grey.shade300,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                slot['startTime']!,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.black87,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                            ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text('${callRemaining ?? 0} lần'),
+                      const SizedBox(width: 16),
+                      if (!hasCallRemaining)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                        );
-                      },
-                    ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.warning, color: Colors.red, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                'Bạn cần gia hạn số lần tư vấn',
+                                style: TextStyle(color: Colors.red, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                ],
-                
-                const SizedBox(height: 16),
-                
-                // Nút xác nhận đặt lịch
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: (hasCallRemaining && selectedTimeSlotId != null) 
-                      ? () {
-                          try {
-                            // Đóng dialog xác nhận
-                            Navigator.pop(context);
-                            
-                            // Hiển thị thông báo đang xử lý
+                  const SizedBox(height: 24),
+                  
+                  // Chọn ngày
+                  const Text(
+                    'Chọn ngày tư vấn:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      controller: dateController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        hintText: 'Chọn ngày',
+                        prefixIcon: const Icon(Icons.calendar_today),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.arrow_drop_down),
+                          onPressed: hasCallRemaining ? () async {
                             scaffoldMessenger.showSnackBar(
                               const SnackBar(
-                                content: Text('Đang đặt lịch...'),
+                                content: Text('Vui lòng chọn ngày trong thời hạn tư vấn để xem lịch làm việc'),
                                 duration: Duration(seconds: 2),
                               ),
                             );
                             
-                            // Tìm thông tin của slot đã chọn để lấy giờ
-                            String selectedTime = '';
-                            for (var slot in availableTimeSlots) {
-                              if (slot['id'] == selectedTimeSlotId) {
-                                selectedTime = slot['startTime']!;
-                                break;
-                              }
-                            }
-                            
-                            // Tạo đối tượng DateTime cho ngày và giờ tư vấn
-                            final List<String> timeParts = selectedTime.split(':');
-                            final hour = int.parse(timeParts[0]);
-                            final minute = int.parse(timeParts[1]);
-                            
-                            final consultationDateTime = DateTime(
-                              selectedDate.year,
-                              selectedDate.month,
-                              selectedDate.day,
-                              hour,
-                              minute,
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: startDate ?? DateTime.now(),
+                              lastDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: const ColorScheme.light(
+                                      primary: Colors.blue,
+                                      onSurface: Colors.black,
+                                    ),
+                                    textButtonTheme: TextButtonThemeData(
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
                             );
                             
-                            // Lấy service từ ConsultationService
-                            final consultationService = ref.read(consultationServiceProvider);
-                            
-                            // Gọi API đặt lịch tư vấn
-                            consultationService.bookConsultation(
-                              doctor.id ?? '',
-                              consultationDateTime
-                            ).then((_) {
-                              // Hiển thị thông báo thành công
+                            if (pickedDate != null && pickedDate != selectedDate) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                                dateController.text = DateFormat('dd/MM/yyyy').format(selectedDate);
+                                selectedTimeSlotId = null;
+                                isLoadingSlots = true;
+                              });
+                              
+                              try {
+                                final slots = await fetchAvailableTimeSlots(selectedDate);
+                                setState(() {
+                                  availableTimeSlots = slots;
+                                  isLoadingSlots = false;
+                                });
+                              } catch (e) {
+                                setState(() {
+                                  isLoadingSlots = false;
+                                });
+                                debugPrint('Lỗi khi tải khung giờ: $e');
+                              }
+                            }
+                          } : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Ngày đã chọn: ${DateFormat('dd/MM/yyyy').format(selectedDate)} (${getDayOfWeekVietnamese(selectedDate)})',
+                        style: const TextStyle(color: Colors.blue, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Hiển thị gợi ý về lịch của bác sĩ
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'Vui lòng chọn ngày để xem lịch làm việc của bác sĩ ${doctor.fullName}',
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey.shade700),
+                    ),
+                  ),
+                  
+                  // Giờ làm việc
+                  const Text(
+                    'Chọn thời gian:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  if (availableTimeSlots.isEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.access_time, color: Colors.grey, size: 40),
+                          const SizedBox(height: 8),
+                          Text(
+                            isLoadingSlots 
+                                ? 'Đang tải lịch làm việc...'
+                                : 'Không có lịch làm việc cho ${getDayOfWeekVietnamese(selectedDate)}',
+                            style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          if (!isLoadingSlots) const Text(
+                            'Vui lòng chọn ngày khác hoặc liên hệ với bác sĩ để biết thêm thông tin',
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Có ${availableTimeSlots.length} khung giờ có sẵn cho ${getDayOfWeekVietnamese(selectedDate)}',
+                        style: const TextStyle(color: Colors.blue, fontSize: 14),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 200,
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 2.5,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: availableTimeSlots.length,
+                        itemBuilder: (context, index) {
+                          final slot = availableTimeSlots[index];
+                          final isSelected = selectedTimeSlotId == slot['id'];
+                          
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                selectedTimeSlotId = isSelected ? null : slot['id'];
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.blue : Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSelected ? Colors.blue.shade700 : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  slot['startTime']!,
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black87,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Nút xác nhận đặt lịch
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: (hasCallRemaining && selectedTimeSlotId != null) 
+                        ? () {
+                            try {
+                              Navigator.pop(context);
+                              
                               scaffoldMessenger.showSnackBar(
                                 const SnackBar(
-                                  content: Text('Đặt lịch tư vấn thành công'),
-                                  backgroundColor: Colors.green,
-                                  duration: Duration(seconds: 3),
+                                  content: Text('Đang đặt lịch...'),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
                               
-                              // Đóng dialog đặt lịch
-                              Navigator.pop(context);
+                              String selectedTime = '';
+                              for (var slot in availableTimeSlots) {
+                                if (slot['id'] == selectedTimeSlotId) {
+                                  selectedTime = slot['startTime']!;
+                                  break;
+                                }
+                              }
                               
-                              // Cập nhật lại dữ liệu
-                              _refreshConsultationData(ref);
-                            }).catchError((error) {
-                              debugPrint('Lỗi khi đặt lịch tư vấn: $error');
+                              final List<String> timeParts = selectedTime.split(':');
+                              final hour = int.parse(timeParts[0]);
+                              final minute = int.parse(timeParts[1]);
+                              
+                              final consultationDateTime = DateTime(
+                                selectedDate.year,
+                                selectedDate.month,
+                                selectedDate.day,
+                                hour,
+                                minute,
+                              );
+                              
+                              final consultationService = ref.read(consultationServiceProvider);
+                              
+                              consultationService.bookConsultation(
+                                doctor.id ?? '',
+                                consultationDateTime
+                              ).then((_) {
+                                scaffoldMessenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Đặt lịch tư vấn thành công'),
+                                    backgroundColor: Colors.green,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                                
+                                Navigator.pop(context);
+                                _refreshConsultationData(ref);
+                              }).catchError((error) {
+                                debugPrint('Lỗi khi đặt lịch tư vấn: $error');
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text('Lỗi: ${error.toString()}'),
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              });
+                            } catch (e) {
+                              debugPrint('Lỗi khi đặt lịch: $e');
                               scaffoldMessenger.showSnackBar(
                                 SnackBar(
-                                  content: Text('Lỗi: ${error.toString()}'),
+                                  content: Text('Lỗi: ${e.toString()}'),
                                   backgroundColor: Colors.red,
                                   duration: const Duration(seconds: 3),
                                 ),
                               );
-                            });
-                          } catch (e) {
-                            debugPrint('Lỗi khi đặt lịch: $e');
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(
-                                content: Text('Lỗi: ${e.toString()}'),
-                                backgroundColor: Colors.red,
-                                duration: const Duration(seconds: 3),
-                              ),
-                            );
-                          }
-                        } 
-                      : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
-                      disabledForegroundColor: Colors.grey.shade600,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                            }
+                          } 
+                        : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        disabledForegroundColor: Colors.grey.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_month),
+                          SizedBox(width: 8),
+                          Text('Xác nhận đặt lịch'),
+                        ],
                       ),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.calendar_month),
-                        SizedBox(width: 8),
-                        Text('Xác nhận đặt lịch'),
-                      ],
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

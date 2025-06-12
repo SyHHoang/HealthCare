@@ -6,7 +6,7 @@ part of 'allergies_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$allergiesNotifierHash() => r'78564f4d4d8983ca719d6da06b8b7b11af545736';
+String _$allergiesNotifierHash() => r'051c5d3c46b904b4423aa278ce221b590596aee0';
 
 /// See also [AllergiesNotifier].
 @ProviderFor(AllergiesNotifier)

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/api_service.dart';
 
 class AIEvaluationScreen extends ConsumerStatefulWidget {
-  final dynamic user; // Có thể là User hoặc Doctor
   final String? patientId; // ID của bệnh nhân nếu là bác sĩ xem
 
   const AIEvaluationScreen({
     super.key,
-    required this.user,
     this.patientId,
   });
 
@@ -18,194 +20,179 @@ class AIEvaluationScreen extends ConsumerStatefulWidget {
 class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
   bool _isLoading = true;
   Map<String, dynamic> _evaluationData = {};
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _fetchEvaluationData();
+    _fetchHealthData();
   }
 
-  Future<void> _fetchEvaluationData() async {
-    // TODO: Gọi API để lấy dữ liệu đánh giá
-    // Tạm thời sử dụng dữ liệu mẫu
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _evaluationData = {
-        'allergies': {
-          
-          'message': 'Có 2 dị ứng đang hoạt động: Penicillin (Nặng) và Đậu phộng (Trung bình). Cần thận trọng khi sử dụng thuốc và thực phẩm.',
-        },
-        'healthData': {
-          
-          'message': 'Huyết áp: 120/80 mmHg, Nhịp tim: 75 bpm, Đường huyết: 5.5 mmol/L. Các chỉ số đều trong giới hạn bình thường.',
-        },
-        'lifestyle': {
-          
-          'message': 'Tập thể dục đều đặn 30 phút/ngày, chế độ ăn cân bằng. Cần cải thiện thời gian ngủ.',
-        },
-        'symptoms': {
-          
-          'message': 'Có triệu chứng đau đầu và mệt mỏi kéo dài. Cần theo dõi và tái khám nếu không cải thiện.',
-        },
-        'treatment': {
-          
-          'message': 'Đang trong quá trình điều trị viêm xoang. Tuân thủ tốt phác đồ điều trị.',
-        },
-        'vaccination': {
-         
-          'message': 'Đã tiêm đầy đủ các mũi vắc xin cơ bản. Cần tiêm nhắc lại vắc xin cúm.',
-        },
-        'conclusion': {
-          'message': 'Tình trạng sức khỏe chung đang ở mức tốt. Các chỉ số cơ bản đều trong giới hạn cho phép. Tuy nhiên, cần lưu ý:',
-          'points': [
-            'Quản lý tốt các dị ứng đang hoạt động',
-            'Theo dõi các triệu chứng đau đầu và mệt mỏi',
-            'Tuân thủ đúng phác đồ điều trị và lịch uống thuốc',
-            'Cải thiện thời gian ngủ và chất lượng giấc ngủ',
-          ],
-        },
-        'recommendations': [
-          'Duy trì chế độ ăn uống lành mạnh, tránh các thực phẩm gây dị ứng',
-          'Tiếp tục tập thể dục đều đặn 30 phút mỗi ngày',
-          'Đặt lịch tái khám định kỳ sau 2 tuần',
-          'Ghi chú lại các triệu chứng bất thường để báo cáo với bác sĩ',
-          'Đặt lịch tiêm vắc xin cúm trong tháng tới',
-        ],
+  Future<void> _fetchHealthData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+
+      final apiService = ref.read(apiServiceProvider);
+      String baseEndpoint = '/medical-record';
+      
+      // Xác định endpoint dựa trên việc có patientId hay không
+      String symptomsEndpoint = widget.patientId != null 
+          ? '$baseEndpoint/symptoms/doctor/${widget.patientId}'
+          : '$baseEndpoint/symptoms';
+      String allergiesEndpoint = widget.patientId != null 
+          ? '$baseEndpoint/allergies/doctor/${widget.patientId}'
+          : '$baseEndpoint/allergies';
+      String lifestyleEndpoint = widget.patientId != null 
+          ? '$baseEndpoint/lifestyles/doctor/${widget.patientId}'
+          : '$baseEndpoint/lifestyles';
+      String healthDataEndpoint = widget.patientId != null 
+          ? '$baseEndpoint/health-data/doctor/${widget.patientId}'
+          : '$baseEndpoint/health-data';
+
+      // Gọi các API song song
+      final responses = await Future.wait([
+        apiService.get(symptomsEndpoint),
+        apiService.get(allergiesEndpoint),
+        apiService.get(lifestyleEndpoint),
+        apiService.get(healthDataEndpoint),
+      ]);
+
+      // Kiểm tra nếu tất cả đều rỗng
+      bool isAllEmpty = responses.every((data) {
+        return data == null || (data is List && data.isEmpty);
+      });
+
+      if (isAllEmpty) {
+        setState(() {
+          _errorMessage = 'Bạn cần nhập ít nhất một dữ liệu sức khỏe để AI có thể đánh giá!';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Gửi dữ liệu để đánh giá
+      final evaluationData = {
+        'symptoms': responses[0],
+        'allergies': responses[1],
+        'lifestyle': responses[2],
+        'healthData': responses[3],
       };
-      _isLoading = false;
-    });
+
+      final evaluationResponse = await apiService.post(
+        '/health-evaluation/evaluate',
+        evaluationData,
+      );
+
+      setState(() {
+        _evaluationData = evaluationResponse;
+        _isLoading = false;
+      });
+
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Không thể tải đánh giá sức khỏe. Vui lòng thử lại sau.';
+        _isLoading = false;
+      });
+      debugPrint('Error fetching health evaluation: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Đánh giá sức khỏe bằng AI'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildEvaluationSection(
-              title: 'Đánh giá chi tiết',
-              icon: Icons.medical_services,
+      body: _isLoading
+          ? Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildMetricItem(
-                    title: 'Dị ứng',
-                    icon: Icons.warning_amber,
-                    
-                    message: _evaluationData['allergies']['message'],
+                  const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
                   ),
-                  _buildMetricItem(
-                    title: 'Chỉ số sức khỏe',
-                    icon: Icons.monitor_heart,
-                    message: _evaluationData['healthData']['message'],
-                  ),
-                  _buildMetricItem(
-                    title: 'Lối sống',
-                    icon: Icons.directions_run,
-                    
-                    message: _evaluationData['lifestyle']['message'],
-                  ),
-                
-                  _buildMetricItem(
-                    title: 'Triệu chứng',
-                    icon: Icons.sick,
-                    
-                    message: _evaluationData['symptoms']['message'],
-                  ),
-                  _buildMetricItem(
-                    title: 'Điều trị',
-                    icon: Icons.healing,
-                    
-                    message: _evaluationData['treatment']['message'],
-                  ),
-                  _buildMetricItem(
-                    title: 'Tiêm chủng',
-                    icon: Icons.vaccines,
-                    
-                    message: _evaluationData['vaccination']['message'],
+                  const SizedBox(height: 16),
+                  Text(
+                    'Đang phân tích dữ liệu sức khỏe...',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildEvaluationSection(
-              title: 'Kết luận tình trạng',
-              icon: Icons.assignment_turned_in,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _evaluationData['conclusion']['message'],
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 12),
-                    ...List<Widget>.from(
-                      (_evaluationData['conclusion']['points'] as List).map(
-                        (point) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.arrow_right, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(point.toString())),
-                            ],
+            )
+          : _errorMessage.isNotEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.red[400],
+                          size: 48,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _errorMessage,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.red[400],
+                            fontSize: 16,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildEvaluationSection(
-              title: 'Lời khuyên',
-              icon: Icons.lightbulb,
-              child: Column(
-                children: List<Widget>.from(
-                  (_evaluationData['recommendations'] as List).map(
-                    (recommendation) => Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(recommendation.toString())),
-                        ],
-                      ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _fetchHealthData,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Thử lại'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildEvaluationSection(
+                        title: 'Đánh giá chi tiết',
+                        icon: Icons.checklist,
+                        child: _buildDetailedEvaluation(),
+                      ),
+                      const SizedBox(height: 30),
+                      _buildEvaluationSection(
+                        title: 'Kết luận tình trạng',
+                        icon: Icons.medical_services,
+                        child: _buildConclusion(),
+                      ),
+                      const SizedBox(height: 30),
+                      _buildEvaluationSection(
+                        title: 'Lời khuyên',
+                        icon: Icons.lightbulb,
+                        child: _buildRecommendations(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -219,56 +206,193 @@ class _AIEvaluationScreenState extends ConsumerState<AIEvaluationScreen> {
       children: [
         Row(
           children: [
-            Icon(icon, color: Theme.of(context).primaryColor),
-            const SizedBox(width: 8),
+            Icon(icon, color: Colors.blue[400], size: 24),
+            const SizedBox(width: 10),
             Text(
               title,
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2c3e50),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         child,
       ],
+    );
+  }
+
+  Widget _buildDetailedEvaluation() {
+    final detailedEvaluation = _evaluationData['detailedEvaluation'] ?? {};
+    
+    if (detailedEvaluation.isEmpty) {
+      return Center(
+        child: Text(
+          'Không có dữ liệu đánh giá sức khỏe',
+          style: TextStyle(
+            color: Colors.red[400],
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: detailedEvaluation.entries.map<Widget>((entry) {
+        return _buildMetricItem(
+          title: entry.key,
+          icon: _getIconForMetric(entry.key),
+          content: entry.value,
+        );
+      }).toList(),
     );
   }
 
   Widget _buildMetricItem({
     required String title,
     required IconData icon,
-    required String message,
+    required dynamic content,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFf8f9fa),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFeee)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: Theme.of(context).primaryColor),
-              const SizedBox(width: 8),
+              Icon(icon, color: Colors.blue[400], size: 20),
+              const SizedBox(width: 10),
               Text(
                 title,
                 style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2c3e50),
                 ),
               ),
-              const Spacer(),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(message),
+          const SizedBox(height: 15),
+          if (content is Map)
+            ...content.entries.map<Widget>((e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.key,
+                        style: TextStyle(
+                          color: Colors.blue[400],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        e.value.toString(),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF495057),
+                          height: 1.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                )).toList()
+          else
+            Text(
+              content.toString(),
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color(0xFF495057),
+                height: 1.6,
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  Widget _buildConclusion() {
+    final conclusion = _evaluationData['conclusion'] ?? '';
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFf8f9fa),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFeee)),
+      ),
+      child: Text(
+        conclusion,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Color(0xFF495057),
+          height: 1.8,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendations() {
+    final recommendations = _evaluationData['recommendations'] ?? [];
+    return Column(
+      children: (recommendations as List).map<Widget>((recommendation) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 15),
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFf8f9fa),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFeee)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.check_circle, color: Color(0xFF2ecc71), size: 20),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Text(
+                  recommendation.toString(),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF495057),
+                    height: 1.6,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  IconData _getIconForMetric(String metric) {
+    switch (metric) {
+      case 'Triệu chứng':
+        return Icons.thermostat;
+      case 'Dị ứng':
+        return Icons.warning;
+      case 'Lối sống':
+        return Icons.directions_run;
+      case 'Dữ liệu sức khỏe':
+        return Icons.favorite;
+      case 'Thuốc men':
+        return Icons.medication;
+      case 'Điều trị':
+        return Icons.healing;
+      case 'Tiêm chủng':
+        return Icons.vaccines;
+      default:
+        return Icons.info;
+    }
   }
 } 

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'doctor_change_password_screen.dart';
 import 'doctor_profile_edit_screen.dart';
 import 'package:mainflutter/widgets/verification_status_badge.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DoctorProfileScreen extends StatefulWidget {
   final Doctor doctor;
 
@@ -62,7 +63,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       // Upload image to server
       final request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://localhost:5000/api/doctors/avatar'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/doctors/avatar'),
       );
 
       request.files.add(

@@ -66,6 +66,30 @@
         </div>
       </div>
 
+      <!-- Thêm phần hiển thị kết quả tìm kiếm thông minh -->
+      <div v-if="smartSearchResults.length > 0" class="smart-search-results mt-4">
+        <h4 class="section-title mb-3">Các chuyên khoa phù hợp</h4>
+        <div class="specialty-results">
+          <div v-for="specialty in smartSearchResults" :key="specialty._id || specialty" class="specialty-item">
+            <div class="specialty-info">
+              <h5 class="specialty-name">
+                {{ specialty.name || specialty }}
+                <span v-if="!specialty._id" class="badge bg-warning ms-2">Đề xuất</span>
+              </h5>
+              <p class="specialty-description">{{ specialty.description || 'Chưa có mô tả chi tiết' }}</p>
+            </div>
+            <button
+              class="btn btn-outline-primary specialty-btn"
+              :class="{ 'active': selectedSmartSpecialty === (specialty._id || specialty) }"
+              @click="handleSmartSpecialtyClick(specialty)"
+            >
+              <i class="bi bi-arrow-right-circle"></i>
+              Xem bác sĩ
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading Spinner -->
       <div v-if="loading" class="loading-container">
         <div class="spinner-border text-primary" role="status">
@@ -374,6 +398,8 @@ const doctorError = ref(null);
 const selectedDoctor = ref(null);
 const showAllReviews = ref(false);
 const smartSearchQuery = ref('');
+const smartSearchResults = ref([]);
+const selectedSmartSpecialty = ref(null);
 
 const displayedReviews = computed(() => {
   if (!selectedDoctor.value?.ratingStats?.latestReviews) return [];
@@ -794,23 +820,88 @@ const handleSmartSearch = async () => {
     loading.value = true;
     error.value = null;
     
-    // Gọi API tìm kiếm thông minh
-    const response = await axios.post('/api/gemini/message', {
-      message: `Tìm kiếm bác sĩ phù hợp với các triệu chứng sau: ${smartSearchQuery.value}`,
-      chatHistory: []
+    // Gọi API thông qua proxy route
+    const response = await axios.post('/api/specialties/predict', {
+      description: smartSearchQuery.value
     });
     
-    // Xử lý kết quả tìm kiếm
-    if (response.data.response) {
-      // Cập nhật danh sách bác sĩ dựa trên kết quả
-      // TODO: Implement logic to filter doctors based on AI response
-      console.log('Smart search response:', response.data.response);
+    // Xử lý dữ liệu trả về
+    const { specialties, confidences } = response.data;
+    console.log('API Response:', response.data); // Log để kiểm tra dữ liệu
+
+    if (!Array.isArray(specialties)) {
+      console.error('Invalid specialties data:', specialties);
+      throw new Error('Invalid specialties data format');
     }
+
+    // Tìm các chuyên khoa trong cơ sở dữ liệu của chúng ta
+    const foundResponse = await axios.get('/api/specialties');
+    const existingSpecialties = foundResponse.data;
+    
+    // Lọc ra các chuyên khoa có trong hệ thống và thêm độ tin cậy
+    const found = existingSpecialties.filter(s => 
+      specialties.some(specialty => 
+        specialty.toLowerCase() === s.name.toLowerCase()
+      )
+    ).map(specialty => ({
+      ...specialty,
+      confidence: confidences[specialty.name] || 0
+    }));
+
+    // Lọc ra các chuyên khoa chưa có trong hệ thống và thêm độ tin cậy
+    const existingNames = existingSpecialties.map(s => s.name.toLowerCase());
+    const missing = specialties
+      .filter(name => !existingNames.includes(name.toLowerCase()))
+      .map(name => ({
+        name,
+        confidence: confidences[name] || 0,
+        isSuggested: true
+      }));
+
+    // Sắp xếp kết quả theo độ tin cậy giảm dần
+    const sortedResults = [...found, ...missing].sort((a, b) => b.confidence - a.confidence);
+
+    // Cập nhật kết quả tìm kiếm thông minh
+    smartSearchResults.value = sortedResults;
+    selectedSmartSpecialty.value = null;
+
+    // Hiển thị thông báo với kết quả
+    toast.add({
+      severity: 'info',
+      summary: 'Kết quả tìm kiếm thông minh',
+      detail: `Dựa vào triệu chứng "${smartSearchQuery.value}", tìm thấy ${smartSearchResults.value.length} chuyên khoa phù hợp`,
+      life: 5000
+    });
+
   } catch (err) {
     error.value = 'Không thể thực hiện tìm kiếm thông minh. Vui lòng thử lại sau.';
     console.error('Smart search error:', err);
+    
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể thực hiện tìm kiếm thông minh. Vui lòng thử lại sau.',
+      life: 3000
+    });
   } finally {
     loading.value = false;
+  }
+};
+
+const handleSmartSpecialtyClick = async (specialty) => {
+  selectedSmartSpecialty.value = specialty._id || specialty;
+  
+  // Nếu là chuyên khoa có trong hệ thống
+  if (specialty._id) {
+    await viewDoctorsBySpecialty(specialty._id);
+  } else {
+    // Nếu là chuyên khoa đề xuất
+    toast.add({
+      severity: 'warn',
+      summary: 'Thông báo',
+      detail: 'Chuyên khoa này chưa có trong hệ thống',
+      life: 3000
+    });
   }
 };
 
@@ -1172,6 +1263,84 @@ onMounted(() => {
 
   .doctor-actions .btn {
     width: 100%;
+  }
+}
+
+/* Thêm styles cho phần kết quả tìm kiếm thông minh */
+.smart-search-results {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.specialty-results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.specialty-item {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.specialty-info {
+  flex: 1;
+}
+
+.specialty-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.specialty-description {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.specialty-btn {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.specialty-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.specialty-btn.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .specialty-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .specialty-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style> 

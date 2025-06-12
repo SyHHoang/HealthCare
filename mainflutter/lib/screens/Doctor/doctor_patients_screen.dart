@@ -4,7 +4,7 @@ import '../../services/token_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'patient_medical_record_screen.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DoctorPatientsScreen extends StatefulWidget {
   final Doctor doctor;
   const DoctorPatientsScreen({super.key, required this.doctor});
@@ -30,10 +30,11 @@ class _DoctorPatientsScreenState extends State<DoctorPatientsScreen> {
       loading = true;
       error = null;
     });
+    String apiUrl = dotenv.env['BASE_URL'] ?? 'http://localhost:5000/api';
     try {
       final token = await TokenService.getToken();
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/consultationList/list/user'),
+        Uri.parse('$apiUrl/consultationList/list/user'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

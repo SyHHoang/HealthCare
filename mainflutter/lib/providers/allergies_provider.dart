@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/allergy.dart';
 import '../services/token_service.dart';
@@ -9,7 +10,7 @@ part 'allergies_provider.g.dart';
 @riverpod
 class AllergiesNotifier extends _$AllergiesNotifier {
   final apiUrl = dotenv.env['BASE_URL'] ?? 'Không có URL';
-
+ 
   @override
   Future<List<Allergy>> build() async {
     return getAllergies();
@@ -27,7 +28,7 @@ class AllergiesNotifier extends _$AllergiesNotifier {
           'Content-Type': 'application/json',
         },
       );
-
+      debugPrint('apiUrl allegre  : $apiUrl');
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => Allergy.fromJson(json)).toList();

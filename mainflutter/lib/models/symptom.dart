@@ -9,9 +9,9 @@ class Symptom with _$Symptom {
   const factory Symptom({
     String? id,
     String? userId,
-    required String name,
-    required String severity,
-    required DateTime startDate,
+    String? name,
+    String? severity,
+    DateTime? startDate,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,

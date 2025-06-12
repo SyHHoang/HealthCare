@@ -39,12 +39,16 @@ class DoctorService extends _$DoctorService {
       }
 
       final queryParams = <String, String>{};
-      if (specialty != null) queryParams['specialty'] = specialty;
+      if (specialty != null) {
+        print('Đang tìm kiếm bác sĩ theo chuyên khoa: $specialty');
+        queryParams['specialty'] = specialty;
+      }
       if (searchQuery != null) queryParams['search'] = searchQuery;
       if (page != null) queryParams['page'] = page.toString();
       if (limit != null) queryParams['limit'] = limit.toString();
 
       final uri = Uri.parse('$baseUrl/doctors/active/isActive').replace(queryParameters: queryParams);
+      print('API URL: $uri');
       
       final response = await http.get(
         uri,
@@ -60,12 +64,29 @@ class DoctorService extends _$DoctorService {
         },
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (responseData['status'] == 'success' && responseData['data'] != null) {
           final Map<String, dynamic> data = responseData['data'];
           final List<dynamic> doctorsList = data['doctors'];
-          return doctorsList.map((doctorData) => Doctor.fromJson(doctorData)).toList();
+          final doctors = doctorsList.map((doctorData) => Doctor.fromJson(doctorData)).toList();
+          
+          // Nếu có chuyên khoa được chỉ định, lọc thêm theo chuyên khoa
+          if (specialty != null) {
+            final filteredDoctors = doctors.where((doctor) {
+              final doctorSpecialty = doctor.specialty?.toLowerCase();
+              final searchSpecialty = specialty.toLowerCase();
+              return doctorSpecialty == searchSpecialty;
+            }).toList();
+            
+            print('Tìm thấy ${filteredDoctors.length} bác sĩ thuộc chuyên khoa $specialty');
+            return filteredDoctors;
+          }
+          
+          return doctors;
         } else {
           throw Exception(responseData['message'] ?? 'Không thể lấy danh sách bác sĩ');
         }
@@ -74,6 +95,7 @@ class DoctorService extends _$DoctorService {
         throw Exception(errorData['message'] ?? 'Lỗi server: ${response.statusCode}');
       }
     } catch (e) {
+      print('Lỗi khi lấy danh sách bác sĩ: $e');
       throw Exception('Đã xảy ra lỗi: $e');
     }
   }

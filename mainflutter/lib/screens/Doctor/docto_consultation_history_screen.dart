@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConsultationHistoryScreen extends ConsumerStatefulWidget {
   final Doctor doctor;
@@ -74,7 +75,7 @@ class _ConsultationHistoryScreenState extends ConsumerState<ConsultationHistoryS
     try {
       final token = await TokenService.getToken();
       final response = await http.get(
-        Uri.parse('http://192.168.2.101:5000/api/consultationList/doctor/history'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/consultationList/doctor/history'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

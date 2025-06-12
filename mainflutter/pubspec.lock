@@ -537,7 +537,7 @@ packages:
     source: hosted
     version: "0.14.1"
   flutter_webview_plugin_ios_android:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_webview_plugin_ios_android
       sha256: "2a084ac5d2e9fd1788bd76794b79055199fe40621c306a14e29ab8fa7f96466b"

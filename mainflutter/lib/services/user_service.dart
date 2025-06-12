@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import 'token_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserService {
-  static const String baseUrl = 'http://192.168.2.101:5000/api'; //10.0.2.2
+  final String baseUrl = dotenv.env['BASE_URL'] ?? 'Không có URL';
 
   Future<User> getUserProfile() async {
     try {

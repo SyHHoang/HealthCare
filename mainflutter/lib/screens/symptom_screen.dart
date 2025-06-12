@@ -145,9 +145,9 @@ class _SymptomScreenState extends ConsumerState<SymptomScreen> {
   }
 
   void _showEditDialog(Symptom symptom) {
-    _nameController.text = symptom.name;
-    _selectedSeverity = symptom.severity;
-    _selectedDate = symptom.startDate;
+    _nameController.text = symptom.name ?? '';
+    _selectedSeverity = symptom.severity ?? '';
+    _selectedDate = symptom.startDate ?? DateTime.now();
     _notesController.text = symptom.notes ?? '';
 
     showDialog(
@@ -326,12 +326,12 @@ class _SymptomScreenState extends ConsumerState<SymptomScreen> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  title: Text(symptom.name),
+                  title: Text(symptom.name ?? ''),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Mức độ: ${symptom.severity}'),
-                      Text('Ngày bắt đầu: ${DateFormat('dd/MM/yyyy').format(symptom.startDate)}'),
+                      Text('Ngày bắt đầu: ${DateFormat('dd/MM/yyyy').format(symptom.startDate ?? DateTime.now())}'),
                       if (symptom.notes != null)
                         Text('Ghi chú: ${symptom.notes}'),
                     ],

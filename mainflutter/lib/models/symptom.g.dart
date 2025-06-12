@@ -10,9 +10,12 @@ _$SymptomImpl _$$SymptomImplFromJson(Map<String, dynamic> json) =>
     _$SymptomImpl(
       id: json['id'] as String?,
       userId: json['userId'] as String?,
-      name: json['name'] as String,
-      severity: json['severity'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
+      name: json['name'] as String?,
+      severity: json['severity'] as String?,
+      startDate:
+          json['startDate'] == null
+              ? null
+              : DateTime.parse(json['startDate'] as String),
       notes: json['notes'] as String?,
       createdAt:
           json['createdAt'] == null
@@ -30,7 +33,7 @@ Map<String, dynamic> _$$SymptomImplToJson(_$SymptomImpl instance) =>
       'userId': instance.userId,
       'name': instance.name,
       'severity': instance.severity,
-      'startDate': instance.startDate.toIso8601String(),
+      'startDate': instance.startDate?.toIso8601String(),
       'notes': instance.notes,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),

@@ -23,9 +23,9 @@ Symptom _$SymptomFromJson(Map<String, dynamic> json) {
 mixin _$Symptom {
   String? get id => throw _privateConstructorUsedError;
   String? get userId => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String get severity => throw _privateConstructorUsedError;
-  DateTime get startDate => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get severity => throw _privateConstructorUsedError;
+  DateTime? get startDate => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -47,9 +47,9 @@ abstract class $SymptomCopyWith<$Res> {
   $Res call({
     String? id,
     String? userId,
-    String name,
-    String severity,
-    DateTime startDate,
+    String? name,
+    String? severity,
+    DateTime? startDate,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -73,9 +73,9 @@ class _$SymptomCopyWithImpl<$Res, $Val extends Symptom>
   $Res call({
     Object? id = freezed,
     Object? userId = freezed,
-    Object? name = null,
-    Object? severity = null,
-    Object? startDate = null,
+    Object? name = freezed,
+    Object? severity = freezed,
+    Object? startDate = freezed,
     Object? notes = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -93,20 +93,20 @@ class _$SymptomCopyWithImpl<$Res, $Val extends Symptom>
                     : userId // ignore: cast_nullable_to_non_nullable
                         as String?,
             name:
-                null == name
+                freezed == name
                     ? _value.name
                     : name // ignore: cast_nullable_to_non_nullable
-                        as String,
+                        as String?,
             severity:
-                null == severity
+                freezed == severity
                     ? _value.severity
                     : severity // ignore: cast_nullable_to_non_nullable
-                        as String,
+                        as String?,
             startDate:
-                null == startDate
+                freezed == startDate
                     ? _value.startDate
                     : startDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
+                        as DateTime?,
             notes:
                 freezed == notes
                     ? _value.notes
@@ -139,9 +139,9 @@ abstract class _$$SymptomImplCopyWith<$Res> implements $SymptomCopyWith<$Res> {
   $Res call({
     String? id,
     String? userId,
-    String name,
-    String severity,
-    DateTime startDate,
+    String? name,
+    String? severity,
+    DateTime? startDate,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -164,9 +164,9 @@ class __$$SymptomImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? userId = freezed,
-    Object? name = null,
-    Object? severity = null,
-    Object? startDate = null,
+    Object? name = freezed,
+    Object? severity = freezed,
+    Object? startDate = freezed,
     Object? notes = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -184,20 +184,20 @@ class __$$SymptomImplCopyWithImpl<$Res>
                 : userId // ignore: cast_nullable_to_non_nullable
                     as String?,
         name:
-            null == name
+            freezed == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
-                    as String,
+                    as String?,
         severity:
-            null == severity
+            freezed == severity
                 ? _value.severity
                 : severity // ignore: cast_nullable_to_non_nullable
-                    as String,
+                    as String?,
         startDate:
-            null == startDate
+            freezed == startDate
                 ? _value.startDate
                 : startDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
+                    as DateTime?,
         notes:
             freezed == notes
                 ? _value.notes
@@ -224,9 +224,9 @@ class _$SymptomImpl with DiagnosticableTreeMixin implements _Symptom {
   const _$SymptomImpl({
     this.id,
     this.userId,
-    required this.name,
-    required this.severity,
-    required this.startDate,
+    this.name,
+    this.severity,
+    this.startDate,
     this.notes,
     this.createdAt,
     this.updatedAt,
@@ -240,11 +240,11 @@ class _$SymptomImpl with DiagnosticableTreeMixin implements _Symptom {
   @override
   final String? userId;
   @override
-  final String name;
+  final String? name;
   @override
-  final String severity;
+  final String? severity;
   @override
-  final DateTime startDate;
+  final DateTime? startDate;
   @override
   final String? notes;
   @override
@@ -323,9 +323,9 @@ abstract class _Symptom implements Symptom {
   const factory _Symptom({
     final String? id,
     final String? userId,
-    required final String name,
-    required final String severity,
-    required final DateTime startDate,
+    final String? name,
+    final String? severity,
+    final DateTime? startDate,
     final String? notes,
     final DateTime? createdAt,
     final DateTime? updatedAt,
@@ -338,11 +338,11 @@ abstract class _Symptom implements Symptom {
   @override
   String? get userId;
   @override
-  String get name;
+  String? get name;
   @override
-  String get severity;
+  String? get severity;
   @override
-  DateTime get startDate;
+  DateTime? get startDate;
   @override
   String? get notes;
   @override

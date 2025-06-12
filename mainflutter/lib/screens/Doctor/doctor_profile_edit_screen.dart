@@ -4,7 +4,7 @@ import 'package:mainflutter/services/doctor_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DoctorProfileEditScreen extends StatefulWidget {
   final Doctor doctor;
 
@@ -83,7 +83,7 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
       // Upload image to server
       final request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://localhost:5000/api/doctors/avatar'),
+        Uri.parse('${dotenv.env['BASE_URL']}/api/doctors/avatar'),
       );
 
       request.files.add(
