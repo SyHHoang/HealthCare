@@ -12,8 +12,7 @@ part of 'specialty.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Specialty _$SpecialtyFromJson(Map<String, dynamic> json) {
   return _Specialty.fromJson(json);
@@ -44,14 +43,13 @@ abstract class $SpecialtyCopyWith<$Res> {
   factory $SpecialtyCopyWith(Specialty value, $Res Function(Specialty) then) =
       _$SpecialtyCopyWithImpl<$Res, Specialty>;
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String? id,
-    String name,
-    String description,
-    String? icon,
-    bool isSuggested,
-    double? confidence,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String? id,
+      String name,
+      String description,
+      String? icon,
+      bool isSuggested,
+      double? confidence});
 }
 
 /// @nodoc
@@ -76,41 +74,32 @@ class _$SpecialtyCopyWithImpl<$Res, $Val extends Specialty>
     Object? isSuggested = null,
     Object? confidence = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                freezed == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            description:
-                null == description
-                    ? _value.description
-                    : description // ignore: cast_nullable_to_non_nullable
-                        as String,
-            icon:
-                freezed == icon
-                    ? _value.icon
-                    : icon // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            isSuggested:
-                null == isSuggested
-                    ? _value.isSuggested
-                    : isSuggested // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            confidence:
-                freezed == confidence
-                    ? _value.confidence
-                    : confidence // ignore: cast_nullable_to_non_nullable
-                        as double?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      icon: freezed == icon
+          ? _value.icon
+          : icon // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isSuggested: null == isSuggested
+          ? _value.isSuggested
+          : isSuggested // ignore: cast_nullable_to_non_nullable
+              as bool,
+      confidence: freezed == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ) as $Val);
   }
 }
 
@@ -118,19 +107,17 @@ class _$SpecialtyCopyWithImpl<$Res, $Val extends Specialty>
 abstract class _$$SpecialtyImplCopyWith<$Res>
     implements $SpecialtyCopyWith<$Res> {
   factory _$$SpecialtyImplCopyWith(
-    _$SpecialtyImpl value,
-    $Res Function(_$SpecialtyImpl) then,
-  ) = __$$SpecialtyImplCopyWithImpl<$Res>;
+          _$SpecialtyImpl value, $Res Function(_$SpecialtyImpl) then) =
+      __$$SpecialtyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String? id,
-    String name,
-    String description,
-    String? icon,
-    bool isSuggested,
-    double? confidence,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String? id,
+      String name,
+      String description,
+      String? icon,
+      bool isSuggested,
+      double? confidence});
 }
 
 /// @nodoc
@@ -138,9 +125,8 @@ class __$$SpecialtyImplCopyWithImpl<$Res>
     extends _$SpecialtyCopyWithImpl<$Res, _$SpecialtyImpl>
     implements _$$SpecialtyImplCopyWith<$Res> {
   __$$SpecialtyImplCopyWithImpl(
-    _$SpecialtyImpl _value,
-    $Res Function(_$SpecialtyImpl) _then,
-  ) : super(_value, _then);
+      _$SpecialtyImpl _value, $Res Function(_$SpecialtyImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Specialty
   /// with the given fields replaced by the non-null parameter values.
@@ -154,54 +140,45 @@ class __$$SpecialtyImplCopyWithImpl<$Res>
     Object? isSuggested = null,
     Object? confidence = freezed,
   }) {
-    return _then(
-      _$SpecialtyImpl(
-        id:
-            freezed == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        description:
-            null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                    as String,
-        icon:
-            freezed == icon
-                ? _value.icon
-                : icon // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        isSuggested:
-            null == isSuggested
-                ? _value.isSuggested
-                : isSuggested // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        confidence:
-            freezed == confidence
-                ? _value.confidence
-                : confidence // ignore: cast_nullable_to_non_nullable
-                    as double?,
-      ),
-    );
+    return _then(_$SpecialtyImpl(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      icon: freezed == icon
+          ? _value.icon
+          : icon // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isSuggested: null == isSuggested
+          ? _value.isSuggested
+          : isSuggested // ignore: cast_nullable_to_non_nullable
+              as bool,
+      confidence: freezed == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SpecialtyImpl implements _Specialty {
-  const _$SpecialtyImpl({
-    @JsonKey(name: '_id') this.id,
-    required this.name,
-    required this.description,
-    this.icon,
-    this.isSuggested = false,
-    this.confidence,
-  });
+  const _$SpecialtyImpl(
+      {@JsonKey(name: '_id') this.id,
+      required this.name,
+      required this.description,
+      this.icon,
+      this.isSuggested = false,
+      this.confidence});
 
   factory _$SpecialtyImpl.fromJson(Map<String, dynamic> json) =>
       _$$SpecialtyImplFromJson(json);
@@ -245,14 +222,7 @@ class _$SpecialtyImpl implements _Specialty {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    description,
-    icon,
-    isSuggested,
-    confidence,
-  );
+      runtimeType, id, name, description, icon, isSuggested, confidence);
 
   /// Create a copy of Specialty
   /// with the given fields replaced by the non-null parameter values.
@@ -264,19 +234,20 @@ class _$SpecialtyImpl implements _Specialty {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SpecialtyImplToJson(this);
+    return _$$SpecialtyImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Specialty implements Specialty {
-  const factory _Specialty({
-    @JsonKey(name: '_id') final String? id,
-    required final String name,
-    required final String description,
-    final String? icon,
-    final bool isSuggested,
-    final double? confidence,
-  }) = _$SpecialtyImpl;
+  const factory _Specialty(
+      {@JsonKey(name: '_id') final String? id,
+      required final String name,
+      required final String description,
+      final String? icon,
+      final bool isSuggested,
+      final double? confidence}) = _$SpecialtyImpl;
 
   factory _Specialty.fromJson(Map<String, dynamic> json) =
       _$SpecialtyImpl.fromJson;

@@ -12,15 +12,14 @@ String _$allergiesNotifierHash() => r'051c5d3c46b904b4423aa278ce221b590596aee0';
 @ProviderFor(AllergiesNotifier)
 final allergiesNotifierProvider =
     AutoDisposeAsyncNotifierProvider<AllergiesNotifier, List<Allergy>>.internal(
-      AllergiesNotifier.new,
-      name: r'allergiesNotifierProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$allergiesNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  AllergiesNotifier.new,
+  name: r'allergiesNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$allergiesNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$AllergiesNotifier = AutoDisposeAsyncNotifier<List<Allergy>>;
 // ignore_for_file: type=lint

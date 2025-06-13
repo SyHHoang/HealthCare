@@ -12,8 +12,7 @@ part of 'lifestyle.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Lifestyle _$LifestyleFromJson(Map<String, dynamic> json) {
   return _Lifestyle.fromJson(json);
@@ -46,16 +45,15 @@ abstract class $LifestyleCopyWith<$Res> {
   factory $LifestyleCopyWith(Lifestyle value, $Res Function(Lifestyle) then) =
       _$LifestyleCopyWithImpl<$Res, Lifestyle>;
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String id,
-    String activityType,
-    String description,
-    String frequency,
-    String? duration,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? startDate,
-    String? notes,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String id,
+      String activityType,
+      String description,
+      String frequency,
+      String? duration,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? startDate,
+      String? notes});
 }
 
 /// @nodoc
@@ -81,46 +79,36 @@ class _$LifestyleCopyWithImpl<$Res, $Val extends Lifestyle>
     Object? startDate = freezed,
     Object? notes = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            activityType:
-                null == activityType
-                    ? _value.activityType
-                    : activityType // ignore: cast_nullable_to_non_nullable
-                        as String,
-            description:
-                null == description
-                    ? _value.description
-                    : description // ignore: cast_nullable_to_non_nullable
-                        as String,
-            frequency:
-                null == frequency
-                    ? _value.frequency
-                    : frequency // ignore: cast_nullable_to_non_nullable
-                        as String,
-            duration:
-                freezed == duration
-                    ? _value.duration
-                    : duration // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            startDate:
-                freezed == startDate
-                    ? _value.startDate
-                    : startDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            notes:
-                freezed == notes
-                    ? _value.notes
-                    : notes // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      activityType: null == activityType
+          ? _value.activityType
+          : activityType // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      frequency: null == frequency
+          ? _value.frequency
+          : frequency // ignore: cast_nullable_to_non_nullable
+              as String,
+      duration: freezed == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as String?,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -128,21 +116,19 @@ class _$LifestyleCopyWithImpl<$Res, $Val extends Lifestyle>
 abstract class _$$LifestyleImplCopyWith<$Res>
     implements $LifestyleCopyWith<$Res> {
   factory _$$LifestyleImplCopyWith(
-    _$LifestyleImpl value,
-    $Res Function(_$LifestyleImpl) then,
-  ) = __$$LifestyleImplCopyWithImpl<$Res>;
+          _$LifestyleImpl value, $Res Function(_$LifestyleImpl) then) =
+      __$$LifestyleImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String id,
-    String activityType,
-    String description,
-    String frequency,
-    String? duration,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? startDate,
-    String? notes,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String id,
+      String activityType,
+      String description,
+      String frequency,
+      String? duration,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? startDate,
+      String? notes});
 }
 
 /// @nodoc
@@ -150,9 +136,8 @@ class __$$LifestyleImplCopyWithImpl<$Res>
     extends _$LifestyleCopyWithImpl<$Res, _$LifestyleImpl>
     implements _$$LifestyleImplCopyWith<$Res> {
   __$$LifestyleImplCopyWithImpl(
-    _$LifestyleImpl _value,
-    $Res Function(_$LifestyleImpl) _then,
-  ) : super(_value, _then);
+      _$LifestyleImpl _value, $Res Function(_$LifestyleImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Lifestyle
   /// with the given fields replaced by the non-null parameter values.
@@ -167,61 +152,51 @@ class __$$LifestyleImplCopyWithImpl<$Res>
     Object? startDate = freezed,
     Object? notes = freezed,
   }) {
-    return _then(
-      _$LifestyleImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        activityType:
-            null == activityType
-                ? _value.activityType
-                : activityType // ignore: cast_nullable_to_non_nullable
-                    as String,
-        description:
-            null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                    as String,
-        frequency:
-            null == frequency
-                ? _value.frequency
-                : frequency // ignore: cast_nullable_to_non_nullable
-                    as String,
-        duration:
-            freezed == duration
-                ? _value.duration
-                : duration // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        startDate:
-            freezed == startDate
-                ? _value.startDate
-                : startDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        notes:
-            freezed == notes
-                ? _value.notes
-                : notes // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$LifestyleImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      activityType: null == activityType
+          ? _value.activityType
+          : activityType // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      frequency: null == frequency
+          ? _value.frequency
+          : frequency // ignore: cast_nullable_to_non_nullable
+              as String,
+      duration: freezed == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as String?,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$LifestyleImpl implements _Lifestyle {
-  const _$LifestyleImpl({
-    @JsonKey(name: '_id') required this.id,
-    required this.activityType,
-    required this.description,
-    required this.frequency,
-    this.duration,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    this.startDate,
-    this.notes,
-  });
+  const _$LifestyleImpl(
+      {@JsonKey(name: '_id') required this.id,
+      required this.activityType,
+      required this.description,
+      required this.frequency,
+      this.duration,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      this.startDate,
+      this.notes});
 
   factory _$LifestyleImpl.fromJson(Map<String, dynamic> json) =>
       _$$LifestyleImplFromJson(json);
@@ -269,16 +244,8 @@ class _$LifestyleImpl implements _Lifestyle {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    activityType,
-    description,
-    frequency,
-    duration,
-    startDate,
-    notes,
-  );
+  int get hashCode => Object.hash(runtimeType, id, activityType, description,
+      frequency, duration, startDate, notes);
 
   /// Create a copy of Lifestyle
   /// with the given fields replaced by the non-null parameter values.
@@ -290,21 +257,22 @@ class _$LifestyleImpl implements _Lifestyle {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LifestyleImplToJson(this);
+    return _$$LifestyleImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Lifestyle implements Lifestyle {
-  const factory _Lifestyle({
-    @JsonKey(name: '_id') required final String id,
-    required final String activityType,
-    required final String description,
-    required final String frequency,
-    final String? duration,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    final DateTime? startDate,
-    final String? notes,
-  }) = _$LifestyleImpl;
+  const factory _Lifestyle(
+      {@JsonKey(name: '_id') required final String id,
+      required final String activityType,
+      required final String description,
+      required final String frequency,
+      final String? duration,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      final DateTime? startDate,
+      final String? notes}) = _$LifestyleImpl;
 
   factory _Lifestyle.fromJson(Map<String, dynamic> json) =
       _$LifestyleImpl.fromJson;

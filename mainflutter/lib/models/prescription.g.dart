@@ -30,20 +30,17 @@ _$PrescriptionImpl _$$PrescriptionImplFromJson(Map<String, dynamic> json) =>
       userId: json['userId'] as String?,
       doctorId: json['doctorId'] as String?,
       diagnosis: json['diagnosis'] as String,
-      medicines:
-          (json['medicines'] as List<dynamic>)
-              .map((e) => Medicine.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      medicines: (json['medicines'] as List<dynamic>)
+          .map((e) => Medicine.fromJson(e as Map<String, dynamic>))
+          .toList(),
       notes: json['notes'] as String?,
       date: DateTime.parse(json['date'] as String),
-      createdAt:
-          json['createdAt'] == null
-              ? null
-              : DateTime.parse(json['createdAt'] as String),
-      updatedAt:
-          json['updatedAt'] == null
-              ? null
-              : DateTime.parse(json['updatedAt'] as String),
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$$PrescriptionImplToJson(_$PrescriptionImpl instance) =>

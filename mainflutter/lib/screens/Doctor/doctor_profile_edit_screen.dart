@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mainflutter/services/token_service.dart';
+
 class DoctorProfileEditScreen extends StatefulWidget {
   final Doctor doctor;
 
@@ -22,6 +24,11 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
   final DoctorService _doctorService = DoctorService();
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+
+  // Thêm biến lưu trữ đường dẫn ảnh xác thực
+  String? _licenseImageUrl;
+  String? _idCardFrontUrl;
+  String? _idCardBackUrl;
 
   // Controllers cho các trường thông tin
   late TextEditingController _fullNameController;
@@ -49,6 +56,11 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
     _educationController = TextEditingController(text: widget.doctor.education);
     _graduationYearController = TextEditingController(text: widget.doctor.graduationYear?.toString());
     _licenseNumberController = TextEditingController(text: widget.doctor.licenseNumber);
+
+    // Khởi tạo giá trị ảnh xác thực nếu có
+    _licenseImageUrl = widget.doctor.licenseImageUrl;
+    _idCardFrontUrl = widget.doctor.idCardFrontUrl;
+    _idCardBackUrl = widget.doctor.idCardBackUrl;
   }
 
   @override
@@ -80,29 +92,295 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
 
       setState(() => _isLoading = true);
 
-      // Upload image to server
-      final request = http.MultipartRequest(
-        'PUT',
-        Uri.parse('${dotenv.env['BASE_URL']}/api/doctors/avatar'),
+      // Đọc file ảnh với kích thước giới hạn
+      final bytes = await image.readAsBytes();
+      if (bytes.length > 5 * 1024 * 1024) { // Giới hạn 5MB
+        throw Exception('Kích thước ảnh không được vượt quá 5MB');
+      }
+
+      final base64Image = base64Encode(bytes);
+
+      // Upload lên ImageBB
+      final response = await http.post(
+        Uri.parse('https://api.imgbb.com/1/upload'),
+        body: {
+          'key': dotenv.env['IMGBB_API_KEY'] ?? '',
+          'image': base64Image,
+        },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Hết thời gian chờ khi tải lên ảnh');
+        },
       );
 
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'avatar',
-          image.path,
-        ),
-      );
+      if (!mounted) return;
 
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-      final jsonData = json.decode(responseData);
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final data = jsonData['data'] as Map<String, dynamic>;
+          final imageUrl = data['url'] as String?;
+          if (imageUrl != null) {
+            // Cập nhật avatar trên server
+            final updateResponse = await http.put(
+              Uri.parse('${dotenv.env['BASE_URL']}/doctors/avatar'),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ${await TokenService.getToken()}',
+              },
+              body: json.encode({
+                'avatar': imageUrl,
+                'imageId': data['id'],
+                'delete_token': data['delete_url'].split('/').last,
+              }),
+            );
 
-      if (response.statusCode == 200 && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật ảnh đại diện thành công')),
-        );
+            if (!mounted) return;
+
+            if (updateResponse.statusCode == 200) {
+              final updateData = json.decode(updateResponse.body) as Map<String, dynamic>;
+              if (updateData['success'] == true) {
+                // Cập nhật UI với ảnh mới
+                setState(() {
+                  // Không cần cập nhật trực tiếp vào model vì nó là immutable
+                  // Thay vào đó, chúng ta sẽ reload profile sau khi cập nhật thành công
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Cập nhật ảnh đại diện thành công')),
+                );
+                // Reload profile để lấy thông tin mới nhất
+                await _doctorService.getDoctorProfile();
+              } else {
+                throw Exception(updateData['message'] ?? 'Không thể cập nhật ảnh đại diện');
+              }
+            } else {
+              throw Exception('Lỗi khi cập nhật ảnh đại diện trên server');
+            }
+          } else {
+            throw Exception('Không thể lấy URL ảnh từ server');
+          }
+        } else {
+          throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+        }
       } else {
-        throw Exception(jsonData['message'] ?? 'Lỗi khi cập nhật ảnh');
+        throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Thêm hàm xử lý upload ảnh giấy phép hành nghề
+  Future<void> _handleLicenseUpload() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      setState(() => _isLoading = true);
+
+      // Đọc file ảnh với kích thước giới hạn
+      final bytes = await image.readAsBytes();
+      if (bytes.length > 5 * 1024 * 1024) { // Giới hạn 5MB
+        throw Exception('Kích thước ảnh không được vượt quá 5MB');
+      }
+
+      final base64Image = base64Encode(bytes);
+
+      // Upload lên ImageBB
+      final response = await http.post(
+        Uri.parse('https://api.imgbb.com/1/upload'),
+        body: {
+          'key': dotenv.env['IMGBB_API_KEY'] ?? '',
+          'image': base64Image,
+        },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Hết thời gian chờ khi tải lên ảnh');
+        },
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final data = jsonData['data'] as Map<String, dynamic>;
+          final imageUrl = data['url'] as String?;
+          if (imageUrl != null) {
+            setState(() {
+              _licenseImageUrl = imageUrl;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tải lên ảnh giấy phép hành nghề thành công')),
+            );
+          } else {
+            throw Exception('Không thể lấy URL ảnh từ server');
+          }
+        } else {
+          throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+        }
+      } else {
+        throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Thêm hàm xử lý upload ảnh CMND/CCCD mặt trước
+  Future<void> _handleIdCardFrontUpload() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      setState(() => _isLoading = true);
+
+      // Đọc file ảnh với kích thước giới hạn
+      final bytes = await image.readAsBytes();
+      if (bytes.length > 5 * 1024 * 1024) { // Giới hạn 5MB
+        throw Exception('Kích thước ảnh không được vượt quá 5MB');
+      }
+
+      final base64Image = base64Encode(bytes);
+
+      // Upload lên ImageBB
+      final response = await http.post(
+        Uri.parse('https://api.imgbb.com/1/upload'),
+        body: {
+          'key': dotenv.env['IMGBB_API_KEY'] ?? '',
+          'image': base64Image,
+        },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Hết thời gian chờ khi tải lên ảnh');
+        },
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final data = jsonData['data'] as Map<String, dynamic>;
+          final imageUrl = data['url'] as String?;
+          if (imageUrl != null) {
+            setState(() {
+              _idCardFrontUrl = imageUrl;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tải lên ảnh CMND/CCCD mặt trước thành công')),
+            );
+          } else {
+            throw Exception('Không thể lấy URL ảnh từ server');
+          }
+        } else {
+          throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+        }
+      } else {
+        throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Thêm hàm xử lý upload ảnh CMND/CCCD mặt sau
+  Future<void> _handleIdCardBackUpload() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      setState(() => _isLoading = true);
+
+      // Đọc file ảnh với kích thước giới hạn
+      final bytes = await image.readAsBytes();
+      if (bytes.length > 5 * 1024 * 1024) { // Giới hạn 5MB
+        throw Exception('Kích thước ảnh không được vượt quá 5MB');
+      }
+
+      final base64Image = base64Encode(bytes);
+
+      // Upload lên ImageBB
+      final response = await http.post(
+        Uri.parse('https://api.imgbb.com/1/upload'),
+        body: {
+          'key': dotenv.env['IMGBB_API_KEY'] ?? '',
+          'image': base64Image,
+        },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Hết thời gian chờ khi tải lên ảnh');
+        },
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final data = jsonData['data'] as Map<String, dynamic>;
+          final imageUrl = data['url'] as String?;
+          if (imageUrl != null) {
+            setState(() {
+              _idCardBackUrl = imageUrl;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tải lên ảnh CMND/CCCD mặt sau thành công')),
+            );
+          } else {
+            throw Exception('Không thể lấy URL ảnh từ server');
+          }
+        } else {
+          throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
+        }
+      } else {
+        throw Exception('Lỗi khi tải lên ảnh lên ImageBB');
       }
     } catch (e) {
       if (mounted) {
@@ -120,17 +398,17 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
   Future<void> _handleVerification() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Kiểm tra ảnh xác thực
+    if (_licenseImageUrl == null || _idCardFrontUrl == null || _idCardBackUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng tải lên đầy đủ các ảnh xác thực')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      // Kiểm tra ảnh đại diện
-      if (widget.doctor.avatar == null || widget.doctor.avatar!.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng cập nhật ảnh đại diện trước khi xác thực tài khoản')),
-        );
-        return;
-      }
-
       // Gửi yêu cầu xác thực
       await _doctorService.requestVerification({
         'fullName': _fullNameController.text,
@@ -144,6 +422,9 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
         'graduationYear': int.parse(_graduationYearController.text),
         'licenseNumber': _licenseNumberController.text,
         'avatar': widget.doctor.avatar,
+        'licenseImageUrl': _licenseImageUrl,
+        'idCardFrontUrl': _idCardFrontUrl,
+        'idCardBackUrl': _idCardBackUrl,
       });
 
       if (mounted) {
@@ -163,6 +444,74 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  // Sửa lại phần hiển thị ảnh trong build method
+  Widget _buildImagePreview(String? imageUrl, String label) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$label *',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (imageUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      width: double.infinity,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      width: double.infinity,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.error_outline, color: Colors.red),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : () {
+                switch (label) {
+                  case 'Giấy phép hành nghề':
+                    _handleLicenseUpload();
+                    break;
+                  case 'CMND/CCCD mặt trước':
+                    _handleIdCardFrontUpload();
+                    break;
+                  case 'CMND/CCCD mặt sau':
+                    _handleIdCardBackUpload();
+                    break;
+                }
+              },
+              icon: const Icon(Icons.upload_file),
+              label: Text('Tải lên $label'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -403,6 +752,29 @@ class _DoctorProfileEditScreenState extends State<DoctorProfileEditScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 24),
+
+              // Thêm phần upload ảnh xác thực
+              const SizedBox(height: 24),
+              const Text(
+                'Tài liệu xác thực',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Giấy phép hành nghề
+              _buildImagePreview(_licenseImageUrl, 'Giấy phép hành nghề'),
+              const SizedBox(height: 16),
+
+              // CMND/CCCD mặt trước
+              _buildImagePreview(_idCardFrontUrl, 'CMND/CCCD mặt trước'),
+              const SizedBox(height: 16),
+
+              // CMND/CCCD mặt sau
+              _buildImagePreview(_idCardBackUrl, 'CMND/CCCD mặt sau'),
               const SizedBox(height: 24),
 
               // Submit Button

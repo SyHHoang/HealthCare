@@ -12,8 +12,7 @@ part of 'allergy.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Allergy _$AllergyFromJson(Map<String, dynamic> json) {
   return _Allergy.fromJson(json);
@@ -49,20 +48,19 @@ abstract class $AllergyCopyWith<$Res> {
   factory $AllergyCopyWith(Allergy value, $Res Function(Allergy) then) =
       _$AllergyCopyWithImpl<$Res, Allergy>;
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String id,
-    String allergen,
-    String type,
-    String severity,
-    List<String> symptoms,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? firstOccurrence,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? lastOccurrence,
-    String? treatment,
-    String? notes,
-    bool isActive,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String id,
+      String allergen,
+      String type,
+      String severity,
+      List<String> symptoms,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? firstOccurrence,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? lastOccurrence,
+      String? treatment,
+      String? notes,
+      bool isActive});
 }
 
 /// @nodoc
@@ -91,86 +89,71 @@ class _$AllergyCopyWithImpl<$Res, $Val extends Allergy>
     Object? notes = freezed,
     Object? isActive = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            allergen:
-                null == allergen
-                    ? _value.allergen
-                    : allergen // ignore: cast_nullable_to_non_nullable
-                        as String,
-            type:
-                null == type
-                    ? _value.type
-                    : type // ignore: cast_nullable_to_non_nullable
-                        as String,
-            severity:
-                null == severity
-                    ? _value.severity
-                    : severity // ignore: cast_nullable_to_non_nullable
-                        as String,
-            symptoms:
-                null == symptoms
-                    ? _value.symptoms
-                    : symptoms // ignore: cast_nullable_to_non_nullable
-                        as List<String>,
-            firstOccurrence:
-                freezed == firstOccurrence
-                    ? _value.firstOccurrence
-                    : firstOccurrence // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            lastOccurrence:
-                freezed == lastOccurrence
-                    ? _value.lastOccurrence
-                    : lastOccurrence // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            treatment:
-                freezed == treatment
-                    ? _value.treatment
-                    : treatment // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            notes:
-                freezed == notes
-                    ? _value.notes
-                    : notes // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            isActive:
-                null == isActive
-                    ? _value.isActive
-                    : isActive // ignore: cast_nullable_to_non_nullable
-                        as bool,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      allergen: null == allergen
+          ? _value.allergen
+          : allergen // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      severity: null == severity
+          ? _value.severity
+          : severity // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptoms: null == symptoms
+          ? _value.symptoms
+          : symptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      firstOccurrence: freezed == firstOccurrence
+          ? _value.firstOccurrence
+          : firstOccurrence // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastOccurrence: freezed == lastOccurrence
+          ? _value.lastOccurrence
+          : lastOccurrence // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      treatment: freezed == treatment
+          ? _value.treatment
+          : treatment // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$AllergyImplCopyWith<$Res> implements $AllergyCopyWith<$Res> {
   factory _$$AllergyImplCopyWith(
-    _$AllergyImpl value,
-    $Res Function(_$AllergyImpl) then,
-  ) = __$$AllergyImplCopyWithImpl<$Res>;
+          _$AllergyImpl value, $Res Function(_$AllergyImpl) then) =
+      __$$AllergyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    @JsonKey(name: '_id') String id,
-    String allergen,
-    String type,
-    String severity,
-    List<String> symptoms,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? firstOccurrence,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    DateTime? lastOccurrence,
-    String? treatment,
-    String? notes,
-    bool isActive,
-  });
+  $Res call(
+      {@JsonKey(name: '_id') String id,
+      String allergen,
+      String type,
+      String severity,
+      List<String> symptoms,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? firstOccurrence,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      DateTime? lastOccurrence,
+      String? treatment,
+      String? notes,
+      bool isActive});
 }
 
 /// @nodoc
@@ -178,9 +161,8 @@ class __$$AllergyImplCopyWithImpl<$Res>
     extends _$AllergyCopyWithImpl<$Res, _$AllergyImpl>
     implements _$$AllergyImplCopyWith<$Res> {
   __$$AllergyImplCopyWithImpl(
-    _$AllergyImpl _value,
-    $Res Function(_$AllergyImpl) _then,
-  ) : super(_value, _then);
+      _$AllergyImpl _value, $Res Function(_$AllergyImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Allergy
   /// with the given fields replaced by the non-null parameter values.
@@ -198,80 +180,68 @@ class __$$AllergyImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? isActive = null,
   }) {
-    return _then(
-      _$AllergyImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        allergen:
-            null == allergen
-                ? _value.allergen
-                : allergen // ignore: cast_nullable_to_non_nullable
-                    as String,
-        type:
-            null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                    as String,
-        severity:
-            null == severity
-                ? _value.severity
-                : severity // ignore: cast_nullable_to_non_nullable
-                    as String,
-        symptoms:
-            null == symptoms
-                ? _value._symptoms
-                : symptoms // ignore: cast_nullable_to_non_nullable
-                    as List<String>,
-        firstOccurrence:
-            freezed == firstOccurrence
-                ? _value.firstOccurrence
-                : firstOccurrence // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        lastOccurrence:
-            freezed == lastOccurrence
-                ? _value.lastOccurrence
-                : lastOccurrence // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        treatment:
-            freezed == treatment
-                ? _value.treatment
-                : treatment // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        notes:
-            freezed == notes
-                ? _value.notes
-                : notes // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        isActive:
-            null == isActive
-                ? _value.isActive
-                : isActive // ignore: cast_nullable_to_non_nullable
-                    as bool,
-      ),
-    );
+    return _then(_$AllergyImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      allergen: null == allergen
+          ? _value.allergen
+          : allergen // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      severity: null == severity
+          ? _value.severity
+          : severity // ignore: cast_nullable_to_non_nullable
+              as String,
+      symptoms: null == symptoms
+          ? _value._symptoms
+          : symptoms // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      firstOccurrence: freezed == firstOccurrence
+          ? _value.firstOccurrence
+          : firstOccurrence // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastOccurrence: freezed == lastOccurrence
+          ? _value.lastOccurrence
+          : lastOccurrence // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      treatment: freezed == treatment
+          ? _value.treatment
+          : treatment // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AllergyImpl implements _Allergy {
-  const _$AllergyImpl({
-    @JsonKey(name: '_id') required this.id,
-    required this.allergen,
-    required this.type,
-    required this.severity,
-    required final List<String> symptoms,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    this.firstOccurrence,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    this.lastOccurrence,
-    this.treatment,
-    this.notes,
-    this.isActive = true,
-  }) : _symptoms = symptoms;
+  const _$AllergyImpl(
+      {@JsonKey(name: '_id') required this.id,
+      required this.allergen,
+      required this.type,
+      required this.severity,
+      required final List<String> symptoms,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      this.firstOccurrence,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      this.lastOccurrence,
+      this.treatment,
+      this.notes,
+      this.isActive = true})
+      : _symptoms = symptoms;
 
   factory _$AllergyImpl.fromJson(Map<String, dynamic> json) =>
       _$$AllergyImplFromJson(json);
@@ -338,18 +308,17 @@ class _$AllergyImpl implements _Allergy {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    allergen,
-    type,
-    severity,
-    const DeepCollectionEquality().hash(_symptoms),
-    firstOccurrence,
-    lastOccurrence,
-    treatment,
-    notes,
-    isActive,
-  );
+      runtimeType,
+      id,
+      allergen,
+      type,
+      severity,
+      const DeepCollectionEquality().hash(_symptoms),
+      firstOccurrence,
+      lastOccurrence,
+      treatment,
+      notes,
+      isActive);
 
   /// Create a copy of Allergy
   /// with the given fields replaced by the non-null parameter values.
@@ -361,25 +330,26 @@ class _$AllergyImpl implements _Allergy {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AllergyImplToJson(this);
+    return _$$AllergyImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Allergy implements Allergy {
-  const factory _Allergy({
-    @JsonKey(name: '_id') required final String id,
-    required final String allergen,
-    required final String type,
-    required final String severity,
-    required final List<String> symptoms,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    final DateTime? firstOccurrence,
-    @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-    final DateTime? lastOccurrence,
-    final String? treatment,
-    final String? notes,
-    final bool isActive,
-  }) = _$AllergyImpl;
+  const factory _Allergy(
+      {@JsonKey(name: '_id') required final String id,
+      required final String allergen,
+      required final String type,
+      required final String severity,
+      required final List<String> symptoms,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      final DateTime? firstOccurrence,
+      @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
+      final DateTime? lastOccurrence,
+      final String? treatment,
+      final String? notes,
+      final bool isActive}) = _$AllergyImpl;
 
   factory _Allergy.fromJson(Map<String, dynamic> json) = _$AllergyImpl.fromJson;
 

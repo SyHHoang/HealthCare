@@ -7,15 +7,15 @@ part of 'notification_model.dart';
 // **************************************************************************
 
 Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
-  id: json['_id'] as String,
-  userId: json['userId'] as String,
-  title: json['title'] as String,
-  message: json['message'] as String,
-  type: json['type'] as String,
-  data: json['data'] as Map<String, dynamic>?,
-  read: json['read'] as bool,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
+      id: json['_id'] as String,
+      userId: json['userId'] as String,
+      title: json['title'] as String,
+      message: json['message'] as String,
+      type: json['type'] as String,
+      data: json['data'] as Map<String, dynamic>?,
+      read: json['read'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
 
 Map<String, dynamic> _$NotificationToJson(Notification instance) =>
     <String, dynamic>{

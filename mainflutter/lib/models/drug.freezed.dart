@@ -12,8 +12,7 @@ part of 'drug.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Drug _$DrugFromJson(Map<String, dynamic> json) {
   return _Drug.fromJson(json);
@@ -46,18 +45,17 @@ abstract class $DrugCopyWith<$Res> {
   factory $DrugCopyWith(Drug value, $Res Function(Drug) then) =
       _$DrugCopyWithImpl<$Res, Drug>;
   @useResult
-  $Res call({
-    String? id,
-    String name,
-    String? category,
-    String? type,
-    String? activeIngredient,
-    String? manufacturer,
-    String? uses,
-    String? dosage,
-    String? contraindications,
-    String? sideEffects,
-  });
+  $Res call(
+      {String? id,
+      String name,
+      String? category,
+      String? type,
+      String? activeIngredient,
+      String? manufacturer,
+      String? uses,
+      String? dosage,
+      String? contraindications,
+      String? sideEffects});
 }
 
 /// @nodoc
@@ -86,84 +84,69 @@ class _$DrugCopyWithImpl<$Res, $Val extends Drug>
     Object? contraindications = freezed,
     Object? sideEffects = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                freezed == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            category:
-                freezed == category
-                    ? _value.category
-                    : category // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            type:
-                freezed == type
-                    ? _value.type
-                    : type // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            activeIngredient:
-                freezed == activeIngredient
-                    ? _value.activeIngredient
-                    : activeIngredient // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            manufacturer:
-                freezed == manufacturer
-                    ? _value.manufacturer
-                    : manufacturer // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            uses:
-                freezed == uses
-                    ? _value.uses
-                    : uses // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            dosage:
-                freezed == dosage
-                    ? _value.dosage
-                    : dosage // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            contraindications:
-                freezed == contraindications
-                    ? _value.contraindications
-                    : contraindications // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            sideEffects:
-                freezed == sideEffects
-                    ? _value.sideEffects
-                    : sideEffects // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      type: freezed == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String?,
+      activeIngredient: freezed == activeIngredient
+          ? _value.activeIngredient
+          : activeIngredient // ignore: cast_nullable_to_non_nullable
+              as String?,
+      manufacturer: freezed == manufacturer
+          ? _value.manufacturer
+          : manufacturer // ignore: cast_nullable_to_non_nullable
+              as String?,
+      uses: freezed == uses
+          ? _value.uses
+          : uses // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dosage: freezed == dosage
+          ? _value.dosage
+          : dosage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contraindications: freezed == contraindications
+          ? _value.contraindications
+          : contraindications // ignore: cast_nullable_to_non_nullable
+              as String?,
+      sideEffects: freezed == sideEffects
+          ? _value.sideEffects
+          : sideEffects // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$DrugImplCopyWith<$Res> implements $DrugCopyWith<$Res> {
   factory _$$DrugImplCopyWith(
-    _$DrugImpl value,
-    $Res Function(_$DrugImpl) then,
-  ) = __$$DrugImplCopyWithImpl<$Res>;
+          _$DrugImpl value, $Res Function(_$DrugImpl) then) =
+      __$$DrugImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String? id,
-    String name,
-    String? category,
-    String? type,
-    String? activeIngredient,
-    String? manufacturer,
-    String? uses,
-    String? dosage,
-    String? contraindications,
-    String? sideEffects,
-  });
+  $Res call(
+      {String? id,
+      String name,
+      String? category,
+      String? type,
+      String? activeIngredient,
+      String? manufacturer,
+      String? uses,
+      String? dosage,
+      String? contraindications,
+      String? sideEffects});
 }
 
 /// @nodoc
@@ -171,7 +154,7 @@ class __$$DrugImplCopyWithImpl<$Res>
     extends _$DrugCopyWithImpl<$Res, _$DrugImpl>
     implements _$$DrugImplCopyWith<$Res> {
   __$$DrugImplCopyWithImpl(_$DrugImpl _value, $Res Function(_$DrugImpl) _then)
-    : super(_value, _then);
+      : super(_value, _then);
 
   /// Create a copy of Drug
   /// with the given fields replaced by the non-null parameter values.
@@ -189,78 +172,65 @@ class __$$DrugImplCopyWithImpl<$Res>
     Object? contraindications = freezed,
     Object? sideEffects = freezed,
   }) {
-    return _then(
-      _$DrugImpl(
-        id:
-            freezed == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        category:
-            freezed == category
-                ? _value.category
-                : category // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        type:
-            freezed == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        activeIngredient:
-            freezed == activeIngredient
-                ? _value.activeIngredient
-                : activeIngredient // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        manufacturer:
-            freezed == manufacturer
-                ? _value.manufacturer
-                : manufacturer // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        uses:
-            freezed == uses
-                ? _value.uses
-                : uses // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        dosage:
-            freezed == dosage
-                ? _value.dosage
-                : dosage // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        contraindications:
-            freezed == contraindications
-                ? _value.contraindications
-                : contraindications // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        sideEffects:
-            freezed == sideEffects
-                ? _value.sideEffects
-                : sideEffects // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$DrugImpl(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      type: freezed == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String?,
+      activeIngredient: freezed == activeIngredient
+          ? _value.activeIngredient
+          : activeIngredient // ignore: cast_nullable_to_non_nullable
+              as String?,
+      manufacturer: freezed == manufacturer
+          ? _value.manufacturer
+          : manufacturer // ignore: cast_nullable_to_non_nullable
+              as String?,
+      uses: freezed == uses
+          ? _value.uses
+          : uses // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dosage: freezed == dosage
+          ? _value.dosage
+          : dosage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contraindications: freezed == contraindications
+          ? _value.contraindications
+          : contraindications // ignore: cast_nullable_to_non_nullable
+              as String?,
+      sideEffects: freezed == sideEffects
+          ? _value.sideEffects
+          : sideEffects // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DrugImpl implements _Drug {
-  const _$DrugImpl({
-    this.id,
-    required this.name,
-    this.category,
-    this.type,
-    this.activeIngredient,
-    this.manufacturer,
-    this.uses,
-    this.dosage,
-    this.contraindications,
-    this.sideEffects,
-  });
+  const _$DrugImpl(
+      {this.id,
+      required this.name,
+      this.category,
+      this.type,
+      this.activeIngredient,
+      this.manufacturer,
+      this.uses,
+      this.dosage,
+      this.contraindications,
+      this.sideEffects});
 
   factory _$DrugImpl.fromJson(Map<String, dynamic> json) =>
       _$$DrugImplFromJson(json);
@@ -316,18 +286,17 @@ class _$DrugImpl implements _Drug {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    category,
-    type,
-    activeIngredient,
-    manufacturer,
-    uses,
-    dosage,
-    contraindications,
-    sideEffects,
-  );
+      runtimeType,
+      id,
+      name,
+      category,
+      type,
+      activeIngredient,
+      manufacturer,
+      uses,
+      dosage,
+      contraindications,
+      sideEffects);
 
   /// Create a copy of Drug
   /// with the given fields replaced by the non-null parameter values.
@@ -339,23 +308,24 @@ class _$DrugImpl implements _Drug {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DrugImplToJson(this);
+    return _$$DrugImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Drug implements Drug {
-  const factory _Drug({
-    final String? id,
-    required final String name,
-    final String? category,
-    final String? type,
-    final String? activeIngredient,
-    final String? manufacturer,
-    final String? uses,
-    final String? dosage,
-    final String? contraindications,
-    final String? sideEffects,
-  }) = _$DrugImpl;
+  const factory _Drug(
+      {final String? id,
+      required final String name,
+      final String? category,
+      final String? type,
+      final String? activeIngredient,
+      final String? manufacturer,
+      final String? uses,
+      final String? dosage,
+      final String? contraindications,
+      final String? sideEffects}) = _$DrugImpl;
 
   factory _Drug.fromJson(Map<String, dynamic> json) = _$DrugImpl.fromJson;
 

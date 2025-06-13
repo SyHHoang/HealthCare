@@ -24,6 +24,9 @@ class Doctor with _$Doctor {
     String? avatar,
     Map<String, dynamic>? schedule,
     @Default('Doctor') String role,
+    String? licenseImageUrl,
+    String? idCardFrontUrl,
+    String? idCardBackUrl,
   }) = _Doctor;
 
   factory Doctor.fromJson(Map<String, dynamic> json) => _$DoctorFromJson(json);

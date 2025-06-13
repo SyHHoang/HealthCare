@@ -67,26 +67,18 @@
                 <div class="icon">
                   <i class="fas fa-robot"></i>
                 </div>
-                <h3>Tư Vấn AI</h3>
+                <h4>Tư Vấn AI</h4>
                 <p>Hệ thống trí tuệ nhân tạo hỗ trợ chẩn đoán sơ bộ 24/7</p>
               </div>
             </div>
+            
             <div class="col-md-6 col-lg-3">
               <div class="service-card">
                 <div class="icon">
                   <i class="fas fa-user-md"></i>
                 </div>
-                <h3>Tư Vấn Trực Tuyến</h3>
+                <h4>Tư Vấn Trực Tuyến</h4>
                 <p>Kết nối trực tiếp với bác sĩ chuyên khoa qua video call</p>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-              <div class="service-card">
-                <div class="icon">
-                  <i class="fas fa-calendar-check"></i>
-                </div>
-                <h3>Đặt Lịch Khám</h3>
-                <p>Đặt lịch khám dễ dàng với các bác sĩ và phòng khám</p>
               </div>
             </div>
             <div class="col-md-6 col-lg-3">
@@ -94,7 +86,7 @@
                 <div class="icon">
                   <i class="fas fa-file-medical"></i>
                 </div>
-                <h3>Hồ Sơ Điện Tử</h3>
+                <h4>Hồ Sơ Điện Tử</h4>
                 <p>Quản lý hồ sơ bệnh án và đơn thuốc trực tuyến</p>
               </div>
             </div>
@@ -236,14 +228,14 @@ onMounted(() => {
 }
 
 .hero-section h1 {
-  font-size: 3.5rem;
+  font-size: 2.8rem;
   font-weight: 700;
   margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .hero-section .lead {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 300;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
@@ -254,6 +246,7 @@ onMounted(() => {
   margin-bottom: 1.5rem;
   position: relative;
   display: inline-block;
+  font-size: 1.8rem;
 }
 
 .section-title::after {
@@ -365,7 +358,7 @@ onMounted(() => {
 
 .expert-info h3 {
   color: #2c3e50;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
@@ -400,10 +393,18 @@ onMounted(() => {
   }
 
   .hero-section h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
   }
 
   .hero-section .lead {
+    font-size: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .value-card h3, .service-card h3 {
     font-size: 1.2rem;
   }
 

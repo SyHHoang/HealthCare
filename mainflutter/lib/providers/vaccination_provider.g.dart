@@ -12,15 +12,12 @@ String _$vaccinationNotifierHash() =>
 /// See also [VaccinationNotifier].
 @ProviderFor(VaccinationNotifier)
 final vaccinationNotifierProvider = AutoDisposeAsyncNotifierProvider<
-  VaccinationNotifier,
-  List<Vaccination>
->.internal(
+    VaccinationNotifier, List<Vaccination>>.internal(
   VaccinationNotifier.new,
   name: r'vaccinationNotifierProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$vaccinationNotifierHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$vaccinationNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

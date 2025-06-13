@@ -11,15 +11,12 @@ String _$lifestyleNotifierHash() => r'223390ce5c789a223beaf26af954a9d34a693856';
 /// See also [LifestyleNotifier].
 @ProviderFor(LifestyleNotifier)
 final lifestyleNotifierProvider = AutoDisposeAsyncNotifierProvider<
-  LifestyleNotifier,
-  List<Lifestyle>
->.internal(
+    LifestyleNotifier, List<Lifestyle>>.internal(
   LifestyleNotifier.new,
   name: r'lifestyleNotifierProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$lifestyleNotifierHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$lifestyleNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

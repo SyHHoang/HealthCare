@@ -29,10 +29,9 @@ _$VaccinationImpl _$$VaccinationImplFromJson(Map<String, dynamic> json) =>
       nextDoseDate: _dateTimeFromJson(json['nextDoseDate'] as String?),
       batchNumber: json['batchNumber'] as String?,
       manufacturer: json['manufacturer'] as String?,
-      sideEffects:
-          (json['sideEffects'] as List<dynamic>?)
-              ?.map((e) => SideEffect.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      sideEffects: (json['sideEffects'] as List<dynamic>?)
+          ?.map((e) => SideEffect.fromJson(e as Map<String, dynamic>))
+          .toList(),
       notes: json['notes'] as String?,
       status: json['status'] as String?,
     );
