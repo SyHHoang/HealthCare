@@ -29,6 +29,7 @@ This project simulates a basic healthcare platform with multiple roles including
 
 Create a `.env` file inside the backend folder:
 
+```env
 PORT=5000
 MONGO_URI=
 retryWrites=
@@ -39,7 +40,7 @@ GEMINI_API_KEY=
 ### Frontend Web (.env)
 
 Create a `.env` file inside the frontend-web folder:
-
+```env
 VITE_BASE_URL=
 VITE_IMGBB_API_KEY=
 VITE_GEMINI_API_KEY=
@@ -47,7 +48,7 @@ VITE_GEMINI_API_KEY=
 ### Mobile (Flutter)
 
 Create a `.env` file or config file:
-
+```env
 BASE_URL=
 IMGBB_API_KEY=
 
