@@ -22,35 +22,30 @@ This project simulates a basic healthcare platform with multiple roles including
 * Mobile: Flutter
 * Backend: Node.js, Express
 * Database: MongoDB
-* 
 ## Environment Variables
 
 ### Backend (.env)
 
 Create a `.env` file inside the backend folder:
-
-```env
-PORT=5000
-MONGO_URI=
-retryWrites=
-JWT_SECRET=
-IMGBB_API_KEY=
-GEMINI_API_KEY=
+PORT=5000<br>
+MONGO_URI=<br>
+retryWrites=<br>
+JWT_SECRET=<br>
+IMGBB_API_KEY=<br>
+GEMINI_API_KEY=<br>
 
 ### Frontend Web (.env)
 
 Create a `.env` file inside the frontend-web folder:
-```env
-VITE_BASE_URL=
-VITE_IMGBB_API_KEY=
-VITE_GEMINI_API_KEY=
+VITE_BASE_URL=<br>
+VITE_IMGBB_API_KEY=<br>
+VITE_GEMINI_API_KEY=<br>
 
 ### Mobile (Flutter)
 
 Create a `.env` file or config file:
-```env
-BASE_URL=
-IMGBB_API_KEY=
+BASE_URL=<br>
+IMGBB_API_KEY=<br>
 
 ---
 
